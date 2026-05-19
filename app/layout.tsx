@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"] });
+const geist = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist",
+  weight: "100 900",
+});
+
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
 
 export const metadata: Metadata = {
-  title: "BMK CRM Platform",
-  description: "CRM and client onboarding platform for BMK Financial Services",
+  title: "BMK CRM — Fact Find Platform",
+  description: "Client onboarding and fact find management for BMK Financial Services",
 };
 
 export default function RootLayout({
@@ -15,8 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className="dark">
+      <body className={cn(geist.variable, geistMono.variable, "font-sans antialiased")}>
+        {children}
+      </body>
     </html>
   );
 }

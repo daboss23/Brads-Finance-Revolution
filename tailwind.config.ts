@@ -9,12 +9,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+          elevated: "hsl(var(--surface-elevated))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -43,6 +48,14 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          dim: "hsl(var(--gold-dim))",
+          foreground: "hsl(var(--background))",
+        },
+        "blue-accent": {
+          DEFAULT: "hsl(var(--blue-accent))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
