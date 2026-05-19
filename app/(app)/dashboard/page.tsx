@@ -24,24 +24,24 @@ export default function DashboardPage() {
   const metrics = getMetrics();
 
   return (
-    <div className="px-10 py-9 max-w-[1240px] mx-auto">
+    <div className="px-14 py-12">
 
       {/* Page header */}
-      <div className="flex items-end justify-between mb-9">
+      <div className="flex items-end justify-between mb-12">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 mb-2">
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
             BMK Financial Services
           </p>
-          <h1 className="text-[28px] font-semibold tracking-tight text-foreground leading-none">
+          <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
             Good morning, Brad.
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground/70">
+          <p className="mt-3 text-[14px] text-muted-foreground/65">
             Tuesday, 19 May 2026 &nbsp;·&nbsp; Client Fact Find Command Centre
           </p>
         </div>
         <Link
           href="/clients"
-          className="inline-flex items-center gap-2 rounded bg-gold px-4 py-2.5 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-wide"
+          className="inline-flex items-center gap-2 rounded bg-gold px-5 py-3 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-wide"
         >
           New Client
           <ArrowRight className="h-3.5 w-3.5" />
@@ -49,7 +49,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-5 mb-12">
         <KpiCard
           label="Active Clients"
           value={metrics.active}
@@ -85,32 +85,32 @@ export default function DashboardPage() {
       </div>
 
       {/* Sarah brief */}
-      <div className="mb-8 rounded-lg border border-border bg-card overflow-hidden">
+      <div className="mb-12 rounded-lg border border-border bg-card overflow-hidden">
         <div className="flex">
           <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
-          <div className="flex-1 px-6 py-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
-                <Sparkles className="h-3.5 w-3.5 text-gold" />
+          <div className="flex-1 px-8 py-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
+                <Sparkles className="h-4 w-4 text-gold" />
               </div>
               <div>
                 <p className="text-[11px] font-bold tracking-[0.22em] text-gold uppercase leading-none">
                   Sarah
                 </p>
-                <p className="text-[10px] text-muted-foreground/60 tracking-wide mt-0.5">
+                <p className="text-[11px] text-muted-foreground/55 tracking-wide mt-0.5">
                   AI Adviser Intelligence &nbsp;·&nbsp; Today's Brief
                 </p>
               </div>
             </div>
-            <ul className="space-y-2.5">
+            <ul className="space-y-3">
               {[
                 `${metrics.notStarted} client${metrics.notStarted !== 1 ? "s have" : " has"} not started their fact find — a follow-up call is recommended.`,
                 "Sarah Mitchell is 85% complete and ready for meeting prep ahead of 28 May.",
                 "David Okafor and Angela Forsyth both require adviser review before they can progress.",
               ].map((insight, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="mt-[7px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/50" />
-                  <p className="text-[13px] text-foreground/75 leading-relaxed">{insight}</p>
+                  <span className="mt-[8px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/50" />
+                  <p className="text-[14px] text-foreground/75 leading-relaxed">{insight}</p>
                 </li>
               ))}
             </ul>
@@ -120,18 +120,18 @@ export default function DashboardPage() {
 
       {/* Client pipeline table */}
       <div>
-        <div className="flex items-end justify-between mb-4">
+        <div className="flex items-end justify-between mb-5">
           <div>
-            <h2 className="text-[13px] font-semibold text-foreground">
+            <h2 className="text-[14px] font-semibold text-foreground">
               Client Pipeline
             </h2>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+            <p className="text-[12px] text-muted-foreground/55 mt-1">
               {CLIENTS.length} active clients
             </p>
           </div>
           <Link
             href="/clients"
-            className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-gold transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-gold transition-colors"
           >
             View all
             <ArrowRight className="h-3 w-3" />
@@ -139,18 +139,18 @@ export default function DashboardPage() {
         </div>
 
         <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
                 {["Client", "Progress", "Status", "Next Action", "Meeting", "Updated"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
+                    className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
                   >
                     {h}
                   </th>
                 ))}
-                <th className="px-4 py-3 w-10" />
+                <th className="px-6 py-4 w-12" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -159,9 +159,9 @@ export default function DashboardPage() {
                   key={client.id}
                   className="hover:bg-gold/[0.025] transition-colors duration-150 group"
                 >
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted border border-border/80 text-[10px] font-bold text-muted-foreground/70 tracking-tight">
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-3.5">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border/80 text-[11px] font-bold text-muted-foreground/70 tracking-tight">
                         {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <span className="font-medium text-[13px] text-foreground/90">
@@ -169,45 +169,45 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-2.5">
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-3">
                       <progress
                         value={client.progress}
                         max={100}
                         className={cn(
-                          "bmk-progress w-[88px]",
+                          "bmk-progress w-28",
                           client.status === "in-progress" ? "bmk-progress-blue" : ""
                         )}
                       />
-                      <span className="text-[12px] text-muted-foreground/70 w-7 tabular-nums">
+                      <span className="text-[12px] text-muted-foreground/65 w-8 tabular-nums">
                         {client.progress}%
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-6 py-5">
                     <Badge className={STATUS_CONFIG[client.status].className}>
                       {STATUS_CONFIG[client.status].label}
                     </Badge>
                   </td>
-                  <td className="px-4 py-4 max-w-[220px]">
-                    <p className="text-[12px] text-muted-foreground/65 truncate">
+                  <td className="px-6 py-5 max-w-[260px]">
+                    <p className="text-[13px] text-muted-foreground/65 truncate">
                       {client.nextAction}
                     </p>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="text-[12px] text-muted-foreground/65 whitespace-nowrap">
+                  <td className="px-6 py-5">
+                    <span className="text-[13px] text-muted-foreground/65 whitespace-nowrap">
                       {client.meetingDate ?? "—"}
                     </span>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="text-[12px] text-muted-foreground/65 whitespace-nowrap">
+                  <td className="px-6 py-5">
+                    <span className="text-[13px] text-muted-foreground/65 whitespace-nowrap">
                       {client.lastActivity}
                     </span>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-6 py-5">
                     <Link
                       href={`/clients/${client.id}`}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-6 w-6 rounded hover:bg-white/[0.08]"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-7 w-7 rounded hover:bg-white/[0.08]"
                     >
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/60" />
                     </Link>
@@ -240,16 +240,16 @@ function KpiCard({
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div className={cn("h-px bg-gradient-to-r to-transparent", accentFrom)} />
-      <div className="px-5 pt-5 pb-5">
-        <div className="flex items-start justify-between mb-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/55">
+      <div className="px-7 pt-7 pb-7">
+        <div className="flex items-start justify-between mb-7">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55 leading-snug max-w-[120px]">
             {label}
           </p>
-          <div className={cn("flex h-7 w-7 items-center justify-center rounded-full", iconBg)}>
+          <div className={cn("flex h-8 w-8 items-center justify-center rounded-full shrink-0", iconBg)}>
             <Icon className={cn("h-3.5 w-3.5", iconColor)} />
           </div>
         </div>
-        <p className="text-[38px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
+        <p className="text-[52px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
           {value}
         </p>
       </div>

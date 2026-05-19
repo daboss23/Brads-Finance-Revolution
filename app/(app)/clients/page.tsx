@@ -78,8 +78,8 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-[1200px] mx-auto">
-      <div className="flex items-end justify-between mb-7">
+    <div className="px-14 py-12">
+      <div className="flex items-end justify-between mb-10">
         <div>
           <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground/50 mb-2">
             BMK Financial Services
@@ -101,7 +101,7 @@ export default function ClientsPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-1.5 mb-5 flex-wrap">
+      <div className="flex items-center gap-1.5 mb-7 flex-wrap">
         {FILTER_OPTIONS.map((opt) => (
           <button
             key={opt.value}
@@ -131,12 +131,12 @@ export default function ClientsPage() {
               {["Client", "Progress", "Status", "Next Action", "Meeting", "Stage", "Updated"].map((h) => (
                 <th
                   key={h}
-                  className="px-4 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
+                  className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
                 >
                   {h}
                 </th>
               ))}
-              <th className="px-4 py-3 w-10" />
+              <th className="px-6 py-4 w-12" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -152,24 +152,24 @@ export default function ClientsPage() {
                   key={client.id}
                   className="hover:bg-gold/[0.025] transition-colors duration-150 group"
                 >
-                  <td className="px-4 py-3.5">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-semibold text-muted-foreground">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-bold text-muted-foreground/70 tracking-tight">
                         {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
-                        <p className="font-medium text-[13px] text-foreground">{client.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{client.email}</p>
+                        <p className="font-medium text-[13px] text-foreground/90">{client.name}</p>
+                        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{client.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-2.5">
                       <progress
                         value={client.progress}
                         max={100}
                         className={cn(
-                          "bmk-progress w-20",
+                          "bmk-progress w-28",
                           client.status === "in-progress" ? "bmk-progress-blue" : ""
                         )}
                       />
@@ -178,24 +178,24 @@ export default function ClientsPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-6 py-5">
                     <Badge className={STATUS_CONFIG[client.status].className}>
                       {STATUS_CONFIG[client.status].label}
                     </Badge>
                   </td>
                   <td className="px-4 py-3.5 max-w-[200px]">
-                    <p className="text-[12px] text-muted-foreground truncate">{client.nextAction}</p>
+                    <p className="text-[13px] text-muted-foreground/65 truncate">{client.nextAction}</p>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[12px] text-muted-foreground">{client.meetingDate ?? "—"}</span>
+                    <span className="text-[13px] text-muted-foreground/65">{client.meetingDate ?? "—"}</span>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[12px] text-muted-foreground">{client.meetingStage}</span>
+                    <span className="text-[13px] text-muted-foreground/65">{client.meetingStage}</span>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[12px] text-muted-foreground">{client.lastActivity}</span>
+                    <span className="text-[13px] text-muted-foreground/65">{client.lastActivity}</span>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-6 py-5">
                     <Link
                       href={`/clients/${client.id}`}
                       className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-6 w-6 rounded hover:bg-white/10"

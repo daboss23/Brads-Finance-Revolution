@@ -29,79 +29,77 @@ export default function ClientDetailPage({
   const total = client.factFindSections.length;
 
   return (
-    <div className="px-10 py-9 max-w-[1100px] mx-auto">
+    <div className="px-14 py-12">
 
       {/* Back */}
       <Link
         href="/clients"
-        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground transition-colors mb-7 tracking-wide"
+        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/55 hover:text-foreground transition-colors mb-9 tracking-wide"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Clients
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-9 pb-7 border-b border-border/60">
-        <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted border border-border text-[13px] font-bold text-muted-foreground/70 tracking-tight">
+      <div className="flex items-start justify-between mb-12 pb-9 border-b border-border/60">
+        <div className="flex items-center gap-5">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted border border-border text-[14px] font-bold text-muted-foreground/70 tracking-tight">
             {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-[24px] font-semibold tracking-tight text-foreground">
               {client.name}
             </h1>
-            <div className="flex items-center gap-2.5 mt-1.5">
+            <div className="flex items-center gap-3 mt-2">
               <Badge className={STATUS_CONFIG[client.status].className}>
                 {STATUS_CONFIG[client.status].label}
               </Badge>
-              <span className="text-[11px] text-muted-foreground/55">
+              <span className="text-[12px] text-muted-foreground/50">
                 {client.meetingStage}
               </span>
               <span className="text-muted-foreground/30">·</span>
-              <span className="text-[11px] text-muted-foreground/55">
+              <span className="text-[12px] text-muted-foreground/50">
                 Updated {client.lastActivity}
               </span>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/40 mb-1">
+          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/40 mb-1.5">
             Adviser
           </p>
           <p className="text-[13px] font-medium text-foreground/80">{client.adviser}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_320px] gap-7">
+      <div className="grid grid-cols-[1fr_380px] gap-8">
         {/* Left */}
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* Contact */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
               <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
                 Contact Information
               </h2>
             </div>
-            <div className="px-5 py-4 grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2.5">
+            <div className="px-6 py-5 grid grid-cols-2 gap-5">
+              <div className="flex items-center gap-3">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.email}</span>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 <Phone className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.mobile}</span>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 <User className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.adviser}</span>
               </div>
               {client.meetingDate && (
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
-                  <span className="text-[13px] text-foreground/80">
-                    {client.meetingDate}
-                  </span>
+                  <span className="text-[13px] text-foreground/80">{client.meetingDate}</span>
                 </div>
               )}
             </div>
@@ -111,11 +109,11 @@ export default function ClientDetailPage({
           <div className="rounded-lg border border-blue-accent/25 bg-blue-accent/[0.04] overflow-hidden">
             <div className="flex">
               <div className="w-[3px] shrink-0 bg-gradient-to-b from-blue-accent/60 to-blue-accent/15" />
-              <div className="px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-accent/80 mb-2">
+              <div className="px-6 py-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-accent/80 mb-2.5">
                   Next Action
                 </p>
-                <p className="text-[13px] text-foreground/80 leading-relaxed">{client.nextAction}</p>
+                <p className="text-[14px] text-foreground/80 leading-relaxed">{client.nextAction}</p>
               </div>
             </div>
           </div>
@@ -123,12 +121,12 @@ export default function ClientDetailPage({
           {/* Notes */}
           {client.notes && (
             <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+              <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
                 <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
                   Adviser Notes
                 </h2>
               </div>
-              <div className="px-5 py-4">
+              <div className="px-6 py-5">
                 <p className="text-[13px] text-muted-foreground/70 leading-relaxed">
                   {client.notes}
                 </p>
@@ -138,15 +136,15 @@ export default function ClientDetailPage({
 
           {/* Timeline */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
               <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
                 Activity Timeline
               </h2>
             </div>
-            <div className="px-5 py-4">
-              <div className="space-y-4">
+            <div className="px-6 py-6">
+              <div className="space-y-5">
                 {[...client.timeline].reverse().map((event, i, arr) => (
-                  <div key={i} className="flex gap-3">
+                  <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div
                         className={cn(
@@ -159,12 +157,12 @@ export default function ClientDetailPage({
                         )}
                       />
                       {i < arr.length - 1 && (
-                        <div className="w-px flex-1 bg-border/50 mt-1.5" />
+                        <div className="w-px flex-1 bg-border/50 mt-2" />
                       )}
                     </div>
-                    <div className={cn("", i < arr.length - 1 ? "pb-4" : "")}>
+                    <div className={cn(i < arr.length - 1 ? "pb-5" : "")}>
                       <p className="text-[13px] text-foreground/80 leading-snug">{event.event}</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-0.5">
+                      <p className="text-[11px] text-muted-foreground/50 mt-1">
                         {event.date}&nbsp;·&nbsp;
                         <span className="capitalize">{event.type}</span>
                       </p>
@@ -177,25 +175,25 @@ export default function ClientDetailPage({
         </div>
 
         {/* Right */}
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* Progress */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
               <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
                 Fact Find Progress
               </h2>
             </div>
-            <div className="px-5 py-5">
-              <p className="text-[42px] font-semibold tracking-tight text-foreground leading-none tabular-nums mb-4">
+            <div className="px-6 py-7">
+              <p className="text-[56px] font-semibold tracking-tight text-foreground leading-none tabular-nums mb-5">
                 {client.progress}%
               </p>
               <progress
                 value={client.progress}
                 max={100}
-                className="bmk-progress w-full mb-2.5"
+                className="bmk-progress w-full mb-3"
               />
-              <p className="text-[11px] text-muted-foreground/55">
+              <p className="text-[12px] text-muted-foreground/55">
                 {completeSections} of {total} sections complete
               </p>
             </div>
@@ -203,21 +201,21 @@ export default function ClientDetailPage({
 
           {/* Section breakdown */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
               <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
                 Section Breakdown
               </h2>
             </div>
-            <div className="px-5 py-4 space-y-0">
+            <div className="px-6 py-3">
               {client.factFindSections.map((section, i) => (
                 <div
                   key={section.name}
                   className={cn(
-                    "flex items-center justify-between py-2.5",
+                    "flex items-center justify-between py-3.5",
                     i < client.factFindSections.length - 1 && "border-b border-border/40"
                   )}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-3">
                     <SectionIcon status={section.status} />
                     <span className="text-[13px] text-foreground/80">{section.name}</span>
                   </div>
@@ -231,16 +229,16 @@ export default function ClientDetailPage({
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="flex">
               <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/60 via-gold/25 to-transparent" />
-              <div className="px-4 py-4">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/25">
-                    <Sparkles className="h-2.5 w-2.5 text-gold" />
+              <div className="px-5 py-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/25">
+                    <Sparkles className="h-3 w-3 text-gold" />
                   </div>
                   <p className="text-[10px] font-bold tracking-[0.2em] text-gold uppercase">
                     Sarah
                   </p>
                 </div>
-                <p className="text-[12px] text-muted-foreground/65 leading-relaxed">
+                <p className="text-[13px] text-muted-foreground/65 leading-relaxed">
                   {getSarahInsight(client.progress, client.status, client.name)}
                 </p>
               </div>
@@ -254,18 +252,18 @@ export default function ClientDetailPage({
 
 function SectionIcon({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <CheckCircle2 className="h-[15px] w-[15px] text-emerald-400 shrink-0" />;
+    return <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />;
   if (status === "in-progress")
-    return <Clock className="h-[15px] w-[15px] text-blue-accent shrink-0" />;
-  return <Circle className="h-[15px] w-[15px] text-muted-foreground/25 shrink-0" />;
+    return <Clock className="h-4 w-4 text-blue-accent shrink-0" />;
+  return <Circle className="h-4 w-4 text-muted-foreground/25 shrink-0" />;
 }
 
 function SectionStatusLabel({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <span className="text-[11px] text-emerald-500/80 font-medium">Complete</span>;
+    return <span className="text-[12px] text-emerald-500/80 font-medium">Complete</span>;
   if (status === "in-progress")
-    return <span className="text-[11px] text-blue-accent/80 font-medium">In Progress</span>;
-  return <span className="text-[11px] text-muted-foreground/35">Missing</span>;
+    return <span className="text-[12px] text-blue-accent/80 font-medium">In Progress</span>;
+  return <span className="text-[12px] text-muted-foreground/35">Missing</span>;
 }
 
 function getSarahInsight(progress: number, status: string, name: string): string {
