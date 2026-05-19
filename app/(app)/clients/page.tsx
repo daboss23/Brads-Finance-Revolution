@@ -79,20 +79,23 @@ export default function ClientsPage() {
 
   return (
     <div className="px-8 py-8 max-w-[1200px] mx-auto">
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-end justify-between mb-7">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground/50 mb-2">
+            BMK Financial Services
+          </p>
+          <h1 className="text-[28px] font-semibold tracking-tight text-foreground leading-none">
             Clients
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground/60">
             {clients.length} clients in your pipeline
           </p>
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded bg-gold px-4 py-2 text-sm font-medium text-gold-foreground hover:bg-gold/90 transition-colors"
+          className="inline-flex items-center gap-2 rounded bg-gold px-4 py-2.5 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-wide"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           New Client
         </button>
       </div>
@@ -104,15 +107,15 @@ export default function ClientsPage() {
             key={opt.value}
             onClick={() => setFilter(opt.value)}
             className={cn(
-              "rounded px-3 py-1.5 text-[12px] font-medium transition-colors border",
+              "rounded px-3 py-1.5 text-[12px] font-medium transition-all duration-150 border",
               filter === opt.value
-                ? "border-gold/40 bg-gold/10 text-gold"
-                : "border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.04] bg-transparent"
+                ? "border-gold/35 bg-gold/[0.08] text-gold"
+                : "border-border/70 text-muted-foreground/60 hover:text-foreground/80 hover:border-border hover:bg-white/[0.03] bg-transparent"
             )}
           >
             {opt.label}
             {opt.value !== "all" && (
-              <span className="ml-1.5 text-[10px] opacity-60">
+              <span className="ml-1.5 text-[10px] opacity-50">
                 {clients.filter((c) => c.status === opt.value).length}
               </span>
             )}
@@ -124,11 +127,11 @@ export default function ClientsPage() {
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-card-elevated">
+            <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
               {["Client", "Progress", "Status", "Next Action", "Meeting", "Stage", "Updated"].map((h) => (
                 <th
                   key={h}
-                  className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70"
+                  className="px-4 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
                 >
                   {h}
                 </th>
@@ -147,7 +150,7 @@ export default function ClientsPage() {
               filtered.map((client) => (
                 <tr
                   key={client.id}
-                  className="hover:bg-white/[0.025] transition-colors group"
+                  className="hover:bg-gold/[0.025] transition-colors duration-150 group"
                 >
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
