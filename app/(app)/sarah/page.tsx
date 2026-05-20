@@ -98,7 +98,7 @@ export default function SarahPage() {
       {/* Page header */}
       <div className="flex items-end justify-between mb-12">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-3">
             AI Fact Find Intelligence
           </p>
           <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none flex items-center gap-3">
@@ -107,7 +107,7 @@ export default function SarahPage() {
               <Sparkles className="h-3.5 w-3.5 text-gold" />
             </span>
           </h1>
-          <p className="mt-3 text-[14px] text-muted-foreground/60">
+          <p className="mt-3 text-[14px] text-muted-foreground">
             Fact find link management &amp; client onboarding intelligence
           </p>
         </div>
@@ -116,18 +116,18 @@ export default function SarahPage() {
       {/* KPI cards */}
       <div className="grid grid-cols-6 gap-4 mb-12">
         {[
-          { label: "Links Sent", value: metrics.sent, icon: LinkIcon, color: "text-blue-accent", bg: "bg-blue-accent/10", accent: "from-blue-accent/40" },
-          { label: "Opened", value: metrics.opened, icon: ExternalLink, color: "text-sky-400", bg: "bg-sky-400/10", accent: "from-sky-400/40" },
-          { label: "In Progress", value: metrics.inProgress, icon: Clock, color: "text-amber-400", bg: "bg-amber-400/10", accent: "from-amber-400/40" },
-          { label: "Completed", value: metrics.completed, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10", accent: "from-emerald-400/40" },
-          { label: "Not Started", value: metrics.notStarted, icon: Users, color: "text-zinc-400", bg: "bg-zinc-400/10", accent: "from-zinc-400/20" },
-          { label: "Avg Completion", value: `${metrics.avg}%`, icon: TrendingDown, color: "text-gold", bg: "bg-gold/10", accent: "from-gold/40" },
+          { label: "Links Sent", value: metrics.sent, icon: LinkIcon, color: "text-blue-accent", bg: "bg-blue-accent/15", accent: "from-blue-accent/50" },
+          { label: "Opened", value: metrics.opened, icon: ExternalLink, color: "text-sky-400", bg: "bg-sky-400/15", accent: "from-sky-400/50" },
+          { label: "In Progress", value: metrics.inProgress, icon: Clock, color: "text-amber-400", bg: "bg-amber-400/15", accent: "from-amber-400/50" },
+          { label: "Completed", value: metrics.completed, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/15", accent: "from-emerald-400/50" },
+          { label: "Not Started", value: metrics.notStarted, icon: Users, color: "text-zinc-400", bg: "bg-zinc-400/15", accent: "from-zinc-400/20" },
+          { label: "Avg Completion", value: `${metrics.avg}%`, icon: TrendingDown, color: "text-gold", bg: "bg-gold/15", accent: "from-gold/50" },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
           <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
             <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
             <div className="px-5 pt-5 pb-5">
               <div className="flex items-start justify-between mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55 leading-snug">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug">
                   {label}
                 </p>
                 <div className={cn("flex h-7 w-7 items-center justify-center rounded-full shrink-0", bg)}>
@@ -158,7 +158,7 @@ export default function SarahPage() {
                   <p className="text-[11px] font-bold tracking-[0.22em] text-gold uppercase leading-none">
                     Sarah
                   </p>
-                  <p className="text-[10px] text-muted-foreground/55 tracking-wide mt-0.5">
+                  <p className="text-[10px] text-muted-foreground tracking-wide mt-0.5">
                     AI Adviser Intelligence · Current Recommendations
                   </p>
                 </div>
@@ -195,7 +195,7 @@ export default function SarahPage() {
                           : "bg-gold/50"
                       )}
                     />
-                    <p className="text-[13px] text-foreground/75 leading-relaxed">
+                    <p className="text-[13px] text-foreground leading-relaxed">
                       {item.text}
                     </p>
                   </li>
@@ -207,11 +207,11 @@ export default function SarahPage() {
 
         {/* Drop-off analysis */}
         <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+          <div className="px-5 py-4 border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Common Drop-off Points
             </h2>
-            <p className="text-[11px] text-muted-foreground/40 mt-0.5">
+            <p className="text-[11px] text-muted-foreground/75 mt-0.5">
               Sections clients most often stall on
             </p>
           </div>
@@ -221,8 +221,8 @@ export default function SarahPage() {
               return (
                 <div key={section}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[12px] text-foreground/75">{section}</span>
-                    <span className="text-[11px] text-muted-foreground/55 tabular-nums">
+                    <span className="text-[12px] text-foreground/90">{section}</span>
+                    <span className="text-[11px] text-muted-foreground tabular-nums">
                       {incomplete}/{CLIENTS.length}
                     </span>
                   </div>
@@ -249,7 +249,7 @@ export default function SarahPage() {
             <h2 className="text-[14px] font-semibold text-foreground">
               Fact Find Links
             </h2>
-            <p className="text-[12px] text-muted-foreground/55 mt-1">
+            <p className="text-[12px] text-muted-foreground mt-1">
               All client fact find links — manage, resend, and monitor progress
             </p>
           </div>
@@ -258,33 +258,33 @@ export default function SarahPage() {
         <div className="rounded-lg border border-border overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
+              <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
                 {["Client", "Link Status", "Progress", "Sent", "Last Activity", "Actions"].map((h) => (
                   <th
                     key={h}
-                    className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
+                    className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y divide-border/80">
               {FACT_FIND_LINKS.map((link) => (
                 <tr
                   key={link.token}
-                  className="hover:bg-gold/[0.025] transition-colors duration-150 group"
+                  className="hover:bg-gold/[0.04] transition-colors duration-150 group"
                 >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border/80 text-[11px] font-bold text-muted-foreground/70 tracking-tight">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border/80 text-[11px] font-bold text-foreground/70 tracking-tight">
                         {link.clientName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
-                        <p className="font-medium text-[13px] text-foreground/90">
+                        <p className="font-medium text-[13px] text-foreground">
                           {link.clientName}
                         </p>
-                        <p className="text-[11px] text-muted-foreground/50 mt-0.5">
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
                           {link.email}
                         </p>
                       </div>
@@ -305,18 +305,18 @@ export default function SarahPage() {
                           link.status === "in-progress" ? "bmk-progress-blue" : ""
                         )}
                       />
-                      <span className="text-[12px] text-muted-foreground/65 tabular-nums w-8">
+                      <span className="text-[12px] text-muted-foreground tabular-nums w-8">
                         {link.progress}%
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground/60">
+                    <span className="text-[13px] text-muted-foreground">
                       {link.sentDate ?? "—"}
                     </span>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground/60">
+                    <span className="text-[13px] text-muted-foreground">
                       {link.lastActivity ?? "—"}
                     </span>
                   </td>
@@ -330,7 +330,7 @@ export default function SarahPage() {
                           "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-all duration-150",
                           copied === link.token
                             ? "border-emerald-800/50 bg-emerald-950/40 text-emerald-400"
-                            : "border-border/70 text-muted-foreground/60 hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
+                            : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
                         )}
                       >
                         {copied === link.token ? (
@@ -349,7 +349,7 @@ export default function SarahPage() {
                           "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-all duration-150",
                           resent === link.token
                             ? "border-blue-800/50 bg-blue-950/40 text-blue-400"
-                            : "border-border/70 text-muted-foreground/60 hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
+                            : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
                         )}
                       >
                         <Send className="h-3 w-3" />

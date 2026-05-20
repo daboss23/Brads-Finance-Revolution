@@ -49,13 +49,13 @@ export default function FactFindPage() {
 
       {/* Page header */}
       <div className="mb-10">
-        <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
+        <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-3">
           Fact Find
         </p>
         <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
           Progress Overview
         </h1>
-        <p className="mt-3 text-[14px] text-muted-foreground/65">
+        <p className="mt-3 text-[14px] text-muted-foreground">
           Section-by-section completion across {CLIENTS.length} active clients
         </p>
       </div>
@@ -68,31 +68,31 @@ export default function FactFindPage() {
             value: `${fullyComplete} / ${CLIENTS.length}`,
             icon: Users,
             color: "text-emerald-400",
-            bg: "bg-emerald-400/10",
-            accent: "from-emerald-400/40",
+            bg: "bg-emerald-400/15",
+            accent: "from-emerald-400/50",
           },
           {
             label: "Avg Completion",
             value: `${avgProgress}%`,
             icon: TrendingUp,
             color: "text-gold",
-            bg: "bg-gold/10",
-            accent: "from-gold/40",
+            bg: "bg-gold/15",
+            accent: "from-gold/50",
           },
           {
             label: "Sections Filled",
             value: `${totalSectionsComplete} / ${totalPossible}`,
             icon: LayoutGrid,
             color: "text-blue-accent",
-            bg: "bg-blue-accent/10",
-            accent: "from-blue-accent/40",
+            bg: "bg-blue-accent/15",
+            accent: "from-blue-accent/50",
           },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
           <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
             <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
             <div className="px-6 pt-6 pb-6">
               <div className="flex items-start justify-between mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55 leading-snug">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug">
                   {label}
                 </p>
                 <div className={cn("flex h-7 w-7 items-center justify-center rounded-full shrink-0", bg)}>
@@ -141,7 +141,7 @@ export default function FactFindPage() {
           <h2 className="text-[15px] font-semibold text-foreground">
             Client Matrix
           </h2>
-          <p className="text-[12px] text-muted-foreground/55 mt-1">
+          <p className="text-[12px] text-muted-foreground mt-1">
             Fact find completion by client and section — hover a column header for the full section name
           </p>
         </div>
