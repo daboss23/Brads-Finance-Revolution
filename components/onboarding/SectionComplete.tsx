@@ -1,5 +1,4 @@
 import { CheckCircle2, ArrowRight } from "lucide-react";
-import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
 import { cn } from "@/lib/utils";
 
 const SECTION_XP_BONUS = 100;
@@ -63,65 +62,64 @@ export function SectionComplete({
   const copy = MILESTONE_HEADINGS[sectionsComplete] ?? { heading: "Section complete.", sub: "" };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-lg text-center space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md onboarding-rise">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {/* BMK accent strip */}
+          <div className="h-px bg-gradient-to-r from-gold/50 to-transparent" />
 
-        {/* Medal */}
-        <div className="flex flex-col items-center gap-4 onboarding-rise">
-          <div className="relative flex items-center justify-center">
-            {/* Glow ring */}
-            <div className="onboarding-ring absolute h-28 w-28 rounded-full border border-gold/25 bg-gold/[0.04]" />
-            {/* Medal circle */}
-            <div className="onboarding-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 border border-gold/40 shadow-[0_0_40px_-8px_hsl(43_68%_52%_/_0.35)]">
-              <CheckCircle2 className="h-9 w-9 text-gold" strokeWidth={1.75} />
+          <div className="px-8 py-10 text-center space-y-7">
+            {/* Medal */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="onboarding-pop flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
+                <CheckCircle2 className="h-7 w-7 text-gold" strokeWidth={1.75} />
+              </div>
+              <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/80">
+                {medal} · Section Complete
+              </span>
             </div>
+
+            {/* Heading */}
+            <div className="space-y-2">
+              <h2 className="text-[26px] font-semibold tracking-tight text-foreground leading-tight">
+                {copy.heading}
+              </h2>
+              <p className="text-[14.5px] text-foreground/70">{copy.sub}</p>
+              <p className="text-[13.5px] text-muted-foreground/70 leading-relaxed">{message}</p>
+            </div>
+
+            {/* XP badge */}
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/30 px-5 py-2">
+                <span className="text-[15px] font-bold text-gold tabular-nums">+{SECTION_XP_BONUS} XP</span>
+                <span className="text-[10px] text-gold/70 font-semibold tracking-[0.12em] uppercase">
+                  Section Bonus
+                </span>
+              </div>
+            </div>
+
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-2">
+              {Array.from({ length: totalSections }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "rounded-full transition-all duration-500",
+                    i < sectionsComplete ? "h-2.5 w-2.5 bg-gold" : "h-1.5 w-1.5 bg-border"
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={onContinue}
+              className="w-full flex items-center justify-center gap-2 rounded bg-gold py-3.5 text-[14px] font-semibold text-gold-foreground hover:bg-gold/90 active:scale-[0.99] transition-all"
+            >
+              {isLastSection ? "View your certificate" : "Continue"}
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
-          <span className="text-[10px] font-bold tracking-[0.28em] uppercase text-gold/70">
-            {medal} · Section Complete
-          </span>
-        </div>
-
-        {/* Heading */}
-        <div className="onboarding-rise onboarding-delay-1 space-y-2">
-          <h2 className="text-[34px] font-semibold tracking-tight text-foreground leading-tight">
-            {copy.heading}
-          </h2>
-          <p className="text-[16px] text-foreground/60">{copy.sub}</p>
-          <p className="text-[14px] text-foreground/50 mt-1">{message}</p>
-        </div>
-
-        {/* XP badge */}
-        <div className="onboarding-rise onboarding-delay-2 flex justify-center">
-          <div className="inline-flex items-center gap-2.5 rounded-full bg-gold/12 border border-gold/30 px-6 py-2.5 shadow-[0_0_24px_-4px_hsl(43_68%_52%_/_0.25)]">
-            <span className="text-[18px] font-bold text-gold tabular-nums">+{SECTION_XP_BONUS} XP</span>
-            <span className="text-[11px] text-gold/60 font-semibold tracking-[0.1em] uppercase">Section Bonus</span>
-          </div>
-        </div>
-
-        {/* Progress dots */}
-        <div className="onboarding-rise onboarding-delay-3 flex items-center justify-center gap-2.5">
-          {Array.from({ length: totalSections }).map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "rounded-full transition-all duration-500",
-                i < sectionsComplete
-                  ? "h-2.5 w-2.5 bg-gold shadow-[0_0_8px_hsl(43_68%_52%_/_0.5)]"
-                  : "h-1.5 w-1.5 bg-border/60"
-              )}
-            />
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="onboarding-rise onboarding-delay-4">
-          <button
-            onClick={onContinue}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gold py-4 text-[14px] font-semibold text-gold-foreground hover:bg-gold/90 active:scale-[0.98] transition-all"
-          >
-            {isLastSection ? "View your certificate" : "Continue"}
-            <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
       </div>
     </div>

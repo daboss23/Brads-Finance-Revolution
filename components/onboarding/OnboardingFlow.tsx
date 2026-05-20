@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { getLinkByToken } from "@/lib/sarah-data";
 import { FACT_FIND_SECTIONS, type Field } from "@/lib/fact-find-flow";
+import { Sparkles } from "lucide-react";
 import { ProgressHeader } from "./ProgressHeader";
 import { IntroScreen } from "./IntroScreen";
 import { QuestionCard } from "./QuestionCard";
@@ -142,9 +143,7 @@ export function OnboardingFlow({ token }: Props) {
     return (
       <>
         <OnboardingBackground />
-        <div className="relative z-10">
-          <IntroScreen firstName={firstName} onBegin={handleBegin} />
-        </div>
+        <IntroScreen firstName={firstName} onBegin={handleBegin} />
       </>
     );
   }
@@ -153,13 +152,11 @@ export function OnboardingFlow({ token }: Props) {
     return (
       <>
         <OnboardingBackground />
-        <div className="relative z-10">
-          <CompletionCertificate
-            clientFullName={clientFullName}
-            xpEarned={xp}
-            completedDate={completedDate}
-          />
-        </div>
+        <CompletionCertificate
+          clientFullName={clientFullName}
+          xpEarned={xp}
+          completedDate={completedDate}
+        />
       </>
     );
   }
@@ -169,15 +166,13 @@ export function OnboardingFlow({ token }: Props) {
     return (
       <>
         <OnboardingBackground />
-        <div className="relative z-10">
-          <SectionComplete
-            sectionId={justCompletedSectionId}
-            sectionsComplete={sectionsComplete}
-            totalSections={FACT_FIND_SECTIONS.length}
-            isLastSection={isLastSection}
-            onContinue={handleSectionContinue}
-          />
-        </div>
+        <SectionComplete
+          sectionId={justCompletedSectionId}
+          sectionsComplete={sectionsComplete}
+          totalSections={FACT_FIND_SECTIONS.length}
+          isLastSection={isLastSection}
+          onContinue={handleSectionContinue}
+        />
       </>
     );
   }
@@ -186,7 +181,7 @@ export function OnboardingFlow({ token }: Props) {
     return (
       <>
         <OnboardingBackground />
-        <div className="relative z-10 min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col">
           <ProgressHeader
             sectionName={current.sectionTitle}
             sectionNumber={current.sectionIndex + 1}
@@ -195,18 +190,18 @@ export function OnboardingFlow({ token }: Props) {
             xp={xp}
           />
 
-          <div className="flex-1 flex items-center justify-center px-6 pt-20 pb-12">
+          <div className="flex-1 flex items-center justify-center px-6 pt-24 pb-12">
             <div className="w-full max-w-lg">
               {/* Sarah message */}
               <div className="flex items-start gap-3 mb-8">
-                <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gold/15 border border-gold/35 mt-0.5">
-                  <span className="text-[9px] font-bold text-gold">SA</span>
+                <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gold/10 border border-gold/30 mt-0.5">
+                  <Sparkles className="h-4 w-4 text-gold" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gold/65 mb-1">
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
                     Sarah · BMK Onboarding
                   </p>
-                  <p className="text-[13px] text-foreground/60 leading-relaxed">
+                  <p className="text-[14px] text-foreground/75 leading-relaxed">
                     {sarahMessage}
                   </p>
                 </div>
