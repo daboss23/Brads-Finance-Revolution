@@ -151,20 +151,20 @@ export default function FactFindPage() {
       <div className="rounded-lg border border-border overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 min-w-[220px]">
+            <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground min-w-[220px]">
                 Client
               </th>
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 w-40">
+              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-40">
                 Status
               </th>
-              <th className="px-5 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 w-36">
+              <th className="px-5 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-36">
                 Progress
               </th>
               {SECTIONS.map((s) => (
                 <th
                   key={s}
-                  className="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/55 w-14"
+                  className="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-14"
                   title={s}
                 >
                   {SECTION_ABBR[s]}
@@ -172,21 +172,21 @@ export default function FactFindPage() {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-border/80">
             {CLIENTS.map((client) => (
               <tr
                 key={client.id}
-                className="hover:bg-gold/[0.025] transition-colors duration-150 group"
+                className="hover:bg-gold/[0.04] transition-colors duration-150 group"
               >
                 <td className="px-6 py-5">
                   <Link
                     href={`/clients/${client.id}`}
                     className="group-hover:text-gold transition-colors"
                   >
-                    <p className="font-medium text-[13px] text-foreground/90">
+                    <p className="font-medium text-[13px] text-foreground">
                       {client.name}
                     </p>
-                    <p className="text-[11px] text-muted-foreground/50 mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                       {client.email}
                     </p>
                   </Link>
