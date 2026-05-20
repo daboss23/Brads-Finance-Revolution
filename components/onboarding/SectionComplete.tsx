@@ -64,54 +64,65 @@ export function SectionComplete({
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-lg onboarding-fade-in text-center space-y-7">
+      <div className="w-full max-w-lg text-center space-y-8">
 
         {/* Medal */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 border border-gold/25">
-            <CheckCircle2 className="h-7 w-7 text-gold" />
+        <div className="flex flex-col items-center gap-4 onboarding-rise">
+          <div className="relative flex items-center justify-center">
+            {/* Glow ring */}
+            <div className="onboarding-ring absolute h-28 w-28 rounded-full border border-gold/25 bg-gold/[0.04]" />
+            {/* Medal circle */}
+            <div className="onboarding-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 border border-gold/40 shadow-[0_0_40px_-8px_hsl(43_68%_52%_/_0.35)]">
+              <CheckCircle2 className="h-9 w-9 text-gold" strokeWidth={1.75} />
+            </div>
           </div>
-          <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold/55">
+          <span className="text-[10px] font-bold tracking-[0.28em] uppercase text-gold/70">
             {medal} · Section Complete
           </span>
         </div>
 
         {/* Heading */}
-        <div>
-          <h2 className="text-[28px] font-semibold tracking-tight text-foreground">
+        <div className="onboarding-rise onboarding-delay-1 space-y-2">
+          <h2 className="text-[34px] font-semibold tracking-tight text-foreground leading-tight">
             {copy.heading}
           </h2>
-          <p className="text-[15px] text-muted-foreground/55 mt-1">{copy.sub}</p>
-          <p className="text-[13px] text-muted-foreground/45 mt-2">{message}</p>
+          <p className="text-[16px] text-foreground/60">{copy.sub}</p>
+          <p className="text-[14px] text-foreground/50 mt-1">{message}</p>
         </div>
 
         {/* XP badge */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 border border-gold/20 px-5 py-2">
-          <span className="text-[15px] font-semibold text-gold">+{SECTION_XP_BONUS} XP</span>
-          <span className="text-[11px] text-gold/45 font-medium">Section Bonus</span>
+        <div className="onboarding-rise onboarding-delay-2 flex justify-center">
+          <div className="inline-flex items-center gap-2.5 rounded-full bg-gold/12 border border-gold/30 px-6 py-2.5 shadow-[0_0_24px_-4px_hsl(43_68%_52%_/_0.25)]">
+            <span className="text-[18px] font-bold text-gold tabular-nums">+{SECTION_XP_BONUS} XP</span>
+            <span className="text-[11px] text-gold/60 font-semibold tracking-[0.1em] uppercase">Section Bonus</span>
+          </div>
         </div>
 
         {/* Progress dots */}
-        <div className="flex items-center justify-center gap-2">
+        <div className="onboarding-rise onboarding-delay-3 flex items-center justify-center gap-2.5">
           {Array.from({ length: totalSections }).map((_, i) => (
             <div
               key={i}
               className={cn(
-                "rounded-full transition-all duration-300",
-                i < sectionsComplete ? "h-2 w-2 bg-gold" : "h-1.5 w-1.5 bg-border"
+                "rounded-full transition-all duration-500",
+                i < sectionsComplete
+                  ? "h-2.5 w-2.5 bg-gold shadow-[0_0_8px_hsl(43_68%_52%_/_0.5)]"
+                  : "h-1.5 w-1.5 bg-border/60"
               )}
             />
           ))}
         </div>
 
         {/* CTA */}
-        <button
-          onClick={onContinue}
-          className="w-full flex items-center justify-center gap-2 rounded-lg bg-gold py-3.5 text-[13.5px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors"
-        >
-          {isLastSection ? "View your certificate" : "Continue"}
-          <ArrowRight className="h-4 w-4" />
-        </button>
+        <div className="onboarding-rise onboarding-delay-4">
+          <button
+            onClick={onContinue}
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gold py-4 text-[14px] font-semibold text-gold-foreground hover:bg-gold/90 active:scale-[0.98] transition-all"
+          >
+            {isLastSection ? "View your certificate" : "Continue"}
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

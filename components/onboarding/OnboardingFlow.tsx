@@ -8,6 +8,7 @@ import { IntroScreen } from "./IntroScreen";
 import { QuestionCard } from "./QuestionCard";
 import { SectionComplete } from "./SectionComplete";
 import { CompletionCertificate } from "./CompletionCertificate";
+import { OnboardingBackground } from "./OnboardingBackground";
 
 const XP_PER_QUESTION = 25;
 const XP_SECTION_BONUS = 100;
@@ -87,25 +88,26 @@ export function OnboardingFlow({ token }: Props) {
     setPhase("question");
   }
 
-  function handleContinue() {
+  // Unified advance — awardXp=true for Continue, false for Skip
+  function advance(awardXp: boolean) {
     const q = current;
     const answer = input.trim();
 
-    // Save answer
-    setAnswers((prev) => ({ ...prev, [q.field.id]: answer }));
+    if (answer) {
+      setAnswers((prev) => ({ ...prev, [q.field.id]: answer }));
+    }
 
     const nextIndex = qIndex + 1;
 
     if (q.isLastInSection) {
-      // Award question XP + section bonus
-      setXp((prev) => prev + XP_PER_QUESTION + XP_SECTION_BONUS);
+      if (awardXp && answer) setXp((prev) => prev + XP_PER_QUESTION);
+      setXp((prev) => prev + XP_SECTION_BONUS);
       setSectionsComplete((prev) => prev + 1);
       setJustCompletedSectionId(q.sectionId);
-      // Advance index now so SectionComplete knows where to go
       setQIndex(nextIndex);
       setPhase("section-complete");
     } else {
-      setXp((prev) => prev + XP_PER_QUESTION);
+      if (awardXp && answer) setXp((prev) => prev + XP_PER_QUESTION);
       setQIndex(nextIndex);
       setInput(answers[FLAT_QUESTIONS[nextIndex]?.field.id] ?? "");
     }
@@ -137,76 +139,97 @@ export function OnboardingFlow({ token }: Props) {
   });
 
   if (phase === "intro") {
-    return <IntroScreen firstName={firstName} onBegin={handleBegin} />;
+    return (
+      <>
+        <OnboardingBackground />
+        <div className="relative z-10">
+          <IntroScreen firstName={firstName} onBegin={handleBegin} />
+        </div>
+      </>
+    );
   }
 
   if (phase === "complete") {
     return (
-      <CompletionCertificate
-        clientFullName={clientFullName}
-        xpEarned={xp}
-        completedDate={completedDate}
-      />
+      <>
+        <OnboardingBackground />
+        <div className="relative z-10">
+          <CompletionCertificate
+            clientFullName={clientFullName}
+            xpEarned={xp}
+            completedDate={completedDate}
+          />
+        </div>
+      </>
     );
   }
 
   if (phase === "section-complete" && justCompletedSectionId) {
     const isLastSection = qIndex >= TOTAL_QUESTIONS;
     return (
-      <SectionComplete
-        sectionId={justCompletedSectionId}
-        sectionsComplete={sectionsComplete}
-        totalSections={FACT_FIND_SECTIONS.length}
-        isLastSection={isLastSection}
-        onContinue={handleSectionContinue}
-      />
+      <>
+        <OnboardingBackground />
+        <div className="relative z-10">
+          <SectionComplete
+            sectionId={justCompletedSectionId}
+            sectionsComplete={sectionsComplete}
+            totalSections={FACT_FIND_SECTIONS.length}
+            isLastSection={isLastSection}
+            onContinue={handleSectionContinue}
+          />
+        </div>
+      </>
     );
   }
 
   if (phase === "question" && current) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <ProgressHeader
-          sectionName={current.sectionTitle}
-          sectionNumber={current.sectionIndex + 1}
-          totalSections={FACT_FIND_SECTIONS.length}
-          overallPct={overallPct}
-          xp={xp}
-        />
+      <>
+        <OnboardingBackground />
+        <div className="relative z-10 min-h-screen flex flex-col">
+          <ProgressHeader
+            sectionName={current.sectionTitle}
+            sectionNumber={current.sectionIndex + 1}
+            totalSections={FACT_FIND_SECTIONS.length}
+            overallPct={overallPct}
+            xp={xp}
+          />
 
-        <div className="flex-1 flex items-center justify-center px-6 pt-20 pb-12">
-          <div className="w-full max-w-lg">
-            {/* Sarah message */}
-            <div className="flex items-start gap-3 mb-8">
-              <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gold/10 border border-gold/25 mt-0.5">
-                <span className="text-[9px] font-bold text-gold">SA</span>
+          <div className="flex-1 flex items-center justify-center px-6 pt-20 pb-12">
+            <div className="w-full max-w-lg">
+              {/* Sarah message */}
+              <div className="flex items-start gap-3 mb-8">
+                <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gold/15 border border-gold/35 mt-0.5">
+                  <span className="text-[9px] font-bold text-gold">SA</span>
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gold/65 mb-1">
+                    Sarah · BMK Onboarding
+                  </p>
+                  <p className="text-[13px] text-foreground/60 leading-relaxed">
+                    {sarahMessage}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gold/55 mb-1">
-                  Sarah · BMK Onboarding
-                </p>
-                <p className="text-[13px] text-muted-foreground/65 leading-relaxed">
-                  {sarahMessage}
-                </p>
-              </div>
+
+              <QuestionCard
+                key={`${current.sectionId}-${current.fieldIndexInSection}`}
+                field={current.field}
+                sectionIntro={sectionIntro}
+                questionNumber={current.fieldIndexInSection + 1}
+                totalInSection={current.totalFieldsInSection}
+                value={input}
+                onChange={(val) => setInput(val)}
+                onContinue={() => advance(true)}
+                onSkip={() => advance(false)}
+                onBack={handleBack}
+                canGoBack={qIndex > 0}
+                xpPerQuestion={XP_PER_QUESTION}
+              />
             </div>
-
-            <QuestionCard
-              key={`${current.sectionId}-${current.fieldIndexInSection}`}
-              field={current.field}
-              sectionIntro={sectionIntro}
-              questionNumber={current.fieldIndexInSection + 1}
-              totalInSection={current.totalFieldsInSection}
-              value={input}
-              onChange={(val) => setInput(val)}
-              onContinue={handleContinue}
-              onBack={handleBack}
-              canGoBack={qIndex > 0}
-              xpPerQuestion={XP_PER_QUESTION}
-            />
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
