@@ -45,7 +45,7 @@ export default function FactFindPage() {
   const secondRow = completionBySection.slice(4);
 
   return (
-    <div className="px-14 py-12">
+    <div className="pl-14 pr-6 py-12">
 
       {/* Page header */}
       <div className="mb-10">
