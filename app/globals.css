@@ -122,6 +122,16 @@
     }
   }
 
+  /* Onboarding question entrance */
+  .onboarding-fade-in {
+    animation: onboarding-fade-in 0.3s ease-out both;
+  }
+
+  @keyframes onboarding-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* Newcastle Financial Services — shoreline water motion */
   @keyframes nfs-water-flow-a {
     0%, 100% { transform: translateX(0) translateY(0) scaleX(1); }
