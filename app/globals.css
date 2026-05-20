@@ -121,4 +121,29 @@
         0 0 40px rgba(201, 168, 76, 0.1);
     }
   }
+
+  /* Newcastle Financial Services — shoreline water motion */
+  @keyframes nfs-water-flow-a {
+    0%, 100% { transform: translateX(0) translateY(0) scaleX(1); }
+    38%  { transform: translateX(-4px) translateY(2px) scaleX(1.012); }
+    72%  { transform: translateX(3px) translateY(-1.5px) scaleX(0.992); }
+  }
+
+  @keyframes nfs-water-flow-b {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    42%  { transform: translateX(3.5px) translateY(-2px); }
+    78%  { transform: translateX(-2.5px) translateY(1.5px); }
+  }
+
+  .nfs-water-a {
+    animation: nfs-water-flow-a 9s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+  }
+
+  .nfs-water-b {
+    animation: nfs-water-flow-b 12s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+  }
 }

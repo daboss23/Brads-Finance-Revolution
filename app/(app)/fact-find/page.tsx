@@ -15,13 +15,13 @@ const SECTIONS = [
 ];
 
 const SHORT_LABELS: Record<string, string> = {
-  "Personal Details": "PD",
-  "Income & Employment": "I&E",
-  "Assets & Liabilities": "A&L",
-  "Expenses": "EXP",
-  "Superannuation": "SUPER",
-  "Insurance": "INS",
-  "Goals & Objectives": "GOALS",
+  "Personal Details": "Personal",
+  "Income & Employment": "Income",
+  "Assets & Liabilities": "Assets",
+  "Expenses": "Expenses",
+  "Superannuation": "Super",
+  "Insurance": "Insurance",
+  "Goals & Objectives": "Goals",
 };
 
 export default function FactFindPage() {
@@ -36,19 +36,44 @@ export default function FactFindPage() {
     return { section, complete, inProgress, pct };
   });
 
+  const fullyComplete = CLIENTS.filter((c) => c.progress === 100).length;
+  const avgProgress = Math.round(CLIENTS.reduce((s, c) => s + c.progress, 0) / CLIENTS.length);
+  const totalSectionsComplete = completionBySection.reduce((s, c) => s + c.complete, 0);
+
   return (
     <div className="px-14 py-12">
 
-      <div className="mb-12">
-        <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
-          Fact Find
-        </p>
-        <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
-          Progress Overview
-        </h1>
-        <p className="mt-3 text-[14px] text-muted-foreground/60">
-          Section-by-section completion across {CLIENTS.length} active clients
-        </p>
+      {/* Page header */}
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
+            Fact Find
+          </p>
+          <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
+            Progress Overview
+          </h1>
+          <p className="mt-3 text-[14px] text-muted-foreground/65">
+            Section-by-section completion across {CLIENTS.length} active clients
+          </p>
+        </div>
+      </div>
+
+      {/* Summary strip */}
+      <div className="flex items-center gap-8 mb-10 pl-0.5">
+        {[
+          { label: "Clients fully complete", value: `${fullyComplete} of ${CLIENTS.length}` },
+          { label: "Avg completion", value: `${avgProgress}%` },
+          { label: "Sections fully filled", value: `${totalSectionsComplete} of ${SECTIONS.length * CLIENTS.length}` },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex items-baseline gap-2.5">
+            <span className="text-[22px] font-semibold text-foreground/90 tabular-nums leading-none">
+              {value}
+            </span>
+            <span className="text-[11px] text-muted-foreground/50 tracking-wide">
+              {label}
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Section summary cards */}
@@ -62,24 +87,24 @@ export default function FactFindPage() {
               className={cn(
                 "h-px bg-gradient-to-r to-transparent",
                 pct === 100
-                  ? "from-emerald-500/50"
+                  ? "from-emerald-500/60"
                   : pct >= 50
-                  ? "from-gold/50"
+                  ? "from-gold/55"
                   : "from-muted-foreground/20"
               )}
             />
-            <div className="px-4 py-6 text-center">
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/45 mb-4">
+            <div className="px-4 py-8 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60 mb-5 leading-snug">
                 {SHORT_LABELS[section]}
               </p>
               <p
                 className={cn(
-                  "text-[30px] font-semibold leading-none tabular-nums mb-4",
+                  "text-[36px] font-semibold leading-none tabular-nums mb-5",
                   pct === 100
                     ? "text-emerald-400"
                     : pct >= 60
                     ? "text-gold"
-                    : "text-foreground/80"
+                    : "text-foreground/85"
                 )}
               >
                 {pct}%
@@ -92,7 +117,7 @@ export default function FactFindPage() {
                   pct < 60 && inProgress > 0 ? "bmk-progress-blue" : ""
                 )}
               />
-              <p className="text-[11px] text-muted-foreground/40">
+              <p className="text-[11px] text-muted-foreground/55 tabular-nums">
                 {complete}/{CLIENTS.length}
               </p>
             </div>
@@ -105,22 +130,22 @@ export default function FactFindPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 min-w-[200px]">
+              <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 min-w-[200px]">
                 Client
               </th>
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-36">
+              <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 w-36">
                 Status
               </th>
-              <th className="px-4 py-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-20">
+              <th className="px-4 py-5 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 w-20">
                 Total
               </th>
               {SECTIONS.map((s) => (
                 <th
                   key={s}
-                  className="px-4 py-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-16"
+                  className="px-4 py-5 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55 w-16"
                   title={s}
                 >
-                  {SHORT_LABELS[s]}
+                  {SHORT_LABELS[s].slice(0, 3).toUpperCase()}
                 </th>
               ))}
             </tr>
@@ -134,7 +159,7 @@ export default function FactFindPage() {
                 <td className="px-6 py-5">
                   <Link
                     href={`/clients/${client.id}`}
-                    className="font-medium text-[13px] text-foreground/85 hover:text-gold transition-colors"
+                    className="font-medium text-[13px] text-foreground/90 hover:text-gold transition-colors"
                   >
                     {client.name}
                   </Link>
@@ -145,7 +170,7 @@ export default function FactFindPage() {
                   </Badge>
                 </td>
                 <td className="px-4 py-5 text-center">
-                  <span className="text-[14px] font-medium text-foreground/80 tabular-nums">
+                  <span className="text-[14px] font-semibold text-foreground/85 tabular-nums">
                     {client.progress}%
                   </span>
                 </td>
@@ -167,15 +192,15 @@ export default function FactFindPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-7 mt-5 pl-1">
+      <div className="flex items-center gap-8 mt-5 pl-1">
         {[
           { status: "complete" as SectionStatus, label: "Complete" },
           { status: "in-progress" as SectionStatus, label: "In Progress" },
-          { status: "missing" as SectionStatus, label: "Missing" },
+          { status: "missing" as SectionStatus, label: "Not started" },
         ].map(({ status, label }) => (
           <div key={status} className="flex items-center gap-2">
             <MatrixDot status={status} />
-            <span className="text-[12px] text-muted-foreground/50">{label}</span>
+            <span className="text-[12px] text-muted-foreground/55">{label}</span>
           </div>
         ))}
       </div>
