@@ -206,7 +206,7 @@ export default function FactFindPage() {
                         client.status === "in-progress" ? "bmk-progress-blue" : ""
                       )}
                     />
-                    <span className="text-[12px] font-medium text-muted-foreground/70 tabular-nums w-8">
+                    <span className="text-[12px] font-medium text-muted-foreground tabular-nums w-8">
                       {client.progress}%
                     </span>
                   </div>
@@ -237,7 +237,7 @@ export default function FactFindPage() {
         ].map(({ status, label }) => (
           <div key={status} className="flex items-center gap-2">
             <MatrixDot status={status} />
-            <span className="text-[12px] text-muted-foreground/55">{label}</span>
+            <span className="text-[12px] text-muted-foreground">{label}</span>
           </div>
         ))}
       </div>
@@ -274,7 +274,7 @@ function SectionCard({
       />
       <div className="px-6 py-7">
         <div className="flex items-start justify-between mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60 leading-snug max-w-[120px]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug max-w-[120px]">
             {section}
           </p>
           <p
@@ -299,7 +299,7 @@ function SectionCard({
           )}
         />
         <div className="flex items-center justify-between mt-3">
-          <span className="text-[11px] text-muted-foreground/50 tabular-nums">
+          <span className="text-[11px] text-muted-foreground/75 tabular-nums">
             {complete} of {total} complete
           </span>
           {inProgress > 0 && (

@@ -221,7 +221,7 @@ export default function SarahPage() {
               return (
                 <div key={section}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[12px] text-foreground/90">{section}</span>
+                    <span className="text-[12px] text-foreground">{section}</span>
                     <span className="text-[11px] text-muted-foreground tabular-nums">
                       {incomplete}/{CLIENTS.length}
                     </span>
