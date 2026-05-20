@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, ClipboardList, Sparkles } from "lucide-react";
+import { NewcastleEmblem } from "@/components/logo/newcastle-logo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -16,18 +17,25 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-border bg-card">
-      {/* Logo */}
-      <div className="flex h-16 items-center px-6 border-b border-border/60">
-        <div className="flex items-baseline gap-0.5 select-none">
-          <span className="text-[22px] font-black tracking-tight text-gold bmk-letter-pulse leading-none">B</span>
-          <span className="text-[22px] font-black tracking-tight text-foreground leading-none">M</span>
-          <span className="text-[22px] font-black tracking-tight text-gold bmk-letter-pulse leading-none">K</span>
+    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-border bg-card">
+
+      {/* Brand / logo */}
+      <div className="px-5 pt-7 pb-6 border-b border-border/60">
+        <div className="flex items-center gap-3.5 mb-4">
+          <NewcastleEmblem size={44} />
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-[13px] font-extralight tracking-[0.28em] text-foreground/90 uppercase leading-none truncate">
+              Newcastle
+            </span>
+            <span className="text-[8.5px] font-bold tracking-[0.2em] text-muted-foreground/45 uppercase mt-1">
+              Financial Services
+            </span>
+          </div>
         </div>
-        <div className="ml-2.5 flex flex-col justify-center leading-none">
-          <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-blue-accent">Financial Services</span>
-          <span className="text-[8px] tracking-[0.12em] text-muted-foreground/40 mt-0.5">Plan · Grow · Prosper</span>
-        </div>
+        <div className="h-px bg-gold/30" />
+        <p className="mt-2.5 text-[8px] tracking-[0.18em] text-muted-foreground/30 uppercase font-medium">
+          Plan · Grow · Prosper
+        </p>
       </div>
 
       {/* Nav */}
@@ -42,7 +50,7 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded px-3 py-2.5 text-[13px] font-medium transition-all duration-150 relative",
+                "flex items-center gap-3 rounded px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
                 active
                   ? "bg-gold/[0.08] text-gold border-l-2 border-gold/60 pl-[10px]"
                   : "text-muted-foreground/60 hover:bg-white/[0.04] hover:text-foreground/80 border-l-2 border-transparent pl-[10px]"
