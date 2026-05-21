@@ -5,9 +5,12 @@ type Props = {
   clientName: string;
   xpEarned: number;
   completedDate: string;
+  sectionsCompleted?: number;
 };
 
-export function CompletionCertificate({ clientName, xpEarned, completedDate }: Props) {
+export function CompletionCertificate({ clientName, xpEarned, completedDate, sectionsCompleted }: Props) {
+  const pct = Math.round((xpEarned / TOTAL_XP) * 100);
+  const completedCount = sectionsCompleted ?? SECTIONS.length;
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-xl onboarding-fade-in">
@@ -51,9 +54,9 @@ export function CompletionCertificate({ clientName, xpEarned, completedDate }: P
 
             {/* Sections completed */}
             <div className="grid grid-cols-2 gap-2 mb-8 text-left">
-              {SECTIONS.map((s) => (
+              {SECTIONS.map((s, i) => (
                 <div key={s.name} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400/70" />
+                  <CheckCircle2 className={`h-3.5 w-3.5 shrink-0 ${i < completedCount ? "text-emerald-400/70" : "text-muted-foreground/20"}`} />
                   <span className="text-[12px] text-muted-foreground/60">{s.name}</span>
                 </div>
               ))}
@@ -71,7 +74,7 @@ export function CompletionCertificate({ clientName, xpEarned, completedDate }: P
               <div className="h-8 w-px bg-border/50" />
               <div className="text-center">
                 <p className="text-[20px] font-semibold text-foreground/70 tabular-nums">
-                  {Math.round((xpEarned / TOTAL_XP) * 100)}%
+                  {pct}%
                 </p>
                 <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-muted-foreground/35 mt-0.5">Completion</p>
               </div>
