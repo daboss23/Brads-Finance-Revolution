@@ -203,4 +203,44 @@
     transform-box: fill-box;
     transform-origin: center bottom;
   }
+
+  /* ─── Sarah Orb ─── */
+  @keyframes sarah-orb-idle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes sarah-orb-think-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes sarah-orb-think-core {
+    from { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(-180deg) scale(1.03); }
+    to { transform: rotate(-360deg) scale(1); }
+  }
+  @keyframes sarah-orb-listen-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  @keyframes sarah-orb-speak-ring {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+  @keyframes sarah-orb-speak-core {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
+  }
+
+  .sarah-orb-idle { animation: sarah-orb-idle 3.5s ease-in-out infinite; }
+  .sarah-orb-thinking { animation: sarah-orb-think-rotate 8s linear infinite; }
+  .sarah-orb-thinking-core { animation: sarah-orb-think-core 5s ease-in-out infinite; }
+  .sarah-orb-listening { animation: sarah-orb-listen-pulse 2s ease-in-out infinite; }
+  .sarah-orb-speaking { animation: sarah-orb-speak-core 0.7s ease-in-out infinite; }
+  .sarah-orb-speak-ring-1 { animation: sarah-orb-speak-ring 1.4s ease-out infinite; }
+  .sarah-orb-speak-ring-2 { animation: sarah-orb-speak-ring 1.4s ease-out 0.47s infinite; }
+  .sarah-orb-speak-ring-3 { animation: sarah-orb-speak-ring 1.4s ease-out 0.94s infinite; }
+
+  /* Typing dot delays */
+  .sarah-dot-delay-1 { animation-delay: 150ms; }
+  .sarah-dot-delay-2 { animation-delay: 300ms; }
 }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Mic, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpeechRecognition } from "@/lib/hooks/use-speech-recognition";
+import { SarahOrb, type OrbState } from "./SarahOrb";
 
 type Message = {
   role: "user" | "assistant";
@@ -50,9 +51,11 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
+  const [orbState, setOrbState] = useState<OrbState>("idle");
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { isListening, isSupported, start, stop } = useSpeechRecognition(
     (text) => setInput(text)
@@ -62,7 +65,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [display, streamingText]);
 
-  // Kick off Sarah's opening message on mount
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
@@ -70,9 +72,50 @@ export function SarahChat({ clientName, onComplete }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function stopAudio() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  }
+
+  async function speakText(text: string) {
+    stopAudio();
+    try {
+      const res = await fetch("/api/sarah/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) return;
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      setOrbState("speaking");
+
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        setOrbState("idle");
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        setOrbState("idle");
+      };
+
+      await audio.play();
+    } catch {
+      setOrbState("idle");
+    }
+  }
+
   async function sendToSarah(apiMessages: Message[]) {
     setIsStreaming(true);
     setStreamingText("");
+    setOrbState("thinking");
 
     try {
       const res = await fetch("/api/sarah", {
@@ -106,7 +149,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
               setStreamingText(full);
             }
           } catch {
-            // ignore parse errors on partial chunks
+            // ignore partial chunk parse errors
           }
         }
       }
@@ -120,18 +163,17 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       setDisplay((prev) => [
         ...prev,
-        {
-          id: `sarah-${Date.now()}`,
-          from: "sarah",
-          text: displayText,
-        },
+        { id: `sarah-${Date.now()}`, from: "sarah", text: displayText },
       ]);
-
       setStreamingText("");
 
       if (factFindData) {
         setIsComplete(true);
-        setTimeout(() => onComplete(factFindData), 1800);
+        speakText(displayText).finally(() => {
+          setTimeout(() => onComplete(factFindData), 1800);
+        });
+      } else {
+        speakText(displayText);
       }
     } catch {
       setDisplay((prev) => [
@@ -143,6 +185,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
         },
       ]);
       setStreamingText("");
+      setOrbState("idle");
     } finally {
       setIsStreaming(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -152,6 +195,8 @@ export function SarahChat({ clientName, onComplete }: Props) {
   function handleSubmit() {
     const text = input.trim();
     if (!text || isStreaming) return;
+
+    stopAudio();
 
     const clientMsg: Message = { role: "user", content: text };
     const updatedMessages = [...messages, clientMsg];
@@ -173,31 +218,51 @@ export function SarahChat({ clientName, onComplete }: Props) {
   }
 
   function handleMic() {
-    if (isListening) stop();
-    else start();
+    if (isListening) {
+      stop();
+      setOrbState(isStreaming ? "thinking" : "idle");
+    } else {
+      start();
+      setOrbState("listening");
+    }
   }
+
+  const orbLabel =
+    orbState === "thinking"
+      ? "Sarah is thinking…"
+      : orbState === "speaking"
+      ? "Sarah is speaking…"
+      : orbState === "listening"
+      ? "Listening…"
+      : "Sarah is ready";
 
   return (
     <div className="flex flex-col h-screen bg-background">
+
       {/* Header */}
-      <div className="shrink-0 border-b border-border px-6 py-4 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
-          <span className="text-[11px] font-bold text-gold tracking-tight">SA</span>
-        </div>
+      <div className="shrink-0 border-b border-border px-6 py-3 flex items-center justify-between">
         <div>
           <p className="text-[13px] font-semibold text-foreground/90 leading-none">Sarah</p>
           <p className="text-[10px] text-muted-foreground/50 mt-0.5 tracking-wide">
             BMK Financial Services · Financial Discovery
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           <span className="text-[10px] text-muted-foreground/50">Online</span>
         </div>
       </div>
 
+      {/* Orb */}
+      <div className="shrink-0 flex flex-col items-center pt-6 pb-2">
+        <SarahOrb state={orbState} />
+        <p className="mt-3 text-[11px] text-muted-foreground/40 tracking-wide">
+          {orbLabel}
+        </p>
+      </div>
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5">
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
         {display.map((msg) => (
           <ChatBubble key={msg.id} message={msg} firstName={firstName} />
         ))}
@@ -211,7 +276,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
           />
         )}
 
-        {/* Typing indicator (before first character streams) */}
+        {/* Typing indicator */}
         {isStreaming && !streamingText && (
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
@@ -219,13 +284,9 @@ export function SarahChat({ clientName, onComplete }: Props) {
             </div>
             <div className="bg-card border border-border/60 rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex items-center gap-1.5">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce"
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  />
-                ))}
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce" />
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce sarah-dot-delay-1" />
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce sarah-dot-delay-2" />
               </div>
             </div>
           </div>
@@ -253,11 +314,10 @@ export function SarahChat({ clientName, onComplete }: Props) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isStreaming ? "Sarah is typing…" : "Type your answer…"}
+                placeholder={isStreaming ? "Sarah is thinking…" : "Type your answer…"}
                 disabled={isStreaming}
                 rows={1}
-                className="w-full bg-card border border-border/60 rounded-xl px-4 py-3 pr-12 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed"
-                style={{ minHeight: "48px", maxHeight: "120px" }}
+                className="w-full bg-card border border-border/60 rounded-xl px-4 py-3 pr-12 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-12 max-h-[120px]"
               />
               {isSupported !== false && (
                 <button
