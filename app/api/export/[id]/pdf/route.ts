@@ -220,7 +220,7 @@ export async function GET(
     });
 
     // Status badge
-    const statusText   = status === "complete" ? "● Complete" : status === "in-progress" ? "◐ In Progress" : "○ Not Completed";
+    const statusText   = status === "complete" ? "Complete" : status === "in-progress" ? "In Progress" : "Not Completed";
     const statusColor  = status === "complete" ? C_GREEN : status === "in-progress" ? C_AMBER : rgb(0.78, 0.22, 0.22);
     const badgeW       = bold.widthOfTextAtSize(statusText, 8) + 14;
     const badgeBg      = status === "complete" ? C_GREEN_BG : C_AMBER_BG;
