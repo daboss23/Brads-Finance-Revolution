@@ -149,16 +149,16 @@ export default function FactFindPage() {
 
       {/* Matrix table */}
       <div className="rounded-lg border border-border overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead>
             <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
-              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground min-w-[260px]">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-[280px]">
                 Client
               </th>
-              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-44">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-[180px]">
                 Status
               </th>
-              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-36">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-[200px]">
                 Progress
               </th>
               {SECTIONS.map((s) => (
@@ -178,15 +178,15 @@ export default function FactFindPage() {
                 key={client.id}
                 className="hover:bg-gold/[0.06] transition-colors duration-150 group"
               >
-                <td className="pl-6 pr-10 py-6 align-middle">
+                <td className="px-6 py-6 align-middle">
                   <Link
                     href={`/clients/${client.id}`}
                     className="group-hover:text-gold transition-colors"
                   >
-                    <p className="font-medium text-[13px] text-foreground">
+                    <p className="font-medium text-[13px] text-foreground truncate">
                       {client.name}
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                    <p className="text-[11px] text-muted-foreground mt-1.5 truncate">
                       {client.email}
                     </p>
                   </Link>
@@ -202,7 +202,7 @@ export default function FactFindPage() {
                       value={client.progress}
                       max={100}
                       className={cn(
-                        "bmk-progress w-24",
+                        "bmk-progress w-28",
                         client.status === "in-progress" ? "bmk-progress-blue" : ""
                       )}
                     />
