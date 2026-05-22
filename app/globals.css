@@ -203,4 +203,263 @@
     transform-box: fill-box;
     transform-origin: center bottom;
   }
+
+  /* ─── Sarah Orb ─── */
+  .sarah-orb {
+    position: relative;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sarah-orb-sphere {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(80, 160, 255, 0.12) 0%, transparent 55%),
+      radial-gradient(circle at 65% 70%, rgba(120, 40, 220, 0.10) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, #15284a 0%, #0a1628 55%, #040d1c 100%);
+    overflow: hidden;
+  }
+
+  .sarah-orb-inner {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  .sarah-orb-core {
+    position: absolute;
+    width: 44%;
+    height: 44%;
+    top: 22%;
+    left: 28%;
+    border-radius: 50%;
+    filter: blur(18px);
+  }
+
+  .sarah-orb-highlight {
+    position: absolute;
+    width: 30%;
+    height: 22%;
+    top: 14%;
+    left: 22%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.18), transparent 70%);
+    filter: blur(8px);
+    pointer-events: none;
+  }
+
+  .sarah-orb-aura {
+    position: absolute;
+    inset: -48px;
+    border-radius: 50%;
+    filter: blur(32px);
+    pointer-events: none;
+  }
+
+  .sarah-orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: 1.5px;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ─── IDLE ─── */
+  .sarah-orb--idle .sarah-orb-sphere {
+    animation: sarah-orb-idle-breathe 4s ease-in-out infinite;
+  }
+  .sarah-orb--idle .sarah-orb-inner {
+    background: conic-gradient(
+      from 0deg,
+      rgba(80, 150, 255, 0.10),
+      rgba(140, 50, 255, 0.12),
+      rgba(0, 200, 220, 0.08),
+      rgba(80, 150, 255, 0.10)
+    );
+    animation: sarah-orb-idle-rotate 14s linear infinite;
+  }
+  .sarah-orb--idle .sarah-orb-core {
+    background: radial-gradient(circle, rgba(140, 200, 255, 0.7), rgba(100, 60, 220, 0.4) 50%, transparent);
+    animation: sarah-orb-idle-core 4s ease-in-out infinite;
+  }
+  .sarah-orb--idle .sarah-orb-aura {
+    background: radial-gradient(ellipse, rgba(60, 120, 255, 0.12), rgba(100, 30, 180, 0.06) 55%, transparent);
+    animation: sarah-orb-idle-breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes sarah-orb-idle-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes sarah-orb-idle-core {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.9; }
+  }
+  @keyframes sarah-orb-idle-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ─── THINKING ─── */
+  .sarah-orb--thinking .sarah-orb-sphere {
+    animation: sarah-orb-thinking-breathe 3s ease-in-out infinite;
+  }
+  .sarah-orb--thinking .sarah-orb-inner {
+    background: radial-gradient(circle at 50% 50%, rgba(130, 40, 255, 0.45), rgba(60, 0, 200, 0.25) 50%, transparent);
+    animation: sarah-orb-thinking-swirl 3s linear infinite;
+  }
+  .sarah-orb--thinking .sarah-orb-core {
+    background: radial-gradient(circle,
+      rgba(220, 190, 255, 0.95),
+      rgba(130, 80, 255, 0.70) 35%,
+      rgba(0, 160, 255, 0.40) 65%,
+      transparent
+    );
+    animation: sarah-orb-thinking-core 2s ease-in-out infinite;
+  }
+  .sarah-orb--thinking .sarah-orb-aura {
+    background: radial-gradient(ellipse, rgba(110, 30, 255, 0.18), rgba(50, 0, 150, 0.08) 55%, transparent);
+    animation: sarah-orb-thinking-breathe 3s ease-in-out infinite;
+  }
+  .sarah-orb--thinking .sarah-orb-ring-1 {
+    width: 76%;
+    height: 76%;
+    border-color: rgba(130, 60, 255, 0.5);
+    opacity: 0.5;
+    animation: sarah-orb-ring-orbit-ccw 4s linear infinite;
+  }
+  .sarah-orb--thinking .sarah-orb-ring-2 {
+    width: 58%;
+    height: 58%;
+    border-color: rgba(0, 160, 255, 0.4);
+    opacity: 0.4;
+    animation: sarah-orb-ring-orbit-cw 3s linear infinite;
+  }
+
+  @keyframes sarah-orb-thinking-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  @keyframes sarah-orb-thinking-swirl {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes sarah-orb-thinking-core {
+    0%, 100% { opacity: 0.75; transform: scale(1) rotate(0deg); }
+    50%       { opacity: 1;    transform: scale(1.1) rotate(180deg); }
+  }
+  @keyframes sarah-orb-ring-orbit-ccw {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(-360deg); }
+  }
+  @keyframes sarah-orb-ring-orbit-cw {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* ─── SPEAKING ─── */
+  .sarah-orb--speaking .sarah-orb-sphere {
+    animation: sarah-orb-speaking-pulse 0.65s ease-in-out infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-inner {
+    background: radial-gradient(circle at 50% 50%, rgba(0, 220, 255, 0.38), rgba(0, 160, 230, 0.22) 45%, transparent);
+    animation: sarah-orb-speaking-color 2.5s linear infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-core {
+    background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.95),
+      rgba(0, 230, 255, 0.75) 35%,
+      rgba(100, 40, 255, 0.30) 65%,
+      transparent
+    );
+    animation: sarah-orb-speaking-core 0.65s ease-in-out infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-aura {
+    background: radial-gradient(ellipse, rgba(0, 200, 255, 0.28), rgba(80, 0, 255, 0.12) 55%, transparent);
+    animation: sarah-orb-speaking-pulse 0.65s ease-in-out infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-ring-1 {
+    border-color: rgba(0, 220, 255, 0.55);
+    animation: sarah-orb-ring-burst 1.1s ease-out infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-ring-2 {
+    border-color: rgba(80, 180, 255, 0.38);
+    animation: sarah-orb-ring-burst 1.1s ease-out 0.37s infinite;
+  }
+  .sarah-orb--speaking .sarah-orb-ring-3 {
+    border-color: rgba(180, 100, 255, 0.25);
+    animation: sarah-orb-ring-burst 1.1s ease-out 0.73s infinite;
+  }
+
+  @keyframes sarah-orb-speaking-pulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.08); }
+  }
+  @keyframes sarah-orb-speaking-core {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.18); }
+  }
+  @keyframes sarah-orb-speaking-color {
+    0%   { filter: hue-rotate(0deg) brightness(1); }
+    50%  { filter: hue-rotate(40deg) brightness(1.1); }
+    100% { filter: hue-rotate(0deg) brightness(1); }
+  }
+  @keyframes sarah-orb-ring-burst {
+    0%   { transform: translate(-50%, -50%) scale(1);    opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.85); opacity: 0; }
+  }
+
+  /* ─── LISTENING ─── */
+  .sarah-orb--listening .sarah-orb-sphere {
+    animation: sarah-orb-listening-lean 2.5s ease-in-out infinite;
+  }
+  .sarah-orb--listening .sarah-orb-inner {
+    background: radial-gradient(circle at 50% 50%, rgba(0, 200, 180, 0.32), rgba(0, 160, 200, 0.18) 50%, transparent);
+  }
+  .sarah-orb--listening .sarah-orb-core {
+    background: radial-gradient(circle,
+      rgba(200, 255, 248, 0.90),
+      rgba(0, 210, 190, 0.65) 40%,
+      rgba(0, 140, 180, 0.35) 70%,
+      transparent
+    );
+    animation: sarah-orb-listening-core 2s ease-in-out infinite;
+  }
+  .sarah-orb--listening .sarah-orb-aura {
+    background: radial-gradient(ellipse, rgba(0, 200, 180, 0.22), rgba(0, 130, 180, 0.10) 55%, transparent);
+    animation: sarah-orb-listening-lean 2.5s ease-in-out infinite;
+  }
+  .sarah-orb--listening .sarah-orb-ring-1 {
+    border-color: rgba(0, 210, 190, 0.50);
+    animation: sarah-orb-ring-ripple 2.2s ease-out infinite;
+  }
+  .sarah-orb--listening .sarah-orb-ring-2 {
+    border-color: rgba(0, 180, 200, 0.35);
+    animation: sarah-orb-ring-ripple 2.2s ease-out 0.73s infinite;
+  }
+  .sarah-orb--listening .sarah-orb-ring-3 {
+    border-color: rgba(80, 220, 200, 0.22);
+    animation: sarah-orb-ring-ripple 2.2s ease-out 1.46s infinite;
+  }
+
+  @keyframes sarah-orb-listening-lean {
+    0%, 100%  { transform: translateY(0) scale(1); }
+    45%, 55%  { transform: translateY(-5px) scale(1.02); }
+  }
+  @keyframes sarah-orb-listening-core {
+    0%, 100% { opacity: 0.65; }
+    50%       { opacity: 1; }
+  }
+  @keyframes sarah-orb-ring-ripple {
+    0%   { transform: translate(-50%, -50%) scale(1);    opacity: 0.75; }
+    100% { transform: translate(-50%, -50%) scale(2.1);  opacity: 0; }
+  }
 }
