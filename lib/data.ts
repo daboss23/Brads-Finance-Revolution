@@ -345,22 +345,22 @@ export const STATUS_CONFIG: Record<
 > = {
   "link-sent": {
     label: "Link Sent",
-    className: "bg-zinc-800/60 text-zinc-400 border-zinc-700/50",
+    className: "bg-zinc-700/30 text-zinc-300 border-zinc-600/50",
   },
   "in-progress": {
     label: "In Progress",
-    className: "bg-blue-950/60 text-blue-400 border-blue-900/50",
+    className: "bg-blue-500/15 text-blue-300 border-blue-500/35",
   },
   "ready-for-meeting": {
     label: "Ready for Meeting",
-    className: "bg-amber-950/60 text-amber-400 border-amber-900/50",
+    className: "bg-amber-500/15 text-amber-300 border-amber-500/35",
   },
   "review-required": {
     label: "Review Required",
-    className: "bg-orange-950/60 text-orange-400 border-orange-900/50",
+    className: "bg-orange-500/15 text-orange-300 border-orange-500/35",
   },
   complete: {
     label: "Complete",
-    className: "bg-emerald-950/60 text-emerald-500 border-emerald-900/50",
+    className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
   },
 };

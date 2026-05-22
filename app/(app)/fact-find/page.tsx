@@ -1,6 +1,6 @@
 import { CLIENTS, STATUS_CONFIG, type SectionStatus } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Circle } from "lucide-react";
+import { CheckCircle2, Clock, Circle, Users, TrendingUp, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -14,14 +14,14 @@ const SECTIONS = [
   "Goals & Objectives",
 ];
 
-const SHORT_LABELS: Record<string, string> = {
+const SECTION_ABBR: Record<string, string> = {
   "Personal Details": "PD",
   "Income & Employment": "I&E",
   "Assets & Liabilities": "A&L",
   "Expenses": "EXP",
-  "Superannuation": "SUPER",
+  "Superannuation": "SUP",
   "Insurance": "INS",
-  "Goals & Objectives": "GOALS",
+  "Goals & Objectives": "GOA",
 };
 
 export default function FactFindPage() {
@@ -36,107 +36,159 @@ export default function FactFindPage() {
     return { section, complete, inProgress, pct };
   });
 
-  return (
-    <div className="px-14 py-12">
+  const fullyComplete = CLIENTS.filter((c) => c.progress === 100).length;
+  const avgProgress = Math.round(CLIENTS.reduce((s, c) => s + c.progress, 0) / CLIENTS.length);
+  const totalSectionsComplete = completionBySection.reduce((s, c) => s + c.complete, 0);
+  const totalPossible = SECTIONS.length * CLIENTS.length;
 
-      <div className="mb-12">
-        <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/50 mb-3">
+  const firstRow = completionBySection.slice(0, 4);
+  const secondRow = completionBySection.slice(4);
+
+  return (
+    <div className="pl-14 pr-6 py-12">
+
+      {/* Page header */}
+      <div className="mb-10">
+        <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-3">
           Fact Find
         </p>
         <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
           Progress Overview
         </h1>
-        <p className="mt-3 text-[14px] text-muted-foreground/60">
+        <p className="mt-3 text-[14px] text-muted-foreground">
           Section-by-section completion across {CLIENTS.length} active clients
         </p>
       </div>
 
-      {/* Section summary cards */}
-      <div className="grid grid-cols-7 gap-4 mb-12">
-        {completionBySection.map(({ section, complete, inProgress, pct }) => (
-          <div
-            key={section}
-            className="rounded-lg border border-border bg-card overflow-hidden"
-          >
-            <div
-              className={cn(
-                "h-px bg-gradient-to-r to-transparent",
-                pct === 100
-                  ? "from-emerald-500/50"
-                  : pct >= 50
-                  ? "from-gold/50"
-                  : "from-muted-foreground/20"
-              )}
-            />
-            <div className="px-4 py-6 text-center">
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/45 mb-4">
-                {SHORT_LABELS[section]}
-              </p>
-              <p
-                className={cn(
-                  "text-[30px] font-semibold leading-none tabular-nums mb-4",
-                  pct === 100
-                    ? "text-emerald-400"
-                    : pct >= 60
-                    ? "text-gold"
-                    : "text-foreground/80"
-                )}
-              >
-                {pct}%
-              </p>
-              <progress
-                value={pct}
-                max={100}
-                className={cn(
-                  "bmk-progress w-full mb-3",
-                  pct < 60 && inProgress > 0 ? "bmk-progress-blue" : ""
-                )}
-              />
-              <p className="text-[11px] text-muted-foreground/40">
-                {complete}/{CLIENTS.length}
+      {/* KPI cards — same pattern as dashboard */}
+      <div className="grid grid-cols-3 gap-4 mb-12">
+        {[
+          {
+            label: "Clients Fully Complete",
+            value: `${fullyComplete} / ${CLIENTS.length}`,
+            icon: Users,
+            color: "text-emerald-400",
+            bg: "bg-emerald-400/15",
+            accent: "from-emerald-400/50",
+          },
+          {
+            label: "Avg Completion",
+            value: `${avgProgress}%`,
+            icon: TrendingUp,
+            color: "text-gold",
+            bg: "bg-gold/15",
+            accent: "from-gold/50",
+          },
+          {
+            label: "Sections Filled",
+            value: `${totalSectionsComplete} / ${totalPossible}`,
+            icon: LayoutGrid,
+            color: "text-blue-accent",
+            bg: "bg-blue-accent/15",
+            accent: "from-blue-accent/50",
+          },
+        ].map(({ label, value, icon: Icon, color, bg, accent }) => (
+          <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
+            <div className="px-6 pt-6 pb-6">
+              <div className="flex items-start justify-between mb-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug">
+                  {label}
+                </p>
+                <div className={cn("flex h-7 w-7 items-center justify-center rounded-full shrink-0", bg)}>
+                  <Icon className={cn("h-3.5 w-3.5", color)} />
+                </div>
+              </div>
+              <p className="text-[36px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
+                {value}
               </p>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Section completion — first 4 */}
+      <div className="grid grid-cols-4 gap-5 mb-5">
+        {firstRow.map(({ section, complete, inProgress, pct }) => (
+          <SectionCard
+            key={section}
+            section={section}
+            complete={complete}
+            inProgress={inProgress}
+            pct={pct}
+            total={CLIENTS.length}
+          />
+        ))}
+      </div>
+
+      {/* Section completion — last 3 (wider) */}
+      <div className="grid grid-cols-3 gap-5 mb-14">
+        {secondRow.map(({ section, complete, inProgress, pct }) => (
+          <SectionCard
+            key={section}
+            section={section}
+            complete={complete}
+            inProgress={inProgress}
+            pct={pct}
+            total={CLIENTS.length}
+          />
+        ))}
+      </div>
+
+      {/* Matrix table header */}
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          <h2 className="text-[15px] font-semibold text-foreground">
+            Client Matrix
+          </h2>
+          <p className="text-[12px] text-muted-foreground mt-1">
+            Fact find completion by client and section — hover a column header for the full section name
+          </p>
+        </div>
+      </div>
+
       {/* Matrix table */}
       <div className="rounded-lg border border-border overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 min-w-[200px]">
+            <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground min-w-[220px]">
                 Client
               </th>
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-36">
+              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-40">
                 Status
               </th>
-              <th className="px-4 py-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-20">
-                Total
+              <th className="px-5 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-36">
+                Progress
               </th>
               {SECTIONS.map((s) => (
                 <th
                   key={s}
-                  className="px-4 py-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-16"
+                  className="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-14"
                   title={s}
                 >
-                  {SHORT_LABELS[s]}
+                  {SECTION_ABBR[s]}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-border/80">
             {CLIENTS.map((client) => (
               <tr
                 key={client.id}
-                className="hover:bg-gold/[0.025] transition-colors duration-150"
+                className="hover:bg-gold/[0.04] transition-colors duration-150 group"
               >
                 <td className="px-6 py-5">
                   <Link
                     href={`/clients/${client.id}`}
-                    className="font-medium text-[13px] text-foreground/85 hover:text-gold transition-colors"
+                    className="group-hover:text-gold transition-colors"
                   >
-                    {client.name}
+                    <p className="font-medium text-[13px] text-foreground">
+                      {client.name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {client.email}
+                    </p>
                   </Link>
                 </td>
                 <td className="px-6 py-5">
@@ -144,15 +196,25 @@ export default function FactFindPage() {
                     {STATUS_CONFIG[client.status].label}
                   </Badge>
                 </td>
-                <td className="px-4 py-5 text-center">
-                  <span className="text-[14px] font-medium text-foreground/80 tabular-nums">
-                    {client.progress}%
-                  </span>
+                <td className="px-5 py-5">
+                  <div className="flex items-center gap-2.5">
+                    <progress
+                      value={client.progress}
+                      max={100}
+                      className={cn(
+                        "bmk-progress w-20",
+                        client.status === "in-progress" ? "bmk-progress-blue" : ""
+                      )}
+                    />
+                    <span className="text-[12px] font-medium text-muted-foreground tabular-nums w-8">
+                      {client.progress}%
+                    </span>
+                  </div>
                 </td>
                 {client.factFindSections.map((section) => (
                   <td
                     key={section.name}
-                    className="px-4 py-5 text-center"
+                    className="px-3 py-5 text-center"
                     title={`${section.name}: ${section.status}`}
                   >
                     <div className="flex items-center justify-center">
@@ -167,17 +229,85 @@ export default function FactFindPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-7 mt-5 pl-1">
+      <div className="flex items-center gap-8 mt-5 pl-1">
         {[
           { status: "complete" as SectionStatus, label: "Complete" },
           { status: "in-progress" as SectionStatus, label: "In Progress" },
-          { status: "missing" as SectionStatus, label: "Missing" },
+          { status: "missing" as SectionStatus, label: "Not started" },
         ].map(({ status, label }) => (
           <div key={status} className="flex items-center gap-2">
             <MatrixDot status={status} />
-            <span className="text-[12px] text-muted-foreground/50">{label}</span>
+            <span className="text-[12px] text-muted-foreground">{label}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionCard({
+  section,
+  complete,
+  inProgress,
+  pct,
+  total,
+}: {
+  section: string;
+  complete: number;
+  inProgress: number;
+  pct: number;
+  total: number;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div
+        className={cn(
+          "h-px bg-gradient-to-r to-transparent",
+          pct === 100
+            ? "from-emerald-500/60"
+            : pct >= 50
+            ? "from-gold/55"
+            : inProgress > 0
+            ? "from-blue-accent/40"
+            : "from-muted-foreground/20"
+        )}
+      />
+      <div className="px-6 py-7">
+        <div className="flex items-start justify-between mb-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug max-w-[120px]">
+            {section}
+          </p>
+          <p
+            className={cn(
+              "text-[28px] font-semibold leading-none tabular-nums shrink-0",
+              pct === 100
+                ? "text-emerald-400"
+                : pct >= 60
+                ? "text-gold"
+                : "text-foreground/85"
+            )}
+          >
+            {pct}%
+          </p>
+        </div>
+        <progress
+          value={pct}
+          max={100}
+          className={cn(
+            "bmk-progress w-full mb-3",
+            inProgress > 0 && pct < 60 ? "bmk-progress-blue" : ""
+          )}
+        />
+        <div className="flex items-center justify-between mt-3">
+          <span className="text-[11px] text-muted-foreground/75 tabular-nums">
+            {complete} of {total} complete
+          </span>
+          {inProgress > 0 && (
+            <span className="text-[10px] font-medium text-blue-accent/70">
+              {inProgress} in progress
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

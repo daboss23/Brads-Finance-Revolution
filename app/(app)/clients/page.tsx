@@ -81,13 +81,13 @@ export default function ClientsPage() {
     <div className="px-14 py-12">
       <div className="flex items-end justify-between mb-10">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground/50 mb-2">
+          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground mb-2">
             BMK Financial Services
           </p>
           <h1 className="text-[28px] font-semibold tracking-tight text-foreground leading-none">
             Clients
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground/60">
+          <p className="mt-2 text-sm text-muted-foreground">
             {clients.length} clients in your pipeline
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function ClientsPage() {
               "rounded px-3 py-1.5 text-[12px] font-medium transition-all duration-150 border",
               filter === opt.value
                 ? "border-gold/35 bg-gold/[0.08] text-gold"
-                : "border-border/70 text-muted-foreground/60 hover:text-foreground/80 hover:border-border hover:bg-white/[0.03] bg-transparent"
+                : "border-border/70 text-muted-foreground hover:text-foreground/80 hover:border-border hover:bg-white/[0.03] bg-transparent"
             )}
           >
             {opt.label}
@@ -127,11 +127,11 @@ export default function ClientsPage() {
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-[hsl(224,20%,7%)]">
+            <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
               {["Client", "Progress", "Status", "Next Action", "Meeting", "Stage", "Updated"].map((h) => (
                 <th
                   key={h}
-                  className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50"
+                  className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
                 >
                   {h}
                 </th>
@@ -150,16 +150,16 @@ export default function ClientsPage() {
               filtered.map((client) => (
                 <tr
                   key={client.id}
-                  className="hover:bg-gold/[0.025] transition-colors duration-150 group"
+                  className="hover:bg-gold/[0.04] transition-colors duration-150 group"
                 >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-bold text-muted-foreground/70 tracking-tight">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-bold text-foreground/70 tracking-tight">
                         {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
-                        <p className="font-medium text-[13px] text-foreground/90">{client.name}</p>
-                        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{client.email}</p>
+                        <p className="font-medium text-[13px] text-foreground">{client.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{client.email}</p>
                       </div>
                     </div>
                   </td>
@@ -184,16 +184,16 @@ export default function ClientsPage() {
                     </Badge>
                   </td>
                   <td className="px-4 py-3.5 max-w-[200px]">
-                    <p className="text-[13px] text-muted-foreground/65 truncate">{client.nextAction}</p>
+                    <p className="text-[13px] text-muted-foreground truncate">{client.nextAction}</p>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[13px] text-muted-foreground/65">{client.meetingDate ?? "—"}</span>
+                    <span className="text-[13px] text-muted-foreground">{client.meetingDate ?? "—"}</span>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[13px] text-muted-foreground/65">{client.meetingStage}</span>
+                    <span className="text-[13px] text-muted-foreground">{client.meetingStage}</span>
                   </td>
                   <td className="px-4 py-3.5 whitespace-nowrap">
-                    <span className="text-[13px] text-muted-foreground/65">{client.lastActivity}</span>
+                    <span className="text-[13px] text-muted-foreground">{client.lastActivity}</span>
                   </td>
                   <td className="px-6 py-5">
                     <Link

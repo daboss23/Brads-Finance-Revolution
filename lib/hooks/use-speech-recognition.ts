@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 export function useSpeechRecognition(onResult: (text: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState<boolean | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recRef = useRef<any>(null);
 
   function start() {
     const SR =
@@ -16,33 +16,26 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
       setIsSupported(false);
       return;
     }
-
     setIsSupported(true);
+    recRef.current?.stop();
 
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-
-    const recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = "en-AU";
-
-    recognition.onresult = (event: any) => {
-      const result = event.results[event.results.length - 1];
+    const r = new SR();
+    r.continuous = false;
+    r.interimResults = true;
+    r.lang = "en-AU";
+    r.onresult = (e: any) => {
+      const result = e.results[e.results.length - 1];
       onResult(result[0].transcript);
     };
-
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-
-    recognition.start();
-    recognitionRef.current = recognition;
+    r.onerror = () => setIsListening(false);
+    r.onend = () => setIsListening(false);
+    r.start();
+    recRef.current = r;
     setIsListening(true);
   }
 
   function stop() {
-    recognitionRef.current?.stop();
+    recRef.current?.stop();
     setIsListening(false);
   }
 
