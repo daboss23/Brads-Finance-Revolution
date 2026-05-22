@@ -10,6 +10,7 @@ import {
   Circle,
   Calendar,
   Sparkles,
+  ClipboardList,
 } from "lucide-react";
 import { CLIENTS, STATUS_CONFIG, type SectionStatus } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
@@ -64,11 +65,20 @@ export default function ClientDetailPage({
             </div>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/40 mb-1.5">
-            Adviser
-          </p>
-          <p className="text-[13px] font-medium text-foreground/80">{client.adviser}</p>
+        <div className="flex items-center gap-4">
+          <div className="text-right mr-2">
+            <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/40 mb-1.5">
+              Adviser
+            </p>
+            <p className="text-[13px] font-medium text-foreground/80">{client.adviser}</p>
+          </div>
+          <Link
+            href={`/clients/${client.id}/fact-find-review`}
+            className="inline-flex items-center gap-2 rounded border border-gold/35 bg-gold/5 px-4 py-2.5 text-[12px] font-medium text-gold/80 hover:text-gold hover:border-gold/55 transition-colors whitespace-nowrap"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            Review Fact Find
+          </Link>
         </div>
       </div>
 

@@ -7,9 +7,9 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { CLIENTS, STATUS_CONFIG } from "@/lib/data";
-import { Badge } from "@/components/ui/badge";
+import { CLIENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { PipelineTable } from "@/components/dashboard/PipelineTable";
 
 function getMetrics() {
   const active = CLIENTS.length;
@@ -138,85 +138,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
-                {["Client", "Progress", "Status", "Next Action", "Meeting", "Updated"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
-                  >
-                    {h}
-                  </th>
-                ))}
-                <th className="px-6 py-4 w-12" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {CLIENTS.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-gold/[0.04] transition-colors duration-150 group"
-                >
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-bold text-foreground/70 tracking-tight">
-                        {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                      </div>
-                      <span className="font-medium text-[13px] text-foreground">
-                        {client.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <progress
-                        value={client.progress}
-                        max={100}
-                        className={cn(
-                          "bmk-progress w-28",
-                          client.status === "in-progress" ? "bmk-progress-blue" : ""
-                        )}
-                      />
-                      <span className="text-[12px] text-muted-foreground w-8 tabular-nums">
-                        {client.progress}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <Badge className={STATUS_CONFIG[client.status].className}>
-                      {STATUS_CONFIG[client.status].label}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-5 max-w-[260px]">
-                    <p className="text-[13px] text-muted-foreground truncate">
-                      {client.nextAction}
-                    </p>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground whitespace-nowrap">
-                      {client.meetingDate ?? "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground whitespace-nowrap">
-                      {client.lastActivity}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <Link
-                      href={`/clients/${client.id}`}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-7 w-7 rounded hover:bg-white/[0.08]"
-                    >
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PipelineTable />
       </div>
     </div>
   );

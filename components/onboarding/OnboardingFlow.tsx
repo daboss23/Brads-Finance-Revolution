@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getLinkByToken } from "@/lib/sarah-data";
+import { markFactFindCompleted } from "@/lib/review-store";
 import { FACT_FIND_SECTIONS, type Field } from "@/lib/fact-find-flow";
 import { Sparkles } from "lucide-react";
 import { ProgressHeader } from "./ProgressHeader";
@@ -126,6 +127,7 @@ export function OnboardingFlow({ token }: Props) {
 
   function handleSectionContinue() {
     if (qIndex >= TOTAL_QUESTIONS) {
+      if (link?.clientId) markFactFindCompleted(link.clientId);
       setPhase("complete");
     } else {
       setInput(answers[FLAT_QUESTIONS[qIndex].field.id] ?? "");
