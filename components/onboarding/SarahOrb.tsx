@@ -38,8 +38,10 @@ export function SarahOrb({ state }: Props) {
     canvas.width = SIZE * dpr;
     canvas.height = SIZE * dpr;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctxRaw = canvas.getContext("2d");
+    if (!ctxRaw) return;
+    // Reassign with explicit non-nullable type so narrowing persists inside rAF closures
+    const ctx: CanvasRenderingContext2D = ctxRaw;
     ctx.scale(dpr, dpr);
 
     const cx = SIZE / 2;
