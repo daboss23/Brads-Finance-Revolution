@@ -258,7 +258,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
       </div>
 
       {/* ── Orb + status ── */}
-      <div className="shrink-0 flex flex-col items-center pt-7 pb-5">
+      <div className="shrink-0 flex flex-col items-center pt-7 pb-5 sarah-orb-backdrop">
         <SarahOrb state={orbState} />
         <p className="mt-4 text-[13px] text-slate-400 font-medium tracking-wide">
           {statusText}

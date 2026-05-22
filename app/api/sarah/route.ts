@@ -1,9 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const SARAH_SYSTEM_PROMPT = (clientName: string) => `
 You are Sarah, the AI onboarding assistant for BMK Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
 
@@ -177,22 +173,41 @@ Then immediately output a structured data block in this exact format:
 </fact-find-complete>
 `;
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const { messages, clientName } = await req.json();
 
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return new Response(
+      `data: ${JSON.stringify({ error: "AI not configured" })}\n\ndata: [DONE]\n\n`,
+      {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      }
+    );
+  }
+
+  const anthropic = new Anthropic({ apiKey });
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const response = await anthropic.messages.stream({
+        // Do NOT await messages.stream() — MessageStream is thenable and awaiting
+        // it resolves to the final Message, not the stream itself.
+        const sarahStream = anthropic.messages.stream({
           model: "claude-sonnet-4-6",
           max_tokens: 1024,
           system: SARAH_SYSTEM_PROMPT(clientName),
           messages,
         });
 
-        for await (const chunk of response) {
+        for await (const chunk of sarahStream) {
           if (
             chunk.type === "content_block_delta" &&
             chunk.delta.type === "text_delta"
@@ -208,6 +223,7 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();
       } catch (err) {
+        console.error("[Sarah API]", err);
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({ error: "Sarah encountered an error. Please try again." })}\n\n`
