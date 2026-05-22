@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-  FileText,
 } from "lucide-react";
 import { CLIENTS, type SectionStatus } from "@/lib/data";
 import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
@@ -14,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { STATUS_CONFIG } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { ReviewInteractive } from "@/components/fact-find-review/ReviewInteractive";
+import { ExportButtons } from "@/components/fact-find-review/ExportButtons";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -87,24 +87,7 @@ export default function FactFindReviewPage({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <a
-            href={`/api/export/${client.id}/docx`}
-            download
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Download Word
-          </a>
-          <a
-            href={`/api/export/${client.id}/pdf`}
-            download
-            className="inline-flex items-center gap-2 rounded border border-gold/35 bg-gold/5 px-4 py-2.5 text-[12px] font-medium text-gold/80 hover:text-gold hover:border-gold/55 transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Download PDF
-          </a>
-        </div>
+        <ExportButtons clientId={client.id} />
       </div>
 
       {/* Gaps summary — only when there are missing sections */}
