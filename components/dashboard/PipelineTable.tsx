@@ -96,7 +96,7 @@ export function PipelineTable() {
             {["Client", "Progress", "Status", "Fact Find Stage", "Next Action", "Meeting", ""].map((h) => (
               <th
                 key={h}
-                className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
+                className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
               >
                 {h}
               </th>
@@ -109,9 +109,9 @@ export function PipelineTable() {
             return (
               <tr
                 key={client.id}
-                className="hover:bg-gold/[0.04] transition-colors duration-150 group"
+                className="hover:bg-gold/[0.06] transition-colors duration-150 group"
               >
-                <td className="px-6 py-5">
+                <td className="pl-6 pr-10 py-6 align-middle">
                   <div className="flex items-center gap-3.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border text-[11px] font-bold text-foreground/70 tracking-tight">
                       {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
@@ -121,8 +121,8 @@ export function PipelineTable() {
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-3">
+                <td className="px-6 py-6 align-middle">
+                  <div className="flex items-center gap-2.5">
                     <progress
                       value={client.progress}
                       max={100}
@@ -131,30 +131,30 @@ export function PipelineTable() {
                         client.status === "in-progress" ? "bmk-progress-blue" : ""
                       )}
                     />
-                    <span className="text-[12px] text-muted-foreground w-8 tabular-nums">
+                    <span className="text-[12px] text-muted-foreground w-9 tabular-nums shrink-0">
                       {client.progress}%
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-6 py-6 align-middle">
                   <Badge className={STATUS_CONFIG[client.status].className}>
                     {STATUS_CONFIG[client.status].label}
                   </Badge>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-6 py-6 align-middle">
                   <StageIndicator stage={stage} />
                 </td>
-                <td className="px-6 py-5 max-w-[220px]">
+                <td className="px-6 py-6 align-middle max-w-[220px]">
                   <p className="text-[13px] text-muted-foreground truncate">
                     {client.nextAction}
                   </p>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-6 py-6 align-middle">
                   <span className="text-[13px] text-muted-foreground whitespace-nowrap">
                     {client.meetingDate ?? "—"}
                   </span>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-6 py-6 align-middle">
                   <Link
                     href={`/clients/${client.id}`}
                     className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-7 w-7 rounded hover:bg-white/[0.08]"

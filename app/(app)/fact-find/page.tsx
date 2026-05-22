@@ -45,7 +45,7 @@ export default function FactFindPage() {
   const secondRow = completionBySection.slice(4);
 
   return (
-    <div className="pl-14 pr-6 py-12">
+    <div className="px-14 py-12">
 
       {/* Page header */}
       <div className="mb-10">
@@ -152,19 +152,19 @@ export default function FactFindPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground min-w-[220px]">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground min-w-[260px]">
                 Client
               </th>
-              <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-40">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-44">
                 Status
               </th>
-              <th className="px-5 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-36">
+              <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-36">
                 Progress
               </th>
               {SECTIONS.map((s) => (
                 <th
                   key={s}
-                  className="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-14"
+                  className="px-3 pb-5 pt-5 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-14"
                   title={s}
                 >
                   {SECTION_ABBR[s]}
@@ -176,9 +176,9 @@ export default function FactFindPage() {
             {CLIENTS.map((client) => (
               <tr
                 key={client.id}
-                className="hover:bg-gold/[0.04] transition-colors duration-150 group"
+                className="hover:bg-gold/[0.06] transition-colors duration-150 group"
               >
-                <td className="px-6 py-5">
+                <td className="pl-6 pr-10 py-6 align-middle">
                   <Link
                     href={`/clients/${client.id}`}
                     className="group-hover:text-gold transition-colors"
@@ -186,27 +186,27 @@ export default function FactFindPage() {
                     <p className="font-medium text-[13px] text-foreground">
                       {client.name}
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
                       {client.email}
                     </p>
                   </Link>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-6 py-6 align-middle">
                   <Badge className={cn(STATUS_CONFIG[client.status].className, "text-[10px]")}>
                     {STATUS_CONFIG[client.status].label}
                   </Badge>
                 </td>
-                <td className="px-5 py-5">
+                <td className="px-6 py-6 align-middle">
                   <div className="flex items-center gap-2.5">
                     <progress
                       value={client.progress}
                       max={100}
                       className={cn(
-                        "bmk-progress w-20",
+                        "bmk-progress w-24",
                         client.status === "in-progress" ? "bmk-progress-blue" : ""
                       )}
                     />
-                    <span className="text-[12px] font-medium text-muted-foreground tabular-nums w-8">
+                    <span className="text-[12px] font-medium text-muted-foreground tabular-nums w-9 shrink-0">
                       {client.progress}%
                     </span>
                   </div>
@@ -214,7 +214,7 @@ export default function FactFindPage() {
                 {client.factFindSections.map((section) => (
                   <td
                     key={section.name}
-                    className="px-3 py-5 text-center"
+                    className="px-3 py-6 text-center align-middle"
                     title={`${section.name}: ${section.status}`}
                   >
                     <div className="flex items-center justify-center">
