@@ -11,6 +11,7 @@ import {
   Calendar,
   Sparkles,
   ClipboardList,
+  FileText,
 } from "lucide-react";
 import { CLIENTS, STATUS_CONFIG, type SectionStatus } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,13 @@ export default function ClientDetailPage({
             </p>
             <p className="text-[13px] font-medium text-foreground/80">{client.adviser}</p>
           </div>
+          <Link
+            href={`/clients/${client.id}/forms`}
+            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors whitespace-nowrap"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            Forms
+          </Link>
           <Link
             href={`/clients/${client.id}/fact-find-review`}
             className="inline-flex items-center gap-2 rounded border border-gold/35 bg-gold/5 px-4 py-2.5 text-[12px] font-medium text-gold/80 hover:text-gold hover:border-gold/55 transition-colors whitespace-nowrap"
