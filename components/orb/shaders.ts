@@ -145,7 +145,16 @@ void main() {
   vec3 baseA = mix(uColorA, uColorB, smoothstep(-0.4, 0.6, n));
   vec3 hueShifted = mix(baseA, cyclePalette(uTime * 0.06 + n * 0.2), uHueShift);
   vec3 emissive = hueShifted * (0.4 + veins * 1.2) * uIntensity;
+
+  // Gold vein highlights: only on the brightest plasma peaks, so the orb
+  // stays cyan/blue overall with warm glints where energy concentrates.
+  vec3 gold = vec3(1.0, 0.78, 0.32);
+  float goldMask = smoothstep(0.62, 0.95, veins) * (0.7 + 0.3 * sin(uTime * 0.8));
+  emissive = mix(emissive, gold * (0.6 + veins * 0.9) * uIntensity, goldMask * 0.55);
+
   vec3 rim = uColorC * fres * (1.1 + uIntensity * 0.35);
+  // Subtle gold accent on the rim as well.
+  rim += gold * fres * 0.18 * goldMask;
 
   vec3 color = emissive + rim;
   // Soft tone-mapping so bright states don't blow to pure white.
@@ -312,9 +321,9 @@ void main() {
   float theta = aSeed * 9.733;
   float phi = mod(aSeed * 3.171, 3.14159265);
   vec3 dir = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
-  float r = mix(uCoreRadius, uCoreRadius + uReach * 1.6, life);
+  float r = mix(uCoreRadius, uCoreRadius + uReach * 0.55, life);
   vec3 sample1 = dir * r + vec3(aSeed, uTime * 0.05, 0.0);
-  vec3 wobble = curlNoise(sample1 * 0.6) * (0.12 * uReach);
+  vec3 wobble = curlNoise(sample1 * 0.6) * (0.08 * uReach);
   vec3 pos = dir * r + wobble;
 
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
