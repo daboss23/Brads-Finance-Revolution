@@ -60,15 +60,15 @@ const STATE_TARGETS: Record<OrbState, StateUniforms> = {
     rimColor: new THREE.Color("#ffe07a"),
   },
   speaking: {
-    intensity: 1.45,
-    hueShift: 1.0,
+    intensity: 1.1,
+    hueShift: 0.6,
     speed: 1.5,
-    displacement: 0.24,
+    displacement: 0.22,
     plasmaA: new THREE.Color("#1a1a6a"),
     plasmaB: new THREE.Color("#5a78ff"),
-    plasmaC: new THREE.Color("#ffffff"),
+    plasmaC: new THREE.Color("#a8d4ff"),
     atmoColor: new THREE.Color("#8ec9ff"),
-    rimColor: new THREE.Color("#ffffff"),
+    rimColor: new THREE.Color("#cfe8ff"),
   },
 };
 

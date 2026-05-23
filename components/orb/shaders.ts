@@ -144,11 +144,13 @@ void main() {
 
   vec3 baseA = mix(uColorA, uColorB, smoothstep(-0.4, 0.6, n));
   vec3 hueShifted = mix(baseA, cyclePalette(uTime * 0.06 + n * 0.2), uHueShift);
-  vec3 emissive = hueShifted * (0.45 + veins * 1.8) * uIntensity;
-  vec3 rim = uColorC * fres * (1.6 + uIntensity * 0.6);
+  vec3 emissive = hueShifted * (0.4 + veins * 1.2) * uIntensity;
+  vec3 rim = uColorC * fres * (1.1 + uIntensity * 0.35);
 
   vec3 color = emissive + rim;
-  float alpha = clamp(0.35 + fres * 0.85 + veins * 0.6, 0.0, 1.0);
+  // Soft tone-mapping so bright states don't blow to pure white.
+  color = color / (1.0 + color * 0.4);
+  float alpha = clamp(0.32 + fres * 0.7 + veins * 0.5, 0.0, 1.0);
   gl_FragColor = vec4(color, alpha);
 }
 `;
@@ -171,9 +173,14 @@ uniform float uIntensity;
 varying vec3 vNormal;
 varying vec3 vViewDir;
 void main() {
-  float fres = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewDir)), 0.0), 3.5);
-  vec3 col = uColor * fres * uIntensity;
-  gl_FragColor = vec4(col, fres * 0.85);
+  // Atmosphere is rendered on the BackSide. For a back-facing surface the
+  // original geometry normal points away from the camera, so dot(N,V) goes
+  // negative. Using abs() means the halo is brightest at the silhouette
+  // (where the dot product crosses zero) and falls off both at the rim
+  // and toward the back centre.
+  float fres = pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewDir))), 3.0);
+  vec3 col = uColor * fres * uIntensity * 0.8;
+  gl_FragColor = vec4(col, fres * 0.7);
 }
 `;
 
