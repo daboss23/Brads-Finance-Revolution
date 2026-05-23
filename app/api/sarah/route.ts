@@ -1,8 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const SARAH_SYSTEM_PROMPT = (clientName: string) => `
 You are Sarah, the AI onboarding assistant for BMK Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
@@ -178,51 +177,138 @@ Then immediately output a structured data block in this exact format:
 `;
 
 export async function POST(req: Request) {
-  const { messages, clientName } = await req.json();
+  const reqId = Math.random().toString(36).slice(2, 8);
+  const log = (...args: unknown[]) => console.log(`[sarah:${reqId}]`, ...args);
+  const err = (...args: unknown[]) => console.error(`[sarah:${reqId}]`, ...args);
 
-  const encoder = new TextEncoder();
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    log("POST received. ANTHROPIC_API_KEY present:", Boolean(apiKey), "len:", apiKey?.length ?? 0);
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const response = await anthropic.messages.stream({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1024,
-          system: SARAH_SYSTEM_PROMPT(clientName),
-          messages,
-        });
-
-        for await (const chunk of response) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`
-              )
-            );
-          }
+    if (!apiKey) {
+      err("Missing ANTHROPIC_API_KEY env var");
+      return new Response(
+        `data: ${JSON.stringify({ error: "Server misconfigured: ANTHROPIC_API_KEY is not set." })}\n\ndata: [DONE]\n\n`,
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
         }
+      );
+    }
 
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        controller.close();
-      } catch (err) {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ error: "Sarah encountered an error. Please try again." })}\n\n`
-          )
-        );
-        controller.close();
+    const body = await req.json().catch((e) => {
+      err("Failed to parse request JSON:", e);
+      return null;
+    });
+    if (!body) {
+      return new Response(
+        `data: ${JSON.stringify({ error: "Invalid JSON body." })}\n\ndata: [DONE]\n\n`,
+        { status: 400, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
+    const { messages, clientName } = body as {
+      messages?: Array<{ role: "user" | "assistant"; content: string }>;
+      clientName?: string;
+    };
+
+    log("clientName:", clientName, "messages:", messages?.length ?? 0);
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      err("messages missing or empty");
+      return new Response(
+        `data: ${JSON.stringify({ error: "Missing messages." })}\n\ndata: [DONE]\n\n`,
+        { status: 400, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
+    const anthropic = new Anthropic({ apiKey });
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          log("Opening Anthropic stream…");
+          const response = anthropic.messages.stream({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1024,
+            system: SARAH_SYSTEM_PROMPT(clientName ?? "there"),
+            messages,
+          });
+
+          for await (const chunk of response) {
+            if (
+              chunk.type === "content_block_delta" &&
+              chunk.delta.type === "text_delta"
+            ) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`
+                )
+              );
+            }
+          }
+
+          const final = await response.finalMessage();
+          log("Anthropic stream complete. stop_reason:", final.stop_reason, "usage:", final.usage);
+
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        } catch (e: unknown) {
+          const anyErr = e as { status?: number; message?: string; error?: unknown; name?: string };
+          err("Anthropic stream error:", {
+            name: anyErr?.name,
+            status: anyErr?.status,
+            message: anyErr?.message,
+            error: anyErr?.error,
+            raw: e,
+          });
+          const detail =
+            anyErr?.message ||
+            (typeof e === "string" ? e : "Unknown error from Anthropic");
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                error: `Sarah error: ${detail}`,
+                status: anyErr?.status ?? null,
+              })}\n\n`
+            )
+          );
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  } catch (e: unknown) {
+    const anyErr = e as { message?: string; stack?: string; name?: string };
+    err("Fatal handler error:", {
+      name: anyErr?.name,
+      message: anyErr?.message,
+      stack: anyErr?.stack,
+      raw: e,
+    });
+    return new Response(
+      `data: ${JSON.stringify({ error: `Fatal: ${anyErr?.message ?? "unknown"}` })}\n\ndata: [DONE]\n\n`,
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+        },
       }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    );
+  }
 }

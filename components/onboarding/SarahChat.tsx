@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Mic, MicOff } from "lucide-react";
+import { ArrowRight, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpeechRecognition } from "@/lib/hooks/use-speech-recognition";
+import { SarahOrb, type OrbState } from "./SarahOrb";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
-};
-
-type DisplayMessage = {
-  id: string;
-  from: "sarah" | "client";
-  text: string;
 };
 
 type Props = {
@@ -45,12 +40,12 @@ function stripFactFindTag(text: string): string {
 export function SarahChat({ clientName, onComplete }: Props) {
   const firstName = getFirstName(clientName);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [display, setDisplay] = useState<DisplayMessage[]>([]);
+  const [currentSubtitle, setCurrentSubtitle] = useState("");
+  const [visibleWordCount, setVisibleWordCount] = useState(0);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingText, setStreamingText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
 
@@ -58,11 +53,26 @@ export function SarahChat({ clientName, onComplete }: Props) {
     (text) => setInput(text)
   );
 
+  // Word-by-word reveal of subtitle
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [display, streamingText]);
+    if (!currentSubtitle) {
+      setVisibleWordCount(0);
+      return;
+    }
+    const words = currentSubtitle.split(/\s+/);
+    if (visibleWordCount >= words.length) return;
+    const timer = setTimeout(() => {
+      setVisibleWordCount((n) => Math.min(n + 1, words.length));
+    }, 70);
+    return () => clearTimeout(timer);
+  }, [currentSubtitle, visibleWordCount]);
 
-  // Kick off Sarah's opening message on mount
+  const orbState: OrbState = isStreaming
+    ? "speaking"
+    : isListening
+      ? "listening"
+      : "idle";
+
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
@@ -72,7 +82,9 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
   async function sendToSarah(apiMessages: Message[]) {
     setIsStreaming(true);
-    setStreamingText("");
+    setErrorMsg(null);
+    setCurrentSubtitle("");
+    setVisibleWordCount(0);
 
     try {
       const res = await fetch("/api/sarah", {
@@ -81,68 +93,60 @@ export function SarahChat({ clientName, onComplete }: Props) {
         body: JSON.stringify({ messages: apiMessages, clientName }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Request failed");
+      if (!res.body) throw new Error(`No response body (status ${res.status})`);
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let full = "";
+      let streamError: string | null = null;
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6);
-          if (data === "[DONE]") break;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
 
           try {
             const parsed = JSON.parse(data);
+            if (parsed.error) {
+              streamError = parsed.error;
+              console.error("[Sarah API error]", parsed);
+            }
             if (parsed.text) {
               full += parsed.text;
-              setStreamingText(full);
+              setCurrentSubtitle(stripFactFindTag(full));
             }
-          } catch {
-            // ignore parse errors on partial chunks
+          } catch (e) {
+            console.warn("[Sarah] parse skip:", data, e);
           }
         }
       }
 
+      if (streamError && !full) {
+        throw new Error(streamError);
+      }
+
       const factFindData = parseFactFindData(full);
-      const displayText = stripFactFindTag(full);
-
       const sarahMessage: Message = { role: "assistant", content: full };
-      const updatedMessages = [...apiMessages, sarahMessage];
-      setMessages(updatedMessages);
-
-      setDisplay((prev) => [
-        ...prev,
-        {
-          id: `sarah-${Date.now()}`,
-          from: "sarah",
-          text: displayText,
-        },
-      ]);
-
-      setStreamingText("");
+      setMessages([...apiMessages, sarahMessage]);
 
       if (factFindData) {
         setIsComplete(true);
         setTimeout(() => onComplete(factFindData), 1800);
       }
-    } catch {
-      setDisplay((prev) => [
-        ...prev,
-        {
-          id: `sarah-err-${Date.now()}`,
-          from: "sarah",
-          text: "Sorry, I ran into a problem. Please refresh and try again.",
-        },
-      ]);
-      setStreamingText("");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[Sarah] request failed:", e);
+      setErrorMsg(msg);
+      setCurrentSubtitle("Sorry, I ran into a problem. Please try again.");
     } finally {
       setIsStreaming(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -156,10 +160,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
     const clientMsg: Message = { role: "user", content: text };
     const updatedMessages = [...messages, clientMsg];
 
-    setDisplay((prev) => [
-      ...prev,
-      { id: `client-${Date.now()}`, from: "client", text },
-    ]);
     setInput("");
     setMessages(updatedMessages);
     sendToSarah(updatedMessages);
@@ -177,75 +177,45 @@ export function SarahChat({ clientName, onComplete }: Props) {
     else start();
   }
 
+  const words = currentSubtitle ? currentSubtitle.split(/\s+/) : [];
+  const visibleSubtitle = words.slice(0, visibleWordCount).join(" ");
+
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="shrink-0 border-b border-border px-6 py-4 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
-          <span className="text-[11px] font-bold text-gold tracking-tight">SA</span>
-        </div>
-        <div>
-          <p className="text-[13px] font-semibold text-foreground/90 leading-none">Sarah</p>
-          <p className="text-[10px] text-muted-foreground/50 mt-0.5 tracking-wide">
-            BMK Financial Services · Financial Discovery
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5">
+    <div className="flex flex-col min-h-screen bg-black text-white">
+      <div className="shrink-0 flex items-center justify-between px-6 py-4">
+        <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold/70">
+          Sarah · BMK Financial Services
+        </p>
+        <div className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] text-muted-foreground/50">Online</span>
+          <span className="text-[10px] text-white/40">Online</span>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5">
-        {display.map((msg) => (
-          <ChatBubble key={msg.id} message={msg} firstName={firstName} />
-        ))}
+      {/* Orb stage */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        <SarahOrb state={orbState} size={340} />
 
-        {/* Streaming bubble */}
-        {isStreaming && streamingText && (
-          <ChatBubble
-            message={{ id: "streaming", from: "sarah", text: streamingText }}
-            firstName={firstName}
-            isStreaming
-          />
-        )}
-
-        {/* Typing indicator (before first character streams) */}
-        {isStreaming && !streamingText && (
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
-              <span className="text-[10px] font-bold text-gold">SA</span>
-            </div>
-            <div className="bg-card border border-border/60 rounded-2xl rounded-tl-sm px-4 py-3">
-              <div className="flex items-center gap-1.5">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce"
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="flex justify-center py-4">
-            <div className="flex items-center gap-2 text-[12px] text-emerald-500/80 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Financial Discovery complete
-            </div>
-          </div>
-        )}
-
-        <div ref={bottomRef} />
+        {/* Subtitle */}
+        <div className="mt-10 max-w-3xl text-center min-h-[6rem]">
+          {errorMsg ? (
+            <p className="text-[15px] text-red-400/90">
+              {errorMsg}
+            </p>
+          ) : (
+            <p className="text-[28px] md:text-[32px] leading-snug text-white font-light tracking-tight whitespace-pre-wrap">
+              {visibleSubtitle}
+              {isStreaming && (
+                <span className="inline-block w-1.5 h-7 bg-white/70 ml-1 align-middle animate-pulse" />
+              )}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Input */}
+      {/* Input bar — mic ALWAYS visible */}
       {!isComplete && (
-        <div className="shrink-0 border-t border-border px-5 py-4">
+        <div className="shrink-0 px-5 py-5">
           <div className="flex items-end gap-3 max-w-2xl mx-auto">
             <div className="flex-1 relative">
               <textarea
@@ -253,109 +223,59 @@ export function SarahChat({ clientName, onComplete }: Props) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isStreaming ? "Sarah is typing…" : "Type your answer…"}
+                placeholder={isStreaming ? "Sarah is speaking…" : "Type or tap the mic to speak…"}
                 disabled={isStreaming}
                 rows={1}
-                className="w-full bg-card border border-border/60 rounded-xl px-4 py-3 pr-12 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed"
-                style={{ minHeight: "48px", maxHeight: "120px" }}
+                className="w-full bg-white/5 border border-white/15 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
               />
-              {isSupported !== false && (
-                <button
-                  type="button"
-                  onClick={handleMic}
-                  disabled={isStreaming}
-                  className={cn(
-                    "absolute right-3 bottom-3 flex h-7 w-7 items-center justify-center rounded-md transition-all",
-                    isListening
-                      ? "text-gold bg-gold/15 ring-1 ring-gold/30"
-                      : "text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/50"
-                  )}
-                >
-                  {isListening ? (
-                    <MicOff className="h-3.5 w-3.5" />
-                  ) : (
-                    <Mic className="h-3.5 w-3.5" />
-                  )}
-                </button>
-              )}
             </div>
+
+            {/* Mic button — gold, persistent, red pulsing ring while listening */}
+            <button
+              type="button"
+              onClick={handleMic}
+              disabled={isSupported === false}
+              aria-label={isListening ? "Stop listening" : "Start listening"}
+              className={cn(
+                "relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-30 disabled:cursor-not-allowed",
+                isListening && "ring-red-500"
+              )}
+            >
+              {isListening && (
+                <>
+                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
+                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
+                </>
+              )}
+              <Mic className="h-5 w-5 relative z-10" />
+            </button>
+
             <button
               onClick={handleSubmit}
               disabled={!input.trim() || isStreaming}
-              className="shrink-0 flex h-12 w-12 items-center justify-center rounded-xl bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Send"
+              className="shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-white text-black transition-all hover:bg-white/90 disabled:opacity-25 disabled:cursor-not-allowed"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
             </button>
           </div>
-          {isListening && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
-              <span className="text-[11px] text-gold/70">Listening…</span>
-            </div>
+
+          {isSupported === false && (
+            <p className="text-center text-[11px] text-white/40 mt-3">
+              Voice input is not supported in this browser.
+            </p>
           )}
-          <p className="text-center text-[10px] text-muted-foreground/25 mt-2">
-            Press Enter to send · Shift+Enter for new line
-          </p>
         </div>
       )}
-    </div>
-  );
-}
 
-function ChatBubble({
-  message,
-  firstName,
-  isStreaming = false,
-}: {
-  message: DisplayMessage;
-  firstName: string;
-  isStreaming?: boolean;
-}) {
-  if (message.from === "sarah") {
-    return (
-      <div className="flex items-start gap-3 max-w-[85%]">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30 mt-0.5">
-          <span className="text-[10px] font-bold text-gold">SA</span>
-        </div>
-        <div>
-          <p className="text-[10px] font-semibold tracking-[0.16em] uppercase text-gold/50 mb-1.5">
-            Sarah
-          </p>
-          <div
-            className={cn(
-              "bg-card border border-border/60 rounded-2xl rounded-tl-sm px-4 py-3",
-              isStreaming && "border-gold/20"
-            )}
-          >
-            <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
-              {message.text}
-              {isStreaming && (
-                <span className="inline-block w-0.5 h-4 bg-gold/70 ml-0.5 animate-pulse align-middle" />
-              )}
-            </p>
+      {isComplete && (
+        <div className="shrink-0 flex justify-center py-8">
+          <div className="flex items-center gap-2 text-[13px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-5 py-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Financial Discovery complete
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-start gap-3 max-w-[85%] ml-auto flex-row-reverse">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border/60 mt-0.5">
-        <span className="text-[10px] font-bold text-muted-foreground/70">
-          {firstName.slice(0, 2).toUpperCase()}
-        </span>
-      </div>
-      <div>
-        <p className="text-[10px] font-semibold tracking-[0.16em] uppercase text-muted-foreground/40 mb-1.5 text-right">
-          {firstName}
-        </p>
-        <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-3">
-          <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
-            {message.text}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
