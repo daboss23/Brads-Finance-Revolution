@@ -23,12 +23,20 @@ export default function OrbCanvas({ state = "idle", className }: Props) {
           premultipliedAlpha: false,
           powerPreference: "high-performance",
         }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 0, 4.4], fov: 35, near: 0.1, far: 50 }}
         onCreated={({ gl, scene }) => {
           gl.setClearColor(0x000000, 0);
           gl.setClearAlpha(0);
           scene.background = null;
+          const canvas = gl.domElement;
+          canvas.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+            console.warn("[OrbCanvas] WebGL context lost");
+          });
+          canvas.addEventListener("webglcontextrestored", () => {
+            console.warn("[OrbCanvas] WebGL context restored");
+          });
         }}
       >
         <Suspense fallback={null}>

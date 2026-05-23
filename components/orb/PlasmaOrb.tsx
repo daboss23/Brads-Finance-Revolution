@@ -124,9 +124,9 @@ function lerpUniforms(
 }
 
 const TRANSITION_SEC = 0.8;
-const TENDRILS = 28;
-const POINTS_PER_TENDRIL = 90;
-const EMBER_COUNT = 360;
+const TENDRILS = 18;
+const POINTS_PER_TENDRIL = 48;
+const EMBER_COUNT = 160;
 
 function cloneStateUniforms(s: StateUniforms): StateUniforms {
   return {
@@ -347,7 +347,7 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
     <group ref={shellGroupRef}>
       {/* Core singularity */}
       <mesh>
-        <sphereGeometry args={[0.85, 64, 64]} />
+        <sphereGeometry args={[0.85, 32, 32]} />
         <shaderMaterial
           ref={coreMatRef}
           vertexShader={ATMOSPHERE_VERT}
@@ -400,7 +400,7 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
 
       {/* Atmospheric halo — backside sphere, inverse fresnel for soft bloom */}
       <mesh>
-        <sphereGeometry args={[1.6, 64, 64]} />
+        <sphereGeometry args={[1.6, 32, 32]} />
         <shaderMaterial
           ref={atmoMatRef}
           vertexShader={ATMOSPHERE_VERT}

@@ -53,7 +53,7 @@ float snoise(vec3 v) {
 float fbm(vec3 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     v += a * snoise(p);
     p *= 2.02;
     a *= 0.5;
@@ -61,25 +61,13 @@ float fbm(vec3 p) {
   return v;
 }
 
-// Cheap curl-noise approximation from snoise gradients.
+// Lightweight curl approximation: two snoise samples, take perpendicular gradient.
+// Much cheaper than full 6-sample curl noise.
 vec3 curlNoise(vec3 p) {
-  const float eps = 0.1;
-  vec3 dx = vec3(eps, 0.0, 0.0);
-  vec3 dy = vec3(0.0, eps, 0.0);
-  vec3 dz = vec3(0.0, 0.0, eps);
-
   float n1 = snoise(p + vec3(31.41, 0.0, 0.0));
   float n2 = snoise(p + vec3(0.0, 17.21, 0.0));
   float n3 = snoise(p + vec3(0.0, 0.0, 53.13));
-
-  vec3 a = vec3(n1, n2, n3);
-
-  vec3 b = vec3(
-    snoise(p + dy + vec3(31.41, 0.0, 0.0)) - snoise(p - dy + vec3(31.41, 0.0, 0.0)),
-    snoise(p + dz + vec3(0.0, 17.21, 0.0)) - snoise(p - dz + vec3(0.0, 17.21, 0.0)),
-    snoise(p + dx + vec3(0.0, 0.0, 53.13)) - snoise(p - dx + vec3(0.0, 0.0, 53.13))
-  );
-  return normalize(cross(a, b));
+  return normalize(vec3(n2 - n3, n3 - n1, n1 - n2) + 0.001);
 }
 `;
 
@@ -94,17 +82,12 @@ uniform float uSpeed;
 varying vec3 vNormal;
 varying vec3 vViewDir;
 varying vec3 vWorldPos;
-varying float vNoise;
-varying vec2 vUv;
 
 void main() {
-  vUv = uv;
   vec3 pos = position;
   float t = uTime * uSpeed * 0.25;
-  float n1 = fbm(pos * 1.6 + vec3(0.0, t, 0.0));
-  float n2 = fbm(pos * 3.1 + vec3(t * 0.5, 0.0, t));
-  float disp = (n1 * 0.65 + n2 * 0.35) * uDisplacement;
-  vNoise = disp;
+  float n1 = fbm(pos * 1.8 + vec3(0.0, t, 0.0));
+  float disp = n1 * uDisplacement;
   vec3 displaced = pos + normal * disp;
   vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
   vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
@@ -129,8 +112,6 @@ uniform float uHueShift;
 varying vec3 vNormal;
 varying vec3 vViewDir;
 varying vec3 vWorldPos;
-varying float vNoise;
-varying vec2 vUv;
 
 vec3 cyclePalette(float t) {
   vec3 a = vec3(0.0, 0.86, 1.0);
@@ -226,7 +207,6 @@ uniform float uIntensity;
 uniform float uCurlAmount;
 uniform float uPixelSize;
 
-varying float vPathU;
 varying float vTendril;
 varying float vAlpha;
 
@@ -258,7 +238,6 @@ void main() {
   float taper = mix(2.4, 0.4, smoothstep(0.0, 1.0, aPathU));
   gl_PointSize = taper * pulse * uPixelSize * (300.0 / -mv.z);
 
-  vPathU = aPathU;
   vTendril = aTendril;
   // Alpha falls off near tip; brighter when uIntensity is high.
   vAlpha = (1.0 - aPathU * 0.85) * (0.6 + uIntensity * 0.6);
@@ -270,7 +249,6 @@ uniform vec3 uColorBright;
 uniform vec3 uColorDeep;
 uniform float uHueShift;
 uniform float uTime;
-varying float vPathU;
 varying float vTendril;
 varying float vAlpha;
 
