@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpeechRecognition } from "@/lib/hooks/use-speech-recognition";
 import { SarahOrb, type OrbState } from "./SarahOrb";
+import { NewcastleEmblem } from "@/components/logo/newcastle-logo";
 
 type Message = {
   role: "user" | "assistant";
@@ -37,6 +38,17 @@ function stripFactFindTag(text: string): string {
   return text.replace(/<fact-find-complete>[\s\S]*?<\/fact-find-complete>/, "").trim();
 }
 
+function detectIsChrome(): boolean {
+  if (typeof navigator === "undefined") return true;
+  const ua = navigator.userAgent;
+  const vendor = navigator.vendor || "";
+  const isEdge = /Edg\//.test(ua);
+  const isOpera = /OPR\//.test(ua) || /Opera/.test(ua);
+  const isBrave = (navigator as unknown as { brave?: unknown }).brave !== undefined;
+  const isChromium = /Chrome\//.test(ua) && /Google Inc/.test(vendor);
+  return isChromium && !isEdge && !isOpera && !isBrave;
+}
+
 export function SarahChat({ clientName, onComplete }: Props) {
   const firstName = getFirstName(clientName);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,12 +58,17 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isChrome, setIsChrome] = useState<boolean>(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
 
   const { isListening, isSupported, start, stop } = useSpeechRecognition(
     (text) => setInput(text)
   );
+
+  useEffect(() => {
+    setIsChrome(detectIsChrome());
+  }, []);
 
   // Word-by-word reveal of subtitle
   useEffect(() => {
@@ -177,43 +194,105 @@ export function SarahChat({ clientName, onComplete }: Props) {
     else start();
   }
 
-  const words = currentSubtitle ? currentSubtitle.split(/\s+/) : [];
-  const visibleSubtitle = words.slice(0, visibleWordCount).join(" ");
+  // Rewind: remove the user message at userIdx and any following assistant reply,
+  // put the user's text back in the input box.
+  function handleEditAnswer(userIdx: number) {
+    if (isStreaming) return;
+    const target = messages[userIdx];
+    if (!target || target.role !== "user") return;
+
+    const trimmed = messages.slice(0, userIdx);
+    setMessages(trimmed);
+    setInput(target.content === "[START]" ? "" : target.content);
+
+    // Restore last Sarah subtitle if any
+    const lastSarah = [...trimmed].reverse().find((m) => m.role === "assistant");
+    if (lastSarah) {
+      const text = stripFactFindTag(lastSarah.content);
+      setCurrentSubtitle(text);
+      setVisibleWordCount(text.split(/\s+/).length);
+    } else {
+      setCurrentSubtitle("");
+      setVisibleWordCount(0);
+    }
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
+  const visibleSubtitle = useMemo(() => {
+    if (!currentSubtitle) return "";
+    return currentSubtitle.split(/\s+/).slice(0, visibleWordCount).join(" ");
+  }, [currentSubtitle, visibleWordCount]);
+
+  // Past user answers (skip the synthetic [START])
+  const pastUserAnswers = messages
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.role === "user" && m.content !== "[START]");
+
+  const recentAnswers = pastUserAnswers.slice(-3);
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
-      <div className="shrink-0 flex items-center justify-between px-6 py-4">
-        <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold/70">
-          Sarah · BMK Financial Services
-        </p>
-        <div className="flex items-center gap-1.5">
+      {/* Top header: logo + headline */}
+      <header className="shrink-0 flex flex-col items-center pt-8 pb-2 px-6">
+        <NewcastleEmblem size={56} className="mb-3" />
+        <h1 className="text-[26px] md:text-[30px] font-light tracking-tight text-white">
+          Financial Discovery Session
+        </h1>
+        <div className="mt-2 flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] text-white/40">Online</span>
+          <span className="text-[10px] text-white/40 tracking-wide">
+            Sarah is online
+          </span>
         </div>
-      </div>
+      </header>
 
       {/* Orb stage */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <SarahOrb state={orbState} size={340} />
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
+        <SarahOrb state={orbState} size={320} />
 
-        {/* Subtitle */}
-        <div className="mt-10 max-w-3xl text-center min-h-[6rem]">
+        {/* Subtitle: closed-caption style */}
+        <div
+          className="mt-8 w-full text-center min-h-[5rem] px-4"
+        >
           {errorMsg ? (
-            <p className="text-[15px] text-red-400/90">
+            <p className="text-[14px] text-red-400/85 mx-auto max-w-[500px]">
               {errorMsg}
             </p>
           ) : (
-            <p className="text-[28px] md:text-[32px] leading-snug text-white font-light tracking-tight whitespace-pre-wrap">
+            <p className="text-[18px] leading-relaxed mx-auto max-w-[500px] whitespace-pre-wrap text-white/75">
               {visibleSubtitle}
               {isStreaming && (
-                <span className="inline-block w-1.5 h-7 bg-white/70 ml-1 align-middle animate-pulse" />
+                <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />
               )}
             </p>
           )}
         </div>
+
+        {/* Recent client answers with edit-back */}
+        {recentAnswers.length > 0 && (
+          <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
+            {recentAnswers.map(({ m, i }) => (
+              <div key={i} className="flex flex-col items-end max-w-full">
+                <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
+                  <p className="text-[14px] text-white/85 leading-relaxed whitespace-pre-wrap">
+                    {m.content}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleEditAnswer(i)}
+                  disabled={isStreaming}
+                  className="mt-1 text-[11px] text-gold/80 hover:text-gold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Edit answer
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Input bar — mic ALWAYS visible */}
+      {/* Input bar */}
       {!isComplete && (
         <div className="shrink-0 px-5 py-5">
           <div className="flex items-end gap-3 max-w-2xl mx-auto">
@@ -223,32 +302,30 @@ export function SarahChat({ clientName, onComplete }: Props) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isStreaming ? "Sarah is speaking…" : "Type or tap the mic to speak…"}
+                placeholder={isStreaming ? "Sarah is speaking…" : "Type your answer…"}
                 disabled={isStreaming}
                 rows={1}
                 className="w-full bg-white/5 border border-white/15 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
               />
             </div>
 
-            {/* Mic button — gold, persistent, red pulsing ring while listening */}
-            <button
-              type="button"
-              onClick={handleMic}
-              disabled={isSupported === false}
-              aria-label={isListening ? "Stop listening" : "Start listening"}
-              className={cn(
-                "relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-30 disabled:cursor-not-allowed",
-                isListening && "ring-red-500"
-              )}
-            >
-              {isListening && (
-                <>
-                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
-                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
-                </>
-              )}
-              <Mic className="h-5 w-5 relative z-10" />
-            </button>
+            {/* Mic button: only show when Chrome AND supported */}
+            {isChrome && isSupported !== false && (
+              <button
+                type="button"
+                onClick={handleMic}
+                aria-label={isListening ? "Stop listening" : "Start listening"}
+                className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {isListening && (
+                  <>
+                    <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
+                    <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
+                  </>
+                )}
+                <Mic className="h-5 w-5 relative z-10" />
+              </button>
+            )}
 
             <button
               onClick={handleSubmit}
@@ -260,9 +337,9 @@ export function SarahChat({ clientName, onComplete }: Props) {
             </button>
           </div>
 
-          {isSupported === false && (
-            <p className="text-center text-[11px] text-white/40 mt-3">
-              Voice input is not supported in this browser.
+          {!isChrome && (
+            <p className="text-center text-[11px] text-white/40 mt-3 max-w-[500px] mx-auto leading-relaxed">
+              For the best experience including voice, please open this link in Google Chrome.
             </p>
           )}
         </div>
