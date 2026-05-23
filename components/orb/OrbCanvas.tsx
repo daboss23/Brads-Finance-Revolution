@@ -70,7 +70,7 @@ export default function OrbCanvas({ state = "idle", className }: Props) {
             failIfMajorPerformanceCaveat: false,
           }}
           dpr={[1, 1.5]}
-          camera={{ position: [0, 0, 4.4], fov: 35, near: 0.1, far: 50 }}
+          camera={{ position: [0, 0, 6.0], fov: 32, near: 0.1, far: 50 }}
           onCreated={({ gl, scene }) => {
             gl.setClearColor(0x000000, 0);
             gl.setClearAlpha(0);

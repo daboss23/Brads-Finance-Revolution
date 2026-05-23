@@ -179,8 +179,8 @@ void main() {
   // (where the dot product crosses zero) and falls off both at the rim
   // and toward the back centre.
   float fres = pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewDir))), 3.0);
-  vec3 col = uColor * fres * uIntensity * 0.8;
-  gl_FragColor = vec4(col, fres * 0.7);
+  vec3 col = uColor * fres * uIntensity * 0.6;
+  gl_FragColor = vec4(col, fres * 0.55);
 }
 `;
 

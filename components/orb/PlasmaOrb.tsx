@@ -252,8 +252,9 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
         />
       </mesh>
 
+      {/* Atmospheric halo — backside sphere, inverse fresnel for soft bloom */}
       <mesh>
-        <sphereGeometry args={[1.55, 24, 24]} />
+        <sphereGeometry args={[1.28, 24, 24]} />
         <shaderMaterial
           ref={atmoMatRef}
           vertexShader={ATMOSPHERE_VERT}
