@@ -23,12 +23,13 @@ export function Sidebar() {
       <div className="px-5 pt-7 pb-6 border-b border-border">
         <div className="flex items-center justify-center mb-4">
           <Image
-            src="/newcastle-logo.png"
+            src="/newcastle-logo.svg"
             alt="Newcastle Financial Services"
-            width={520}
-            height={180}
+            width={48}
+            height={48}
             priority
-            className="h-12 w-auto"
+            unoptimized
+            className="h-12 w-12 object-contain"
           />
         </div>
         <div className="h-px bg-gold/45" />

@@ -343,11 +343,12 @@ export function SarahChat({ clientName, onComplete }: Props) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
         <Image
-          src="/newcastle-logo.png"
+          src="/newcastle-logo.svg"
           alt="Newcastle Financial Services"
           width={80}
           height={80}
           priority
+          unoptimized
           className="h-20 w-20 object-contain mb-6"
         />
         <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center mb-4">
@@ -371,19 +372,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="shrink-0 flex flex-col items-center pt-8 pb-2 px-6">
+      <header className="shrink-0 flex flex-col items-center pt-5 pb-1 px-6">
         <Image
-          src="/newcastle-logo.png"
+          src="/newcastle-logo.svg"
           alt="Newcastle Financial Services"
-          width={80}
-          height={80}
+          width={56}
+          height={56}
           priority
-          className="h-20 w-20 object-contain mb-4"
+          unoptimized
+          className="h-14 w-14 object-contain mb-2"
         />
-        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center">
+        <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white text-center">
           Financial Discovery Session
         </h1>
-        <div className="mt-3 flex items-center gap-1.5">
+        <div className="mt-2 flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           <span className="text-[10px] text-white/40 tracking-wide">
             Sarah is online
@@ -392,10 +394,14 @@ export function SarahChat({ clientName, onComplete }: Props) {
       </header>
 
       {/* Orb stage */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
-        <SarahOrb state={orbState} size={500} className="w-[360px] h-[360px] md:w-[500px] md:h-[500px]" />
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-start px-6 py-3 overflow-hidden">
+        <SarahOrb
+          state={orbState}
+          size={500}
+          className="w-[260px] h-[260px] md:w-[380px] md:h-[380px] shrink-0"
+        />
 
-        <div className="mt-8 w-full flex items-start justify-center px-4 min-h-[120px] max-w-[680px] mx-auto">
+        <div className="mt-4 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
           {errorMsg ? (
             <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
               {errorMsg}
@@ -411,7 +417,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
         </div>
 
         {recentAnswers.length > 0 && (
-          <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
+          <div className="mt-3 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
             {recentAnswers.map(({ m, i }) => (
               <div key={i} className="flex flex-col items-end max-w-full">
                 <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
