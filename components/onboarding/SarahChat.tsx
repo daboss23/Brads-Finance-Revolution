@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { ArrowRight, Mic, Loader2 } from "lucide-react";
 import { useAudioRecorder } from "@/lib/hooks/use-audio-recorder";
-import { SarahOrb, type OrbState } from "./SarahOrb";
+import type { OrbState } from "@/components/orb/OrbCanvas";
+
+const OrbCanvas = dynamic(() => import("@/components/orb/OrbCanvas"), {
+  ssr: false,
+  loading: () => null,
+});
 
 type Message = {
   role: "user" | "assistant";
@@ -395,9 +401,8 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       {/* Orb stage */}
       <div className="flex-1 min-h-0 flex flex-col items-center justify-start px-6 py-3 overflow-hidden">
-        <SarahOrb
+        <OrbCanvas
           state={orbState}
-          size={500}
           className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
         />
 
