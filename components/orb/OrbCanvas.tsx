@@ -2,6 +2,8 @@
 
 import { Suspense, Component, useState, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { KernelSize } from "postprocessing";
 import { PlasmaOrb, type OrbState } from "./PlasmaOrb";
 
 export type { OrbState } from "./PlasmaOrb";
@@ -89,6 +91,15 @@ export default function OrbCanvas({ state = "idle", className }: Props) {
         >
           <Suspense fallback={null}>
             <PlasmaOrb state={state} />
+            <EffectComposer multisampling={0} enableNormalPass={false}>
+              <Bloom
+                intensity={1.0}
+                luminanceThreshold={0.2}
+                luminanceSmoothing={0.85}
+                mipmapBlur
+                kernelSize={KernelSize.LARGE}
+              />
+            </EffectComposer>
           </Suspense>
         </Canvas>
       </OrbErrorBoundary>

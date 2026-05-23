@@ -9,6 +9,8 @@ import {
   ATMOSPHERE_VERT,
   ATMOSPHERE_FRAG,
   CORE_FRAG,
+  EMBER_VERT,
+  EMBER_FRAG,
 } from "./shaders";
 
 export type OrbState = "idle" | "speaking" | "listening" | "thinking";
@@ -18,11 +20,13 @@ type StateUniforms = {
   hueShift: number;
   speed: number;
   displacement: number;
+  reach: number;
   plasmaA: THREE.Color;
   plasmaB: THREE.Color;
   plasmaC: THREE.Color;
   atmoColor: THREE.Color;
   rimColor: THREE.Color;
+  emberColor: THREE.Color;
 };
 
 const STATE_TARGETS: Record<OrbState, StateUniforms> = {
@@ -31,44 +35,52 @@ const STATE_TARGETS: Record<OrbState, StateUniforms> = {
     hueShift: 0.0,
     speed: 0.55,
     displacement: 0.14,
+    reach: 0.55,
     plasmaA: new THREE.Color("#0a1f6e"),
     plasmaB: new THREE.Color("#1ea0ff"),
     plasmaC: new THREE.Color("#84d8ff"),
     atmoColor: new THREE.Color("#3aa7ff"),
     rimColor: new THREE.Color("#8edcff"),
+    emberColor: new THREE.Color("#bfe5ff"),
   },
   thinking: {
     intensity: 0.9,
     hueShift: 0.0,
     speed: 0.95,
     displacement: 0.2,
+    reach: 0.5,
     plasmaA: new THREE.Color("#2a0e60"),
     plasmaB: new THREE.Color("#7b2fff"),
     plasmaC: new THREE.Color("#dbb6ff"),
     atmoColor: new THREE.Color("#9a55ff"),
     rimColor: new THREE.Color("#d6b3ff"),
+    emberColor: new THREE.Color("#d8c2ff"),
   },
   listening: {
     intensity: 1.05,
     hueShift: 0.0,
     speed: 0.75,
     displacement: 0.16,
+    reach: 0.7,
     plasmaA: new THREE.Color("#062d4d"),
     plasmaB: new THREE.Color("#26d6ff"),
     plasmaC: new THREE.Color("#ffd87a"),
     atmoColor: new THREE.Color("#2bd6e8"),
     rimColor: new THREE.Color("#ffe07a"),
+    emberColor: new THREE.Color("#a8efff"),
   },
   speaking: {
     intensity: 1.1,
     hueShift: 0.6,
     speed: 1.5,
     displacement: 0.22,
+    reach: 0.85,
     plasmaA: new THREE.Color("#1a1a6a"),
     plasmaB: new THREE.Color("#5a78ff"),
     plasmaC: new THREE.Color("#a8d4ff"),
     atmoColor: new THREE.Color("#8ec9ff"),
     rimColor: new THREE.Color("#cfe8ff"),
+    emberColor: new THREE.Color("#e6f4ff"),
   },
 };
 
@@ -78,22 +90,43 @@ function cloneStateUniforms(s: StateUniforms): StateUniforms {
     hueShift: s.hueShift,
     speed: s.speed,
     displacement: s.displacement,
+    reach: s.reach,
     plasmaA: s.plasmaA.clone(),
     plasmaB: s.plasmaB.clone(),
     plasmaC: s.plasmaC.clone(),
     atmoColor: s.atmoColor.clone(),
     rimColor: s.rimColor.clone(),
+    emberColor: s.emberColor.clone(),
   };
 }
+
+const EMBER_COUNT = 140;
 
 export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
   const plasmaMatRef = useRef<THREE.ShaderMaterial>(null);
   const atmoMatRef = useRef<THREE.ShaderMaterial>(null);
   const coreMatRef = useRef<THREE.ShaderMaterial>(null);
+  const emberMatRef = useRef<THREE.ShaderMaterial>(null);
   const shellGroupRef = useRef<THREE.Group>(null);
 
   const currentRef = useRef<StateUniforms>(cloneStateUniforms(STATE_TARGETS[state]));
   const lastTargetRef = useRef<OrbState>(state);
+
+  const emberGeometry = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array(EMBER_COUNT * 3);
+    const seed = new Float32Array(EMBER_COUNT);
+    const life = new Float32Array(EMBER_COUNT);
+    for (let i = 0; i < EMBER_COUNT; i++) {
+      seed[i] = Math.random() * 100;
+      life[i] = Math.random();
+    }
+    geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
+    geom.setAttribute("aLife", new THREE.BufferAttribute(life, 1));
+    geom.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 6);
+    return geom;
+  }, []);
 
   const plasmaUniforms = useMemo(
     () => ({
@@ -122,6 +155,17 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
     }),
     []
   );
+  const emberUniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uSpeed: { value: currentRef.current.speed },
+      uCoreRadius: { value: 1.1 },
+      uReach: { value: currentRef.current.reach * 2.5 },
+      uIntensity: { value: currentRef.current.intensity },
+      uColor: { value: currentRef.current.emberColor.clone() },
+    }),
+    []
+  );
 
   useFrame((stateRf, dt) => {
     const elapsed = stateRf.clock.elapsedTime;
@@ -136,11 +180,13 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
     cur.hueShift = THREE.MathUtils.lerp(cur.hueShift, target.hueShift, k);
     cur.speed = THREE.MathUtils.lerp(cur.speed, target.speed, k);
     cur.displacement = THREE.MathUtils.lerp(cur.displacement, target.displacement, k);
+    cur.reach = THREE.MathUtils.lerp(cur.reach, target.reach, k);
     cur.plasmaA.lerp(target.plasmaA, k);
     cur.plasmaB.lerp(target.plasmaB, k);
     cur.plasmaC.lerp(target.plasmaC, k);
     cur.atmoColor.lerp(target.atmoColor, k);
     cur.rimColor.lerp(target.rimColor, k);
+    cur.emberColor.lerp(target.emberColor, k);
 
     if (plasmaMatRef.current) {
       const u = plasmaMatRef.current.uniforms;
@@ -162,6 +208,14 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
       const u = coreMatRef.current.uniforms;
       (u.uRim.value as THREE.Color).copy(cur.rimColor);
       u.uIntensity.value = cur.intensity;
+    }
+    if (emberMatRef.current) {
+      const u = emberMatRef.current.uniforms;
+      u.uTime.value = elapsed;
+      u.uSpeed.value = cur.speed;
+      u.uReach.value = cur.reach * 2.5;
+      u.uIntensity.value = cur.intensity;
+      (u.uColor.value as THREE.Color).copy(cur.emberColor);
     }
 
     if (shellGroupRef.current) {
@@ -211,6 +265,19 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
           blending={THREE.AdditiveBlending}
         />
       </mesh>
+
+      {/* Embers — drifting GPU points around the orb */}
+      <points geometry={emberGeometry} frustumCulled={false}>
+        <shaderMaterial
+          ref={emberMatRef}
+          vertexShader={EMBER_VERT}
+          fragmentShader={EMBER_FRAG}
+          uniforms={emberUniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
     </group>
   );
 }
