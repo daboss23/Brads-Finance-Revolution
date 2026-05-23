@@ -353,13 +353,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
         <SarahOrb state={orbState} size={320} />
 
-        <div className="mt-8 w-full text-center min-h-[5rem] px-4">
+        <div className="mt-8 w-full flex items-start justify-center px-4 min-h-[120px] max-w-[680px] mx-auto">
           {errorMsg ? (
-            <p className="text-[14px] text-red-400/85 mx-auto max-w-[500px]">
+            <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
               {errorMsg}
             </p>
           ) : (
-            <p className="text-[18px] leading-relaxed mx-auto max-w-[500px] whitespace-pre-wrap text-white/75">
+            <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-white/75 text-center">
               {visibleSubtitle}
               {(isStreaming || isLoadingVoice) && (
                 <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />

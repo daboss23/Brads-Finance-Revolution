@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 const MAX_DURATION_MS = 30_000;
+const SILENCE_HANGOVER_MS = 1500;
+const SILENCE_RMS_THRESHOLD = 0.025;
+const SPEECH_RMS_THRESHOLD = 0.05;
+const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 800;
 
 export function useAudioRecorder(onTranscript: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
@@ -12,14 +16,38 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const timeoutRef = useRef<number | null>(null);
+  const maxTimeoutRef = useRef<number | null>(null);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      cleanupAnalyser();
+      if (maxTimeoutRef.current) window.clearTimeout(maxTimeoutRef.current);
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
+
+  function cleanupAnalyser() {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (analyserRef.current) {
+      try {
+        analyserRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+      analyserRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
+    }
+  }
 
   function pickMimeType(): string {
     const candidates = [
@@ -35,6 +63,56 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
       }
     }
     return "";
+  }
+
+  function attachSilenceDetector(stream: MediaStream, startedAt: number) {
+    try {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      const ctx = new AudioCtx();
+      audioCtxRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const buf = new Uint8Array(analyser.fftSize);
+      let lastSpokeAt = performance.now();
+      let hasSpoken = false;
+
+      const loop = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteTimeDomainData(buf);
+        let sumSq = 0;
+        for (let i = 0; i < buf.length; i++) {
+          const v = (buf[i] - 128) / 128;
+          sumSq += v * v;
+        }
+        const rms = Math.sqrt(sumSq / buf.length);
+        const now = performance.now();
+
+        if (rms > SPEECH_RMS_THRESHOLD) {
+          hasSpoken = true;
+          lastSpokeAt = now;
+        } else if (hasSpoken && rms < SILENCE_RMS_THRESHOLD) {
+          if (
+            now - lastSpokeAt > SILENCE_HANGOVER_MS &&
+            now - startedAt > MIN_RECORDING_BEFORE_AUTOSTOP_MS
+          ) {
+            stop();
+            return;
+          }
+        }
+
+        rafRef.current = requestAnimationFrame(loop);
+      };
+      rafRef.current = requestAnimationFrame(loop);
+    } catch (e) {
+      console.warn("[recorder] silence detector unavailable:", e);
+    }
   }
 
   async function start() {
@@ -54,6 +132,7 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
       };
 
       recorder.onstop = async () => {
+        cleanupAnalyser();
         const tracks = streamRef.current?.getTracks() ?? [];
         tracks.forEach((t) => t.stop());
         streamRef.current = null;
@@ -70,7 +149,11 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
         setIsTranscribing(true);
         try {
           const fd = new FormData();
-          fd.append("audio", blob, `audio.${blobType.includes("mp4") ? "mp4" : "webm"}`);
+          fd.append(
+            "audio",
+            blob,
+            `audio.${blobType.includes("mp4") ? "mp4" : "webm"}`
+          );
           const res = await fetch("/api/transcribe", { method: "POST", body: fd });
           const data = (await res.json().catch(() => null)) as
             | { text?: string; error?: string }
@@ -94,7 +177,10 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
       recorder.start();
       setIsRecording(true);
 
-      timeoutRef.current = window.setTimeout(() => {
+      const startedAt = performance.now();
+      attachSilenceDetector(stream, startedAt);
+
+      maxTimeoutRef.current = window.setTimeout(() => {
         stop();
       }, MAX_DURATION_MS);
     } catch (e) {
@@ -109,10 +195,11 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
   }
 
   function stop() {
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
+    if (maxTimeoutRef.current) {
+      window.clearTimeout(maxTimeoutRef.current);
+      maxTimeoutRef.current = null;
     }
+    cleanupAnalyser();
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== "inactive") {
       try {
