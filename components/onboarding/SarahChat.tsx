@@ -398,7 +398,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
         <SarahOrb
           state={orbState}
           size={500}
-          className="w-[260px] h-[260px] md:w-[380px] md:h-[380px] shrink-0"
+          className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
         />
 
         <div className="mt-4 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
