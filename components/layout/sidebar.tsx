@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, ClipboardList, Sparkles } from "lucide-react";
-import { NewcastleEmblem } from "@/components/logo/newcastle-logo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -21,19 +21,18 @@ export function Sidebar() {
 
       {/* Brand */}
       <div className="px-5 pt-7 pb-6 border-b border-border">
-        <div className="flex items-center gap-3.5 mb-4">
-          <NewcastleEmblem size={46} />
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[13.5px] font-light tracking-[0.32em] text-foreground uppercase leading-none truncate">
-              Newcastle
-            </span>
-            <span className="text-[8px] font-bold tracking-[0.22em] text-muted-foreground uppercase mt-1.5 truncate">
-              Financial Services
-            </span>
-          </div>
+        <div className="flex items-center justify-center mb-4">
+          <Image
+            src="/newcastle-logo.png"
+            alt="Newcastle Financial Services"
+            width={520}
+            height={180}
+            priority
+            className="h-12 w-auto"
+          />
         </div>
         <div className="h-px bg-gold/45" />
-        <p className="mt-2.5 text-[7.5px] tracking-[0.2em] text-muted-foreground/60 uppercase font-semibold">
+        <p className="mt-2.5 text-[7.5px] tracking-[0.2em] text-muted-foreground/60 uppercase font-semibold text-center">
           Plan · Grow · Prosper
         </p>
       </div>

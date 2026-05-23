@@ -11,11 +11,17 @@ type Props = {
   className?: string;
 };
 
-type Bolt = {
-  points: Array<{ x: number; y: number }>;
-  branches: Array<Array<{ x: number; y: number }>>;
-  angle: number;
-  targetAngle: number;
+type Tendril = {
+  baseAngle: number;
+  length: number;
+  swayAmp: number;
+  swaySpeed: number;
+  phase: number;
+  color: [number, number, number];
+  alpha: number;
+  thickness: number;
+  branchOffsets: Array<{ at: number; angle: number; length: number }>;
+  segCount: number;
 };
 
 type Particle = {
@@ -25,125 +31,131 @@ type Particle = {
   vy: number;
   life: number;
   maxLife: number;
+  size: number;
 };
 
 type Ripple = { r: number; alpha: number };
 
 type StateConfig = {
-  boltCount: number;
-  redrawEvery: number;
-  coreAlpha: number;
-  glowAlpha: number;
-  glowRadiusMul: number;
-  primary: [number, number, number];
-  accent: [number, number, number];
-  tip: [number, number, number];
-  rotateSpeed: number;
-  jitter: number;
-  particleRate: number;
-  particleMode: number; // 0 idle drift, 1 vortex, 2 ambient, 3 burst
-  rippleRate: number;
-  waveAlpha: number; // frequency wave lines
+  tendrilCount: number;
+  tendrilLengthMin: number;
+  tendrilLengthMax: number;
+  swayAmp: number;
+  swaySpeed: number;
+  curlBias: number; // negative = curl inward (thinking), 0 = neutral, positive = reach outward
+  paletteWeights: [number, number, number, number]; // cyan, purple, pale, white
+  hueCycle: number;
+  coreRadius: number;
   coreBreathHz: number;
   coreBreathDepth: number;
-  glowPulseHz: number;
-  hueCycle: number; // 0 fixed, 1 cycling
+  coreDark: number; // 1 = black void, 0 = lighter
+  coronaCyan: number;
+  coronaPurple: number;
+  coronaBlue: number;
+  particleRate: number;
+  particleMode: number; // 0 outward, 1 inward, 2 outward fast
+  rippleEverySec: number;
+  regenEveryFrames: number;
 };
 
 const STATES: Record<OrbState, StateConfig> = {
   idle: {
-    boltCount: 2.5,
-    redrawEvery: 20,
-    coreAlpha: 0.55,
-    glowAlpha: 0.35,
-    glowRadiusMul: 1.55,
-    primary: [80, 180, 255],
-    accent: [40, 100, 220],
-    tip: [255, 200, 120],
-    rotateSpeed: 0.0006,
-    jitter: 0.16,
-    particleRate: 0.25,
-    particleMode: 0,
-    rippleRate: 0,
-    waveAlpha: 0,
-    coreBreathHz: 0.18,
-    coreBreathDepth: 0.18,
-    glowPulseHz: 0.33,
+    tendrilCount: 16,
+    tendrilLengthMin: 110,
+    tendrilLengthMax: 180,
+    swayAmp: 0.16,
+    swaySpeed: 0.6,
+    curlBias: 0,
+    paletteWeights: [0.55, 0.18, 0.22, 0.05],
     hueCycle: 0,
+    coreRadius: 50,
+    coreBreathHz: 0.4,
+    coreBreathDepth: 0.08,
+    coreDark: 1,
+    coronaCyan: 0.3,
+    coronaPurple: 0.15,
+    coronaBlue: 0.08,
+    particleRate: 0.55,
+    particleMode: 0,
+    rippleEverySec: 0,
+    regenEveryFrames: 240,
   },
   thinking: {
-    boltCount: 5.5,
-    redrawEvery: 10,
-    coreAlpha: 0.65,
-    glowAlpha: 0.55,
-    glowRadiusMul: 1.5,
-    primary: [200, 140, 255],
-    accent: [140, 80, 230],
-    tip: [255, 180, 220],
-    rotateSpeed: 0.006,
-    jitter: 0.2,
-    particleRate: 0.6,
-    particleMode: 1,
-    rippleRate: 0,
-    waveAlpha: 0,
-    coreBreathHz: 0.9,
-    coreBreathDepth: 0.28,
-    glowPulseHz: 0.5,
+    tendrilCount: 18,
+    tendrilLengthMin: 95,
+    tendrilLengthMax: 150,
+    swayAmp: 0.28,
+    swaySpeed: 1.2,
+    curlBias: -0.35,
+    paletteWeights: [0.1, 0.68, 0.18, 0.04],
     hueCycle: 0,
+    coreRadius: 58,
+    coreBreathHz: 0.9,
+    coreBreathDepth: 0.16,
+    coreDark: 1.1,
+    coronaCyan: 0.18,
+    coronaPurple: 0.35,
+    coronaBlue: 0.05,
+    particleRate: 0.75,
+    particleMode: 1,
+    rippleEverySec: 0,
+    regenEveryFrames: 140,
   },
   listening: {
-    boltCount: 4.5,
-    redrawEvery: 8,
-    coreAlpha: 0.78,
-    glowAlpha: 0.55,
-    glowRadiusMul: 1.55,
-    primary: [80, 230, 220],
-    accent: [40, 180, 200],
-    tip: [255, 215, 140],
-    rotateSpeed: 0.0014,
-    jitter: 0.22,
-    particleRate: 0.35,
-    particleMode: 2,
-    rippleRate: 0.018,
-    waveAlpha: 0,
-    coreBreathHz: 0.5,
-    coreBreathDepth: 0.12,
-    glowPulseHz: 0.4,
+    tendrilCount: 18,
+    tendrilLengthMin: 140,
+    tendrilLengthMax: 220,
+    swayAmp: 0.22,
+    swaySpeed: 0.9,
+    curlBias: 0.2,
+    paletteWeights: [0.55, 0.08, 0.25, 0.12],
     hueCycle: 0,
+    coreRadius: 52,
+    coreBreathHz: 0.55,
+    coreBreathDepth: 0.12,
+    coreDark: 1,
+    coronaCyan: 0.42,
+    coronaPurple: 0.12,
+    coronaBlue: 0.1,
+    particleRate: 0.65,
+    particleMode: 0,
+    rippleEverySec: 1.5,
+    regenEveryFrames: 180,
   },
   speaking: {
-    boltCount: 11,
-    redrawEvery: 2.5,
-    coreAlpha: 1,
-    glowAlpha: 0.9,
-    glowRadiusMul: 1.7,
-    primary: [120, 220, 255],
-    accent: [60, 130, 255],
-    tip: [255, 190, 90],
-    rotateSpeed: 0.0025,
-    jitter: 0.32,
-    particleRate: 1.6,
-    particleMode: 3,
-    rippleRate: 0,
-    waveAlpha: 0.55,
-    coreBreathHz: 4,
-    coreBreathDepth: 0.2,
-    glowPulseHz: 2.4,
+    tendrilCount: 22,
+    tendrilLengthMin: 130,
+    tendrilLengthMax: 230,
+    swayAmp: 0.42,
+    swaySpeed: 2.6,
+    curlBias: 0.15,
+    paletteWeights: [0.32, 0.32, 0.18, 0.18],
     hueCycle: 1,
+    coreRadius: 55,
+    coreBreathHz: 3.6,
+    coreBreathDepth: 0.18,
+    coreDark: 0.9,
+    coronaCyan: 0.55,
+    coronaPurple: 0.4,
+    coronaBlue: 0.18,
+    particleRate: 2.1,
+    particleMode: 2,
+    rippleEverySec: 0.5,
+    regenEveryFrames: 90,
   },
 };
 
-const TRANSITION_MS = 800;
+const TRANSITION_MS = 600;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
-function lerpColor(
-  a: [number, number, number],
-  b: [number, number, number],
+function lerp4(
+  a: [number, number, number, number],
+  b: [number, number, number, number],
   t: number
-): [number, number, number] {
-  return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+): [number, number, number, number] {
+  return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t), lerp(a[3], b[3], t)];
 }
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -151,105 +163,109 @@ function easeInOut(t: number) {
 
 function interpConfig(a: StateConfig, b: StateConfig, t: number): StateConfig {
   return {
-    boltCount: lerp(a.boltCount, b.boltCount, t),
-    redrawEvery: lerp(a.redrawEvery, b.redrawEvery, t),
-    coreAlpha: lerp(a.coreAlpha, b.coreAlpha, t),
-    glowAlpha: lerp(a.glowAlpha, b.glowAlpha, t),
-    glowRadiusMul: lerp(a.glowRadiusMul, b.glowRadiusMul, t),
-    primary: lerpColor(a.primary, b.primary, t),
-    accent: lerpColor(a.accent, b.accent, t),
-    tip: lerpColor(a.tip, b.tip, t),
-    rotateSpeed: lerp(a.rotateSpeed, b.rotateSpeed, t),
-    jitter: lerp(a.jitter, b.jitter, t),
-    particleRate: lerp(a.particleRate, b.particleRate, t),
-    particleMode: t < 0.5 ? a.particleMode : b.particleMode,
-    rippleRate: lerp(a.rippleRate, b.rippleRate, t),
-    waveAlpha: lerp(a.waveAlpha, b.waveAlpha, t),
+    tendrilCount: lerp(a.tendrilCount, b.tendrilCount, t),
+    tendrilLengthMin: lerp(a.tendrilLengthMin, b.tendrilLengthMin, t),
+    tendrilLengthMax: lerp(a.tendrilLengthMax, b.tendrilLengthMax, t),
+    swayAmp: lerp(a.swayAmp, b.swayAmp, t),
+    swaySpeed: lerp(a.swaySpeed, b.swaySpeed, t),
+    curlBias: lerp(a.curlBias, b.curlBias, t),
+    paletteWeights: lerp4(a.paletteWeights, b.paletteWeights, t),
+    hueCycle: lerp(a.hueCycle, b.hueCycle, t),
+    coreRadius: lerp(a.coreRadius, b.coreRadius, t),
     coreBreathHz: lerp(a.coreBreathHz, b.coreBreathHz, t),
     coreBreathDepth: lerp(a.coreBreathDepth, b.coreBreathDepth, t),
-    glowPulseHz: lerp(a.glowPulseHz, b.glowPulseHz, t),
-    hueCycle: lerp(a.hueCycle, b.hueCycle, t),
+    coreDark: lerp(a.coreDark, b.coreDark, t),
+    coronaCyan: lerp(a.coronaCyan, b.coronaCyan, t),
+    coronaPurple: lerp(a.coronaPurple, b.coronaPurple, t),
+    coronaBlue: lerp(a.coronaBlue, b.coronaBlue, t),
+    particleRate: lerp(a.particleRate, b.particleRate, t),
+    particleMode: t < 0.5 ? a.particleMode : b.particleMode,
+    rippleEverySec: lerp(a.rippleEverySec, b.rippleEverySec, t),
+    regenEveryFrames: lerp(a.regenEveryFrames, b.regenEveryFrames, t),
   };
 }
 
-function midpointDisplace(
-  start: { x: number; y: number },
-  end: { x: number; y: number },
-  displacement: number,
-  depth: number
-): Array<{ x: number; y: number }> {
-  if (depth <= 0) return [start, end];
-  const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const nx = -dy / len;
-  const ny = dx / len;
-  const off = (Math.random() - 0.5) * displacement;
-  mid.x += nx * off;
-  mid.y += ny * off;
-  const left = midpointDisplace(start, mid, displacement / 2, depth - 1);
-  const right = midpointDisplace(mid, end, displacement / 2, depth - 1);
-  return [...left.slice(0, -1), ...right];
-}
+const PALETTE: Array<[number, number, number, number]> = [
+  // r, g, b, baseAlpha
+  [100, 220, 255, 0.9], // cyan
+  [150, 100, 255, 0.75], // purple
+  [200, 240, 255, 0.55], // pale blue
+  [255, 255, 255, 0.95], // white
+];
 
-function generateBolt(
-  cx: number,
-  cy: number,
-  radius: number,
-  angle: number,
-  jitter: number
-): Bolt {
-  const end = {
-    x: cx + Math.cos(angle) * radius,
-    y: cy + Math.sin(angle) * radius,
-  };
-  const start = { x: cx, y: cy };
-  const points = midpointDisplace(start, end, radius * jitter, 5);
-  const branches: Array<Array<{ x: number; y: number }>> = [];
-  const branchCount = Math.floor(Math.random() * 3);
-  for (let i = 0; i < branchCount; i++) {
-    const t = 0.3 + Math.random() * 0.5;
-    const idx = Math.floor(points.length * t);
-    const from = points[idx];
-    const branchAngle = angle + (Math.random() - 0.5) * 1.4;
-    const branchLen = radius * (0.2 + Math.random() * 0.35);
-    const bEnd = {
-      x: from.x + Math.cos(branchAngle) * branchLen,
-      y: from.y + Math.sin(branchAngle) * branchLen,
-    };
-    branches.push(midpointDisplace(from, bEnd, branchLen * jitter, 3));
+function pickColor(weights: [number, number, number, number]): {
+  rgb: [number, number, number];
+  alpha: number;
+} {
+  const total = weights[0] + weights[1] + weights[2] + weights[3];
+  let r = Math.random() * total;
+  for (let i = 0; i < 4; i++) {
+    if (r < weights[i]) {
+      const c = PALETTE[i];
+      return { rgb: [c[0], c[1], c[2]], alpha: c[3] };
+    }
+    r -= weights[i];
   }
-  return { points, branches, angle, targetAngle: angle };
+  const c = PALETTE[0];
+  return { rgb: [c[0], c[1], c[2]], alpha: c[3] };
 }
 
 function rgba(c: [number, number, number], a: number) {
   return `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${a})`;
 }
 
-function hueShift(c: [number, number, number], shift: number): [number, number, number] {
-  // simple channel rotation toward cycling palette: cyan -> aqua -> purple -> white -> gold
-  const palette: Array<[number, number, number]> = [
-    [120, 220, 255], // cyan
-    [80, 240, 220], // aqua
-    [190, 140, 255], // purple
-    [255, 255, 255], // white
-    [255, 200, 120], // gold
+function cyclePalette(t: number): [number, number, number] {
+  const stops: Array<[number, number, number]> = [
+    [0, 220, 255],
+    [120, 220, 255],
+    [180, 120, 255],
+    [255, 255, 255],
+    [255, 215, 100],
   ];
-  const total = palette.length;
-  const f = ((shift % 1) + 1) % 1;
-  const idx = f * total;
-  const i0 = Math.floor(idx) % total;
-  const i1 = (i0 + 1) % total;
+  const f = ((t % 1) + 1) % 1;
+  const idx = f * stops.length;
+  const i0 = Math.floor(idx) % stops.length;
+  const i1 = (i0 + 1) % stops.length;
   const tt = idx - Math.floor(idx);
-  return lerpColor(palette[i0], palette[i1], tt) as [number, number, number];
+  return [
+    lerp(stops[i0][0], stops[i1][0], tt),
+    lerp(stops[i0][1], stops[i1][1], tt),
+    lerp(stops[i0][2], stops[i1][2], tt),
+  ];
 }
 
-export function SarahOrb({ state = "idle", size = 320, className }: Props) {
+function generateTendril(cfg: StateConfig): Tendril {
+  const baseAngle = Math.random() * Math.PI * 2;
+  const length = lerp(cfg.tendrilLengthMin, cfg.tendrilLengthMax, Math.random());
+  const { rgb, alpha } = pickColor(cfg.paletteWeights);
+  const branchOffsets: Tendril["branchOffsets"] = [];
+  const branchCount = Math.random() < 0.6 ? 1 : Math.random() < 0.4 ? 2 : 0;
+  for (let i = 0; i < branchCount; i++) {
+    branchOffsets.push({
+      at: 0.35 + Math.random() * 0.45,
+      angle: (Math.random() - 0.5) * 1.2,
+      length: length * (0.35 + Math.random() * 0.35),
+    });
+  }
+  return {
+    baseAngle,
+    length,
+    swayAmp: cfg.swayAmp * (0.7 + Math.random() * 0.7),
+    swaySpeed: cfg.swaySpeed * (0.6 + Math.random() * 0.9),
+    phase: Math.random() * Math.PI * 2,
+    color: rgb,
+    alpha: alpha * (0.7 + Math.random() * 0.4),
+    thickness: 0.8 + Math.random() * 1.2,
+    branchOffsets,
+    segCount: 7,
+  };
+}
+
+export function SarahOrb({ state = "idle", size = 500, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const targetStateRef = useRef<OrbState>(state);
   const prevStateRef = useRef<OrbState>(state);
-  const transitionStartRef = useRef<number>(performance.now());
+  const transitionStartRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -273,129 +289,189 @@ export function SarahOrb({ state = "idle", size = 320, className }: Props) {
 
     const cx = size / 2;
     const cy = size / 2;
-    const radius = size * 0.42;
 
-    let bolts: Bolt[] = [];
+    let tendrils: Tendril[] = [];
     const particles: Particle[] = [];
     const ripples: Ripple[] = [];
     let frame = 0;
-    let rotation = 0;
-    let lastRedrawFrame = 0;
-    let lastRippleFrame = 0;
+    let lastRegen = 0;
+    let lastRippleSec = -1;
     const startTs = performance.now();
+    transitionStartRef.current = startTs;
 
     function currentCfg(now: number): StateConfig {
       const elapsed = now - transitionStartRef.current;
       const t = Math.min(1, Math.max(0, elapsed / TRANSITION_MS));
       const eased = easeInOut(t);
-      const prev = STATES[prevStateRef.current];
-      const target = STATES[targetStateRef.current];
-      return interpConfig(prev, target, eased);
+      return interpConfig(
+        STATES[prevStateRef.current],
+        STATES[targetStateRef.current],
+        eased
+      );
     }
 
-    function regenerateBolts(cfg: StateConfig) {
-      const count = Math.max(1, Math.round(cfg.boltCount));
-      const next: Bolt[] = [];
+    function regenerate(cfg: StateConfig) {
+      const count = Math.max(4, Math.round(cfg.tendrilCount));
+      tendrils = [];
       for (let i = 0; i < count; i++) {
-        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5 + rotation;
-        next.push(
-          generateBolt(cx, cy, radius * (0.85 + Math.random() * 0.15), angle, cfg.jitter)
-        );
+        const t = generateTendril(cfg);
+        t.baseAngle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+        tendrils.push(t);
       }
-      bolts = next;
     }
 
-    function spawnParticle(cfg: StateConfig) {
+    function buildPolyline(
+      t: Tendril,
+      cfg: StateConfig,
+      time: number,
+      coreEdge: number,
+      hueCycledOverride?: [number, number, number]
+    ): { points: Array<{ x: number; y: number }>; color: [number, number, number]; alpha: number } {
+      const N = t.segCount;
+      const pts: Array<{ x: number; y: number }> = [];
+      for (let i = 0; i < N; i++) {
+        const u = i / (N - 1);
+        const r = coreEdge + u * t.length;
+        const sway =
+          Math.sin(time * t.swaySpeed + t.phase + u * 1.6) * t.swayAmp * u;
+        const curl = cfg.curlBias * u * 0.5;
+        const angle = t.baseAngle + sway + curl;
+        pts.push({
+          x: cx + Math.cos(angle) * r,
+          y: cy + Math.sin(angle) * r,
+        });
+      }
+      const color = hueCycledOverride ?? t.color;
+      return { points: pts, color, alpha: t.alpha };
+    }
+
+    function drawSmoothPath(
+      points: Array<{ x: number; y: number }>,
+      width: number,
+      color: string,
+      blur: number,
+      shadow: string
+    ) {
+      if (!ctx || points.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      // Smooth through midpoints (quadratic curves through anchors)
+      for (let i = 1; i < points.length - 1; i++) {
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+      }
+      ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowBlur = blur;
+      ctx.shadowColor = shadow;
+      ctx.stroke();
+    }
+
+    function drawTendril(
+      t: Tendril,
+      cfg: StateConfig,
+      time: number,
+      coreEdge: number,
+      hueShifted?: [number, number, number]
+    ) {
+      const built = buildPolyline(t, cfg, time, coreEdge, hueShifted);
+      const pts = built.points;
+      const c = built.color;
+      const a = built.alpha;
+      const shadow = rgba(c, 1);
+
+      // Fade-along-length: draw in two halves with tapering line width and alpha.
+      // Pass 1: wide soft glow
+      drawSmoothPath(pts, 6 * t.thickness, rgba(c, a * 0.18), 22, shadow);
+      // Pass 2: mid colour
+      drawSmoothPath(pts, 2.5 * t.thickness, rgba(c, a * 0.85), 14, shadow);
+      // Pass 3: bright core
+      drawSmoothPath(pts, 0.9 * t.thickness, rgba([255, 255, 255], a * 0.85), 6, shadow);
+
+      // Branches
+      for (const b of t.branchOffsets) {
+        const atIdx = Math.max(1, Math.floor((pts.length - 1) * b.at));
+        const from = pts[atIdx];
+        const parentAng = Math.atan2(
+          pts[atIdx].y - pts[atIdx - 1].y,
+          pts[atIdx].x - pts[atIdx - 1].x
+        );
+        const branchAngle =
+          parentAng + b.angle + Math.sin(time * t.swaySpeed * 1.3 + t.phase) * 0.15;
+        const bN = 5;
+        const bPts: Array<{ x: number; y: number }> = [];
+        for (let i = 0; i < bN; i++) {
+          const u = i / (bN - 1);
+          const r = u * b.length;
+          const sway = Math.sin(time * t.swaySpeed * 1.4 + t.phase + i) * 0.18 * u;
+          const ang = branchAngle + sway;
+          bPts.push({
+            x: from.x + Math.cos(ang) * r,
+            y: from.y + Math.sin(ang) * r,
+          });
+        }
+        drawSmoothPath(bPts, 3 * t.thickness, rgba(c, a * 0.22), 14, shadow);
+        drawSmoothPath(bPts, 1.1 * t.thickness, rgba(c, a * 0.7), 8, shadow);
+        drawSmoothPath(bPts, 0.5 * t.thickness, rgba([255, 255, 255], a * 0.7), 4, shadow);
+      }
+    }
+
+    function spawnParticle(cfg: StateConfig, coreEdge: number) {
       const a = Math.random() * Math.PI * 2;
+      const size = 0.8 + Math.random() * 2.2;
       if (cfg.particleMode === 1) {
-        // vortex: spawn at edge, swirl inward
-        const r = radius * (0.9 + Math.random() * 0.2);
+        const r = coreEdge + Math.random() * 160;
         particles.push({
           x: cx + Math.cos(a) * r,
           y: cy + Math.sin(a) * r,
-          vx: -Math.cos(a) * 0.4 + -Math.sin(a) * 0.6,
-          vy: -Math.sin(a) * 0.4 + Math.cos(a) * 0.6,
+          vx: -Math.cos(a) * (0.35 + Math.random() * 0.4),
+          vy: -Math.sin(a) * (0.35 + Math.random() * 0.4),
           life: 0,
-          maxLife: 90,
+          maxLife: 110,
+          size,
         });
-      } else if (cfg.particleMode === 3) {
-        // burst outward fast
-        const speed = 1.6 + Math.random() * 1.4;
+      } else if (cfg.particleMode === 2) {
+        const speed = 2 + Math.random() * 2;
         particles.push({
-          x: cx + Math.cos(a) * radius * 0.2,
-          y: cy + Math.sin(a) * radius * 0.2,
+          x: cx + Math.cos(a) * coreEdge,
+          y: cy + Math.sin(a) * coreEdge,
           vx: Math.cos(a) * speed,
           vy: Math.sin(a) * speed,
           life: 0,
-          maxLife: 50,
-        });
-      } else if (cfg.particleMode === 2) {
-        // ambient gentle within sphere
-        const r = radius * Math.random();
-        particles.push({
-          x: cx + Math.cos(a) * r,
-          y: cy + Math.sin(a) * r,
-          vx: Math.cos(a) * 0.15,
-          vy: Math.sin(a) * 0.15,
-          life: 0,
-          maxLife: 110,
+          maxLife: 60,
+          size,
         });
       } else {
-        // idle slow outward drift
-        const r = radius * (0.2 + Math.random() * 0.4);
+        const speed = 0.4 + Math.random() * 0.5;
         particles.push({
-          x: cx + Math.cos(a) * r,
-          y: cy + Math.sin(a) * r,
-          vx: Math.cos(a) * 0.25,
-          vy: Math.sin(a) * 0.25,
+          x: cx + Math.cos(a) * coreEdge,
+          y: cy + Math.sin(a) * coreEdge,
+          vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed,
           life: 0,
           maxLife: 160,
+          size,
         });
       }
     }
 
-    function updateParticles(cfg: StateConfig) {
-      // spawn
+    function updateParticles(cfg: StateConfig, coreEdge: number) {
       let toSpawn = cfg.particleRate;
       while (toSpawn > 0) {
-        if (toSpawn >= 1 || Math.random() < toSpawn) spawnParticle(cfg);
+        if (toSpawn >= 1 || Math.random() < toSpawn) spawnParticle(cfg, coreEdge);
         toSpawn -= 1;
       }
-      // update
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
         p.life++;
-        if (cfg.particleMode === 1) {
-          // vortex tangential acceleration toward centre
-          const dx = cx - p.x;
-          const dy = cy - p.y;
-          const d = Math.sqrt(dx * dx + dy * dy) || 1;
-          p.vx += (dx / d) * 0.03;
-          p.vy += (dy / d) * 0.03;
-          // slight tangential swirl
-          p.vx += (-dy / d) * 0.02;
-          p.vy += (dx / d) * 0.02;
-        }
         if (p.life >= p.maxLife) particles.splice(i, 1);
       }
-    }
-
-    function drawBoltPath(
-      points: Array<{ x: number; y: number }>,
-      width: number,
-      color: string
-    ) {
-      if (!ctx || points.length < 2) return;
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = width;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke();
     }
 
     function render() {
@@ -403,177 +479,127 @@ export function SarahOrb({ state = "idle", size = 320, className }: Props) {
       const now = performance.now();
       const elapsedSec = (now - startTs) / 1000;
       const cfg = currentCfg(now);
-      rotation += cfg.rotateSpeed;
 
-      // colour cycling for speaking
-      const primary =
-        cfg.hueCycle > 0.01
-          ? lerpColor(cfg.primary, hueShift(cfg.primary, elapsedSec * 0.35), cfg.hueCycle)
-          : cfg.primary;
-      const accent =
-        cfg.hueCycle > 0.01
-          ? lerpColor(cfg.accent, hueShift(cfg.accent, elapsedSec * 0.35 + 0.2), cfg.hueCycle)
-          : cfg.accent;
-
-      // breathing factors
       const breath =
         1 +
-        Math.sin(elapsedSec * Math.PI * 2 * cfg.coreBreathHz) * cfg.coreBreathDepth;
-      const glowPulse =
-        1 + Math.sin(elapsedSec * Math.PI * 2 * cfg.glowPulseHz) * 0.15;
+        Math.sin(elapsedSec * Math.PI * 2 * cfg.coreBreathHz) *
+          cfg.coreBreathDepth;
+      const coreEdge = cfg.coreRadius * breath;
 
       ctx.clearRect(0, 0, size, size);
+      ctx.shadowBlur = 0;
+      ctx.globalCompositeOperation = "source-over";
 
-      // Outer atmospheric glow
-      const glowR = radius * cfg.glowRadiusMul * glowPulse;
-      const glow = ctx.createRadialGradient(cx, cy, radius * 0.4, cx, cy, glowR);
-      glow.addColorStop(0, rgba(primary, 0.25 * cfg.glowAlpha * glowPulse));
-      glow.addColorStop(0.5, rgba(accent, 0.12 * cfg.glowAlpha));
-      glow.addColorStop(1, rgba(accent, 0));
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, size, size);
-
-      // Sphere base
-      const base = ctx.createRadialGradient(
-        cx - radius * 0.2,
-        cy - radius * 0.25,
-        radius * 0.1,
-        cx,
-        cy,
-        radius
-      );
-      base.addColorStop(0, "rgba(20,30,55,0.95)");
-      base.addColorStop(0.55, "rgba(8,12,28,0.92)");
-      base.addColorStop(1, "rgba(0,0,0,0.98)");
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fillStyle = base;
-      ctx.fill();
-
-      // Clip to sphere
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.98, 0, Math.PI * 2);
-      ctx.clip();
-
+      // Corona glow rings — drawn first so tendrils sit on top
       ctx.globalCompositeOperation = "lighter";
 
-      // Frequency wave lines (speaking)
-      if (cfg.waveAlpha > 0.02) {
-        const waves = 3;
-        for (let w = 0; w < waves; w++) {
-          ctx.beginPath();
-          const amp = radius * 0.18 * (1 - w * 0.25);
-          const freq = 0.05 + w * 0.02;
-          const phase = elapsedSec * (4 + w * 1.5);
-          const yOff = (w - (waves - 1) / 2) * radius * 0.18;
-          for (let x = -radius; x <= radius; x += 2) {
-            const y = Math.sin(x * freq + phase) * amp * Math.cos((x / radius) * 1.4);
-            const px = cx + x;
-            const py = cy + yOff + y;
-            if (x === -radius) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-          }
-          ctx.strokeStyle = rgba(primary, cfg.waveAlpha * (0.4 - w * 0.08));
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-      }
+      const coronaCyan = ctx.createRadialGradient(cx, cy, coreEdge * 0.9, cx, cy, coreEdge * 1.9);
+      coronaCyan.addColorStop(0, `rgba(0,200,255,${cfg.coronaCyan})`);
+      coronaCyan.addColorStop(1, "rgba(0,200,255,0)");
+      ctx.fillStyle = coronaCyan;
+      ctx.fillRect(0, 0, size, size);
 
-      // Ripple rings (listening)
-      if (cfg.rippleRate > 0.001) {
-        if (frame - lastRippleFrame > 1 / Math.max(cfg.rippleRate, 0.001)) {
-          ripples.push({ r: radius * 0.2, alpha: 0.55 });
-          lastRippleFrame = frame;
+      const coronaPurple = ctx.createRadialGradient(cx, cy, coreEdge * 1, cx, cy, coreEdge * 2.6);
+      coronaPurple.addColorStop(0, `rgba(150,50,255,${cfg.coronaPurple})`);
+      coronaPurple.addColorStop(1, "rgba(150,50,255,0)");
+      ctx.fillStyle = coronaPurple;
+      ctx.fillRect(0, 0, size, size);
+
+      const coronaBlue = ctx.createRadialGradient(cx, cy, coreEdge * 1.1, cx, cy, coreEdge * 3.4);
+      coronaBlue.addColorStop(0, `rgba(0,100,200,${cfg.coronaBlue})`);
+      coronaBlue.addColorStop(1, "rgba(0,100,200,0)");
+      ctx.fillStyle = coronaBlue;
+      ctx.fillRect(0, 0, size, size);
+
+      // Ripples
+      if (cfg.rippleEverySec > 0.001) {
+        const period = cfg.rippleEverySec;
+        const sec = elapsedSec;
+        if (Math.floor(sec / period) > lastRippleSec) {
+          ripples.push({ r: coreEdge, alpha: 0.55 });
+          lastRippleSec = Math.floor(sec / period);
         }
       }
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i];
-        r.r += 0.8;
-        r.alpha -= 0.006;
-        if (r.alpha <= 0 || r.r > radius) {
+        r.r += 1.1;
+        r.alpha -= 0.0055;
+        if (r.alpha <= 0 || r.r > size * 0.55) {
           ripples.splice(i, 1);
           continue;
         }
         ctx.beginPath();
         ctx.arc(cx, cy, r.r, 0, Math.PI * 2);
-        ctx.strokeStyle = rgba(primary, r.alpha);
-        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = rgba([100, 220, 255], r.alpha);
+        ctx.lineWidth = 1.3;
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = "rgba(100,220,255,0.8)";
         ctx.stroke();
+        ctx.shadowBlur = 0;
       }
 
       // Particles
       for (const p of particles) {
         const lifeT = p.life / p.maxLife;
-        const a = (1 - lifeT) * 0.7;
-        const r = 1.2 + (1 - lifeT) * 1.4;
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3);
-        grad.addColorStop(0, rgba(primary, a));
-        grad.addColorStop(1, rgba(primary, 0));
+        const a = (1 - lifeT) * 0.85;
+        const r = p.size;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+        grad.addColorStop(0, rgba([220, 245, 255], a));
+        grad.addColorStop(0.5, rgba([100, 220, 255], a * 0.55));
+        grad.addColorStop(1, "rgba(100,220,255,0)");
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 3, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Bolts
-      for (const bolt of bolts) {
-        drawBoltPath(bolt.points, 6, rgba(accent, 0.18));
-        drawBoltPath(bolt.points, 3, rgba(primary, 0.55));
-        drawBoltPath(bolt.points, 1.2, rgba([255, 255, 255], 0.9));
+      // Tendrils — speaking palette cycles
+      const cycledColor: [number, number, number] | undefined =
+        cfg.hueCycle > 0.01 ? cyclePalette(elapsedSec * 0.45) : undefined;
 
-        const tip = bolt.points[bolt.points.length - 1];
-        const tipGrad = ctx.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 14);
-        tipGrad.addColorStop(0, rgba(cfg.tip, 0.95));
-        tipGrad.addColorStop(1, rgba(cfg.tip, 0));
-        ctx.fillStyle = tipGrad;
-        ctx.beginPath();
-        ctx.arc(tip.x, tip.y, 14, 0, Math.PI * 2);
-        ctx.fill();
-
-        for (const branch of bolt.branches) {
-          drawBoltPath(branch, 3, rgba(accent, 0.25));
-          drawBoltPath(branch, 1.5, rgba(primary, 0.6));
-          drawBoltPath(branch, 0.8, rgba([255, 255, 255], 0.7));
-        }
+      for (const t of tendrils) {
+        const useHue =
+          cycledColor && Math.random() < cfg.hueCycle ? cycledColor : undefined;
+        drawTendril(t, cfg, elapsedSec, coreEdge, useHue);
       }
+      ctx.shadowBlur = 0;
 
-      // Breathing core
-      const coreR = radius * 0.35 * breath;
-      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
-      core.addColorStop(0, rgba([255, 255, 255], cfg.coreAlpha));
-      core.addColorStop(0.3, rgba(primary, 0.7 * cfg.coreAlpha));
-      core.addColorStop(1, rgba(primary, 0));
-      ctx.fillStyle = core;
-      ctx.beginPath();
-      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-      ctx.fill();
-
+      // Dark void core (drawn LAST, on top, so tendrils appear to emerge from its rim)
       ctx.globalCompositeOperation = "source-over";
-      ctx.restore();
-
-      // Rim highlight
-      const rim = ctx.createRadialGradient(cx, cy, radius * 0.85, cx, cy, radius);
-      rim.addColorStop(0, "rgba(0,0,0,0)");
-      rim.addColorStop(1, rgba(primary, 0.35));
+      const voidGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreEdge);
+      voidGrad.addColorStop(0, `rgba(5,5,16,${cfg.coreDark})`);
+      voidGrad.addColorStop(0.7, `rgba(5,5,16,${cfg.coreDark * 0.85})`);
+      voidGrad.addColorStop(1, "rgba(5,5,16,0)");
+      ctx.fillStyle = voidGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fillStyle = rim;
+      ctx.arc(cx, cy, coreEdge * 1.05, 0, Math.PI * 2);
       ctx.fill();
 
-      updateParticles(cfg);
+      // Bright rim around the void to make it pop
+      ctx.globalCompositeOperation = "lighter";
+      const rimGrad = ctx.createRadialGradient(cx, cy, coreEdge * 0.95, cx, cy, coreEdge * 1.15);
+      rimGrad.addColorStop(0, "rgba(0,0,0,0)");
+      rimGrad.addColorStop(0.5, "rgba(120,220,255,0.35)");
+      rimGrad.addColorStop(1, "rgba(120,220,255,0)");
+      ctx.fillStyle = rimGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreEdge * 1.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
 
-      const interval = Math.max(1, Math.round(cfg.redrawEvery));
-      if (frame - lastRedrawFrame >= interval) {
-        regenerateBolts(cfg);
-        lastRedrawFrame = frame;
+      updateParticles(cfg, coreEdge);
+
+      const regenInterval = Math.max(40, Math.round(cfg.regenEveryFrames));
+      if (frame - lastRegen >= regenInterval || tendrils.length === 0) {
+        regenerate(cfg);
+        lastRegen = frame;
       }
 
       frame++;
       rafRef.current = requestAnimationFrame(render);
     }
 
-    regenerateBolts(STATES[targetStateRef.current]);
+    regenerate(STATES[targetStateRef.current]);
     render();
 
     return () => {
