@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Mic } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useSpeechRecognition } from "@/lib/hooks/use-speech-recognition";
+import Image from "next/image";
+import { ArrowRight, Mic, Loader2 } from "lucide-react";
+import { useAudioRecorder } from "@/lib/hooks/use-audio-recorder";
 import { SarahOrb, type OrbState } from "./SarahOrb";
-import { NewcastleEmblem } from "@/components/logo/newcastle-logo";
 
 type Message = {
   role: "user" | "assistant";
@@ -16,13 +15,6 @@ type Props = {
   clientName: string;
   onComplete: (factFindData?: Record<string, unknown>) => void;
 };
-
-function getFirstName(fullName: string): string {
-  if (fullName.includes("&")) {
-    return fullName.split(" ").slice(0, -1).join(" ");
-  }
-  return fullName.split(" ")[0];
-}
 
 function parseFactFindData(text: string): Record<string, unknown> | null {
   const match = text.match(/<fact-find-complete>([\s\S]*?)<\/fact-find-complete>/);
@@ -38,19 +30,7 @@ function stripFactFindTag(text: string): string {
   return text.replace(/<fact-find-complete>[\s\S]*?<\/fact-find-complete>/, "").trim();
 }
 
-function detectIsChrome(): boolean {
-  if (typeof navigator === "undefined") return true;
-  const ua = navigator.userAgent;
-  const vendor = navigator.vendor || "";
-  const isEdge = /Edg\//.test(ua);
-  const isOpera = /OPR\//.test(ua) || /Opera/.test(ua);
-  const isBrave = (navigator as unknown as { brave?: unknown }).brave !== undefined;
-  const isChromium = /Chrome\//.test(ua) && /Google Inc/.test(vendor);
-  return isChromium && !isEdge && !isOpera && !isBrave;
-}
-
 export function SarahChat({ clientName, onComplete }: Props) {
-  const firstName = getFirstName(clientName);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
@@ -58,17 +38,15 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isChrome, setIsChrome] = useState<boolean>(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
 
-  const { isListening, isSupported, start, stop } = useSpeechRecognition(
-    (text) => setInput(text)
+  const { isRecording, isTranscribing, error: recorderError, toggle } = useAudioRecorder(
+    (text) => {
+      setInput((prev) => (prev ? `${prev} ${text}` : text));
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
   );
-
-  useEffect(() => {
-    setIsChrome(detectIsChrome());
-  }, []);
 
   // Word-by-word reveal of subtitle
   useEffect(() => {
@@ -86,7 +64,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
   const orbState: OrbState = isStreaming
     ? "speaking"
-    : isListening
+    : isRecording
       ? "listening"
       : "idle";
 
@@ -189,13 +167,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
     }
   }
 
-  function handleMic() {
-    if (isListening) stop();
-    else start();
-  }
-
-  // Rewind: remove the user message at userIdx and any following assistant reply,
-  // put the user's text back in the input box.
   function handleEditAnswer(userIdx: number) {
     if (isStreaming) return;
     const target = messages[userIdx];
@@ -205,7 +176,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
     setMessages(trimmed);
     setInput(target.content === "[START]" ? "" : target.content);
 
-    // Restore last Sarah subtitle if any
     const lastSarah = [...trimmed].reverse().find((m) => m.role === "assistant");
     if (lastSarah) {
       const text = stripFactFindTag(lastSarah.content);
@@ -223,7 +193,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
     return currentSubtitle.split(/\s+/).slice(0, visibleWordCount).join(" ");
   }, [currentSubtitle, visibleWordCount]);
 
-  // Past user answers (skip the synthetic [START])
   const pastUserAnswers = messages
     .map((m, i) => ({ m, i }))
     .filter(({ m }) => m.role === "user" && m.content !== "[START]");
@@ -232,13 +201,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
-      {/* Top header: logo + headline */}
+      {/* Header */}
       <header className="shrink-0 flex flex-col items-center pt-8 pb-2 px-6">
-        <NewcastleEmblem size={56} className="mb-3" />
-        <h1 className="text-[26px] md:text-[30px] font-light tracking-tight text-white">
+        <Image
+          src="/newcastle-logo.png"
+          alt="Newcastle Financial Services"
+          width={520}
+          height={180}
+          priority
+          className="h-16 md:h-20 w-auto mb-4"
+        />
+        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center">
           Financial Discovery Session
         </h1>
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-3 flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           <span className="text-[10px] text-white/40 tracking-wide">
             Sarah is online
@@ -250,10 +226,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
         <SarahOrb state={orbState} size={320} />
 
-        {/* Subtitle: closed-caption style */}
-        <div
-          className="mt-8 w-full text-center min-h-[5rem] px-4"
-        >
+        <div className="mt-8 w-full text-center min-h-[5rem] px-4">
           {errorMsg ? (
             <p className="text-[14px] text-red-400/85 mx-auto max-w-[500px]">
               {errorMsg}
@@ -268,7 +241,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
           )}
         </div>
 
-        {/* Recent client answers with edit-back */}
         {recentAnswers.length > 0 && (
           <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
             {recentAnswers.map(({ m, i }) => (
@@ -302,30 +274,32 @@ export function SarahChat({ clientName, onComplete }: Props) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isStreaming ? "Sarah is speaking…" : "Type your answer…"}
+                placeholder="Type your answer here..."
                 disabled={isStreaming}
                 rows={1}
-                className="w-full bg-white/5 border border-white/15 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
+                className="w-full bg-white/5 border border-white/40 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/40 focus:outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
               />
             </div>
 
-            {/* Mic button: only show when Chrome AND supported */}
-            {isChrome && isSupported !== false && (
-              <button
-                type="button"
-                onClick={handleMic}
-                aria-label={isListening ? "Stop listening" : "Start listening"}
-                className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {isListening && (
-                  <>
-                    <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
-                    <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
-                  </>
-                )}
+            <button
+              type="button"
+              onClick={toggle}
+              disabled={isStreaming || isTranscribing}
+              aria-label={isRecording ? "Stop recording" : "Start recording"}
+              className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isRecording && (
+                <>
+                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
+                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
+                </>
+              )}
+              {isTranscribing ? (
+                <Loader2 className="h-5 w-5 relative z-10 animate-spin" />
+              ) : (
                 <Mic className="h-5 w-5 relative z-10" />
-              </button>
-            )}
+              )}
+            </button>
 
             <button
               onClick={handleSubmit}
@@ -337,9 +311,9 @@ export function SarahChat({ clientName, onComplete }: Props) {
             </button>
           </div>
 
-          {!isChrome && (
-            <p className="text-center text-[11px] text-white/40 mt-3 max-w-[500px] mx-auto leading-relaxed">
-              For the best experience including voice, please open this link in Google Chrome.
+          {recorderError && (
+            <p className="text-center text-[11px] text-red-400/80 mt-3 max-w-[500px] mx-auto leading-relaxed">
+              {recorderError}
             </p>
           )}
         </div>
