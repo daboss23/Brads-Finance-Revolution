@@ -335,7 +335,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
     .map((m, i) => ({ m, i }))
     .filter(({ m }) => m.role === "user" && m.content !== "[START]");
 
-  const recentAnswers = pastUserAnswers.slice(-3);
+  const recentAnswers = pastUserAnswers.slice(-1);
 
   const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
 
@@ -343,18 +343,17 @@ export function SarahChat({ clientName, onComplete }: Props) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
         <Image
-          src="/newcastle-logo.svg"
+          src="/newcastle-logo.png"
           alt="Newcastle Financial Services"
-          width={72}
-          height={72}
+          width={80}
+          height={80}
           priority
-          unoptimized
-          className="h-[72px] w-[72px] mb-6"
+          className="h-20 w-20 object-contain mb-6"
         />
         <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center mb-4">
           Financial Discovery Session
         </h1>
-        <p className="text-[15px] text-white/55 text-center max-w-[440px] mb-10 leading-relaxed">
+        <p className="text-lg text-white/70 text-center max-w-[520px] mb-10 leading-relaxed">
           Sarah will guide you through a short conversation so Brad can prepare
           for your meeting. Make sure your sound is on.
         </p>
@@ -363,7 +362,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
           onClick={() => setHasStarted(true)}
           className="px-8 py-4 rounded-full bg-gold text-background text-[15px] font-semibold tracking-wide hover:bg-gold/90 transition-colors"
         >
-          Tap to begin your session
+          Begin My Financial Discovery
         </button>
       </div>
     );
@@ -374,13 +373,12 @@ export function SarahChat({ clientName, onComplete }: Props) {
       {/* Header */}
       <header className="shrink-0 flex flex-col items-center pt-8 pb-2 px-6">
         <Image
-          src="/newcastle-logo.svg"
+          src="/newcastle-logo.png"
           alt="Newcastle Financial Services"
-          width={72}
-          height={72}
+          width={80}
+          height={80}
           priority
-          unoptimized
-          className="h-[72px] w-[72px] mb-4"
+          className="h-20 w-20 object-contain mb-4"
         />
         <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center">
           Financial Discovery Session
