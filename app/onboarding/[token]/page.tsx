@@ -1,11 +1,15 @@
 "use client";
 
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { SarahChat } from "@/components/onboarding/SarahChat";
+import { getLinkByToken } from "@/lib/sarah-data";
 
 export default function OnboardingPage({
   params,
 }: {
   params: { token: string };
 }) {
-  return <OnboardingFlow token={params.token} />;
+  const link = getLinkByToken(params.token);
+  const clientName = link?.clientName ?? "Friend";
+
+  return <SarahChat clientName={clientName} onComplete={() => {}} />;
 }
