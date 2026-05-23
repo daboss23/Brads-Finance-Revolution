@@ -393,7 +393,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       {/* Orb stage */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
-        <SarahOrb state={orbState} size={320} />
+        <SarahOrb state={orbState} size={500} className="w-[280px] h-[280px] md:w-[500px] md:h-[500px]" />
 
         <div className="mt-8 w-full flex items-start justify-center px-4 min-h-[120px] max-w-[680px] mx-auto">
           {errorMsg ? (
