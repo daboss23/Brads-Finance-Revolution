@@ -7,6 +7,7 @@ const SILENCE_HANGOVER_MS = 1500;
 const SILENCE_RMS_THRESHOLD = 0.025;
 const SPEECH_RMS_THRESHOLD = 0.05;
 const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 800;
+const TRANSCRIPT_REVEAL_DELAY_MS = 2500;
 
 export function useAudioRecorder(onTranscript: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
@@ -162,13 +163,24 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
             const msg = data?.error ?? `Transcription failed (${res.status})`;
             console.error("[transcribe] error:", msg, data);
             setError(msg);
+            setIsTranscribing(false);
+            setIsRecording(false);
           } else if (data.text) {
-            onTranscript(data.text);
+            // Hold the spinner and delay the reveal so it feels like the system
+            // is thoughtfully processing rather than snapping.
+            const text = data.text;
+            window.setTimeout(() => {
+              onTranscript(text);
+              setIsTranscribing(false);
+              setIsRecording(false);
+            }, TRANSCRIPT_REVEAL_DELAY_MS);
+          } else {
+            setIsTranscribing(false);
+            setIsRecording(false);
           }
         } catch (e) {
           console.error("[transcribe] request failed:", e);
           setError(e instanceof Error ? e.message : "Transcription request failed.");
-        } finally {
           setIsTranscribing(false);
           setIsRecording(false);
         }

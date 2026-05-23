@@ -40,8 +40,8 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hasStarted = useRef(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -63,11 +63,10 @@ export function SarahChat({ clientName, onComplete }: Props) {
         : "idle";
 
   useEffect(() => {
-    if (hasStarted.current) return;
-    hasStarted.current = true;
+    if (!hasStarted) return;
     sendToSarah([{ role: "user", content: "[START]" }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasStarted]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -98,7 +97,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
     setIsPlayingAudio(false);
   }
 
-  async function playSarahVoice(text: string) {
+  async function playSarahVoice(text: string, showSubtitle: boolean) {
     const cleaned = text.trim();
     if (!cleaned) return;
     stopAudioPlayback();
@@ -114,17 +113,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
         console.error("[SarahChat] voice route failed", res.status, errBody);
-        // Still reveal the subtitle even if audio fails
-        setCurrentSubtitle(cleaned);
-        setVisibleWordCount(cleaned.split(/\s+/).length);
+        if (showSubtitle) {
+          setCurrentSubtitle(cleaned);
+          setVisibleWordCount(cleaned.split(/\s+/).length);
+        }
         return;
       }
 
       const blob = await res.blob();
       if (blob.size === 0) {
         console.error("[SarahChat] voice route returned empty audio");
-        setCurrentSubtitle(cleaned);
-        setVisibleWordCount(cleaned.split(/\s+/).length);
+        if (showSubtitle) {
+          setCurrentSubtitle(cleaned);
+          setVisibleWordCount(cleaned.split(/\s+/).length);
+        }
         return;
       }
 
@@ -135,15 +137,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
       audio.preload = "auto";
 
       const words = cleaned.split(/\s+/);
-      setCurrentSubtitle(cleaned);
-      setVisibleWordCount(0);
+      if (showSubtitle) {
+        setCurrentSubtitle(cleaned);
+        setVisibleWordCount(0);
+      } else {
+        setCurrentSubtitle("");
+        setVisibleWordCount(0);
+      }
 
       const startSync = () => {
         const tick = () => {
           if (!audioRef.current) return;
           const dur = audioRef.current.duration;
           const t = audioRef.current.currentTime;
-          if (dur && isFinite(dur) && dur > 0) {
+          if (showSubtitle && dur && isFinite(dur) && dur > 0) {
             const ratio = Math.min(1, t / dur);
             const n = Math.min(words.length, Math.ceil(ratio * words.length));
             setVisibleWordCount(n);
@@ -158,7 +165,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
         startSync();
       };
       audio.onended = () => {
-        setVisibleWordCount(words.length);
+        if (showSubtitle) setVisibleWordCount(words.length);
         if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
         setIsPlayingAudio(false);
@@ -170,21 +177,22 @@ export function SarahChat({ clientName, onComplete }: Props) {
       audio.onerror = (e) => {
         console.error("[SarahChat] audio playback error:", e, audio.error);
         setIsPlayingAudio(false);
-        setVisibleWordCount(words.length);
+        if (showSubtitle) setVisibleWordCount(words.length);
       };
 
       try {
         await audio.play();
       } catch (e) {
-        // Autoplay blocked by browser. Fall back to revealing text immediately.
         console.warn("[SarahChat] autoplay blocked, falling back to text-only:", e);
-        setVisibleWordCount(words.length);
+        if (showSubtitle) setVisibleWordCount(words.length);
         setIsPlayingAudio(false);
       }
     } catch (e) {
       console.error("[SarahChat] playSarahVoice fatal:", e);
-      setCurrentSubtitle(cleaned);
-      setVisibleWordCount(cleaned.split(/\s+/).length);
+      if (showSubtitle) {
+        setCurrentSubtitle(cleaned);
+        setVisibleWordCount(cleaned.split(/\s+/).length);
+      }
     } finally {
       setIsLoadingVoice(false);
     }
@@ -252,7 +260,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       const spoken = stripFactFindTag(full);
       if (spoken) {
-        await playSarahVoice(spoken);
+        // Sarah turn number = number of prior assistant messages + 1.
+        // 1 = audio check (show subtitle), 2 = full greeting (NO subtitle),
+        // 3+ = normal (show subtitle).
+        const sarahTurnNumber =
+          apiMessages.filter((m) => m.role === "assistant").length + 1;
+        const showSubtitle = sarahTurnNumber !== 2;
+        await playSarahVoice(spoken, showSubtitle);
       }
 
       if (factFindData) {
@@ -324,6 +338,36 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const recentAnswers = pastUserAnswers.slice(-3);
 
   const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
+
+  if (!hasStarted) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
+        <Image
+          src="/newcastle-logo.svg"
+          alt="Newcastle Financial Services"
+          width={72}
+          height={72}
+          priority
+          unoptimized
+          className="h-[72px] w-[72px] mb-6"
+        />
+        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center mb-4">
+          Financial Discovery Session
+        </h1>
+        <p className="text-[15px] text-white/55 text-center max-w-[440px] mb-10 leading-relaxed">
+          Sarah will guide you through a short conversation so Brad can prepare
+          for your meeting. Make sure your sound is on.
+        </p>
+        <button
+          type="button"
+          onClick={() => setHasStarted(true)}
+          className="px-8 py-4 rounded-full bg-gold text-background text-[15px] font-semibold tracking-wide hover:bg-gold/90 transition-colors"
+        >
+          Tap to begin your session
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
