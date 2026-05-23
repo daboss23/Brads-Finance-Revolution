@@ -360,7 +360,7 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
 
       {/* Plasma shell (noise-displaced surface, fresnel + animated emissive) */}
       <mesh>
-        <icosahedronGeometry args={[1.05, 64]} />
+        <icosahedronGeometry args={[1.05, 5]} />
         <shaderMaterial
           ref={plasmaMatRef}
           vertexShader={PLASMA_VERT}
