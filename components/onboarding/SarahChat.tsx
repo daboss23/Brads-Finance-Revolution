@@ -348,16 +348,26 @@ export function SarahChat({ clientName, onComplete }: Props) {
   if (!hasStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
-        <Image
-          src="/newcastle-logo.svg"
-          alt="Newcastle Financial Services"
-          width={80}
-          height={80}
-          priority
-          unoptimized
-          className="h-20 w-20 object-contain mb-6"
-        />
-        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center mb-4">
+        <div className="flex items-center gap-3 mb-6">
+          <Image
+            src="/newcastle-logo.svg"
+            alt="Newcastle Financial Services"
+            width={64}
+            height={64}
+            priority
+            unoptimized
+            className="h-16 w-16 object-contain"
+          />
+          <div className="flex flex-col items-start leading-none">
+            <span className="text-[16px] tracking-[0.32em] uppercase text-white font-light">
+              Newcastle
+            </span>
+            <span className="text-[10px] tracking-[0.24em] uppercase text-white/55 font-semibold mt-1.5">
+              Financial Services
+            </span>
+          </div>
+        </div>
+        <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white text-center mb-4">
           Financial Discovery Session
         </h1>
         <p className="text-lg text-white/70 text-center max-w-[520px] mb-10 leading-relaxed">
@@ -377,21 +387,31 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="shrink-0 flex flex-col items-center pt-5 pb-1 px-6">
-        <Image
-          src="/newcastle-logo.svg"
-          alt="Newcastle Financial Services"
-          width={56}
-          height={56}
-          priority
-          unoptimized
-          className="h-14 w-14 object-contain mb-2"
-        />
-        <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white text-center">
+      {/* Header: logo lockup + headline + status — tight stack */}
+      <header className="shrink-0 flex flex-col items-center pt-6 px-6">
+        <div className="flex items-center gap-2.5">
+          <Image
+            src="/newcastle-logo.svg"
+            alt="Newcastle Financial Services"
+            width={44}
+            height={44}
+            priority
+            unoptimized
+            className="h-11 w-11 object-contain"
+          />
+          <div className="flex flex-col items-start leading-none">
+            <span className="text-[12px] tracking-[0.32em] uppercase text-white font-light">
+              Newcastle
+            </span>
+            <span className="text-[8px] tracking-[0.24em] uppercase text-white/55 font-semibold mt-1">
+              Financial Services
+            </span>
+          </div>
+        </div>
+        <h1 className="mt-3 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
           Financial Discovery Session
         </h1>
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-1 flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           <span className="text-[10px] text-white/40 tracking-wide">
             Sarah is online
@@ -399,8 +419,8 @@ export function SarahChat({ clientName, onComplete }: Props) {
         </div>
       </header>
 
-      {/* Orb stage */}
-      <div className="flex-1 min-h-0 flex flex-col items-center justify-start px-6 py-3 overflow-hidden">
+      {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
+      <main className="shrink-0 flex flex-col items-center px-6 pt-6">
         <OrbCanvas
           state={orbState}
           className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
@@ -422,7 +442,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
         </div>
 
         {recentAnswers.length > 0 && (
-          <div className="mt-3 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
+          <div className="mt-2 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
             {recentAnswers.map(({ m, i }) => (
               <div key={i} className="flex flex-col items-end max-w-full">
                 <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
@@ -442,11 +462,11 @@ export function SarahChat({ clientName, onComplete }: Props) {
             ))}
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Input bar */}
+      {/* Input bar — close below subtitle/answer, fixed-height to prevent shake */}
       {!isComplete && (
-        <div className="shrink-0 px-5 py-5">
+        <div className="shrink-0 px-5 pt-4 pb-5">
           <div className="flex items-end gap-3 max-w-2xl mx-auto">
             <div className="flex-1 relative">
               <textarea
@@ -466,12 +486,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
               onClick={toggle}
               disabled={inputDisabled || isTranscribing}
               aria-label={isRecording ? "Stop recording" : "Start recording"}
-              className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ width: 56, height: 56 }}
+              className="relative shrink-0 inline-flex items-center justify-center rounded-full bg-gold text-background transition-colors hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isRecording && (
                 <>
-                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
-                  <span className="absolute inset-0 rounded-full ring-2 ring-red-500/70" />
+                  <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-red-500 animate-ping" />
+                  <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-red-500/70" />
                 </>
               )}
               {isTranscribing ? (
@@ -485,17 +506,21 @@ export function SarahChat({ clientName, onComplete }: Props) {
               onClick={handleSubmit}
               disabled={!input.trim() || inputDisabled}
               aria-label="Send"
-              className="shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-white text-black transition-all hover:bg-white/90 disabled:opacity-25 disabled:cursor-not-allowed"
+              style={{ width: 56, height: 56 }}
+              className="shrink-0 inline-flex items-center justify-center rounded-full bg-white text-black transition-colors hover:bg-white/90 disabled:opacity-25 disabled:cursor-not-allowed"
             >
               <ArrowRight className="h-5 w-5" />
             </button>
           </div>
 
-          {recorderError && (
-            <p className="text-center text-[11px] text-red-400/80 mt-3 max-w-[500px] mx-auto leading-relaxed">
-              {recorderError}
-            </p>
-          )}
+          {/* Reserved slot so recorder errors don't push the layout */}
+          <div className="h-5 mt-2 flex items-center justify-center">
+            {recorderError && (
+              <p className="text-[11px] text-red-400/80 max-w-[500px] text-center leading-tight">
+                {recorderError}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
