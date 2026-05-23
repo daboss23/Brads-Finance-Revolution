@@ -36,10 +36,16 @@ export function SarahChat({ clientName, onComplete }: Props) {
   const [visibleWordCount, setVisibleWordCount] = useState(0);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isLoadingVoice, setIsLoadingVoice] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   const { isRecording, isTranscribing, error: recorderError, toggle } = useAudioRecorder(
     (text) => {
@@ -48,25 +54,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
     }
   );
 
-  // Word-by-word reveal of subtitle
-  useEffect(() => {
-    if (!currentSubtitle) {
-      setVisibleWordCount(0);
-      return;
-    }
-    const words = currentSubtitle.split(/\s+/);
-    if (visibleWordCount >= words.length) return;
-    const timer = setTimeout(() => {
-      setVisibleWordCount((n) => Math.min(n + 1, words.length));
-    }, 70);
-    return () => clearTimeout(timer);
-  }, [currentSubtitle, visibleWordCount]);
-
-  const orbState: OrbState = isStreaming
+  const orbState: OrbState = isPlayingAudio
     ? "speaking"
-    : isRecording
-      ? "listening"
-      : "idle";
+    : isStreaming || isLoadingVoice
+      ? "thinking"
+      : isRecording
+        ? "listening"
+        : "idle";
 
   useEffect(() => {
     if (hasStarted.current) return;
@@ -75,12 +69,135 @@ export function SarahChat({ clientName, onComplete }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
+    };
+  }, []);
+
+  function stopAudioPlayback() {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setIsPlayingAudio(false);
+  }
+
+  async function playSarahVoice(text: string) {
+    const cleaned = text.trim();
+    if (!cleaned) return;
+    stopAudioPlayback();
+
+    setIsLoadingVoice(true);
+    try {
+      const res = await fetch("/api/sarah/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleaned }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        console.error("[SarahChat] voice route failed", res.status, errBody);
+        // Still reveal the subtitle even if audio fails
+        setCurrentSubtitle(cleaned);
+        setVisibleWordCount(cleaned.split(/\s+/).length);
+        return;
+      }
+
+      const blob = await res.blob();
+      if (blob.size === 0) {
+        console.error("[SarahChat] voice route returned empty audio");
+        setCurrentSubtitle(cleaned);
+        setVisibleWordCount(cleaned.split(/\s+/).length);
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      audioUrlRef.current = url;
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.preload = "auto";
+
+      const words = cleaned.split(/\s+/);
+      setCurrentSubtitle(cleaned);
+      setVisibleWordCount(0);
+
+      const startSync = () => {
+        const tick = () => {
+          if (!audioRef.current) return;
+          const dur = audioRef.current.duration;
+          const t = audioRef.current.currentTime;
+          if (dur && isFinite(dur) && dur > 0) {
+            const ratio = Math.min(1, t / dur);
+            const n = Math.min(words.length, Math.ceil(ratio * words.length));
+            setVisibleWordCount(n);
+          }
+          rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      };
+
+      audio.onplay = () => {
+        setIsPlayingAudio(true);
+        startSync();
+      };
+      audio.onended = () => {
+        setVisibleWordCount(words.length);
+        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+        setIsPlayingAudio(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+      };
+      audio.onerror = (e) => {
+        console.error("[SarahChat] audio playback error:", e, audio.error);
+        setIsPlayingAudio(false);
+        setVisibleWordCount(words.length);
+      };
+
+      try {
+        await audio.play();
+      } catch (e) {
+        // Autoplay blocked by browser. Fall back to revealing text immediately.
+        console.warn("[SarahChat] autoplay blocked, falling back to text-only:", e);
+        setVisibleWordCount(words.length);
+        setIsPlayingAudio(false);
+      }
+    } catch (e) {
+      console.error("[SarahChat] playSarahVoice fatal:", e);
+      setCurrentSubtitle(cleaned);
+      setVisibleWordCount(cleaned.split(/\s+/).length);
+    } finally {
+      setIsLoadingVoice(false);
+    }
+  }
+
   async function sendToSarah(apiMessages: Message[]) {
     setIsStreaming(true);
     setErrorMsg(null);
     setCurrentSubtitle("");
     setVisibleWordCount(0);
+    stopAudioPlayback();
 
+    let full = "";
     try {
       const res = await fetch("/api/sarah", {
         method: "POST",
@@ -92,7 +209,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let full = "";
       let streamError: string | null = null;
       let buffer = "";
 
@@ -117,7 +233,6 @@ export function SarahChat({ clientName, onComplete }: Props) {
             }
             if (parsed.text) {
               full += parsed.text;
-              setCurrentSubtitle(stripFactFindTag(full));
             }
           } catch (e) {
             console.warn("[Sarah] parse skip:", data, e);
@@ -133,6 +248,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
       const sarahMessage: Message = { role: "assistant", content: full };
       setMessages([...apiMessages, sarahMessage]);
 
+      setIsStreaming(false);
+
+      const spoken = stripFactFindTag(full);
+      if (spoken) {
+        await playSarahVoice(spoken);
+      }
+
       if (factFindData) {
         setIsComplete(true);
         setTimeout(() => onComplete(factFindData), 1800);
@@ -142,6 +264,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
       console.error("[Sarah] request failed:", e);
       setErrorMsg(msg);
       setCurrentSubtitle("Sorry, I ran into a problem. Please try again.");
+      setVisibleWordCount(8);
     } finally {
       setIsStreaming(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -172,6 +295,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
     const target = messages[userIdx];
     if (!target || target.role !== "user") return;
 
+    stopAudioPlayback();
     const trimmed = messages.slice(0, userIdx);
     setMessages(trimmed);
     setInput(target.content === "[START]" ? "" : target.content);
@@ -199,17 +323,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
   const recentAnswers = pastUserAnswers.slice(-3);
 
+  const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
+
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Header */}
       <header className="shrink-0 flex flex-col items-center pt-8 pb-2 px-6">
         <Image
-          src="/newcastle-logo.png"
+          src="/newcastle-logo.svg"
           alt="Newcastle Financial Services"
-          width={520}
-          height={180}
+          width={72}
+          height={72}
           priority
-          className="h-16 md:h-20 w-auto mb-4"
+          unoptimized
+          className="h-[72px] w-[72px] mb-4"
         />
         <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white text-center">
           Financial Discovery Session
@@ -234,7 +361,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
           ) : (
             <p className="text-[18px] leading-relaxed mx-auto max-w-[500px] whitespace-pre-wrap text-white/75">
               {visibleSubtitle}
-              {isStreaming && (
+              {(isStreaming || isLoadingVoice) && (
                 <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />
               )}
             </p>
@@ -275,7 +402,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type your answer here..."
-                disabled={isStreaming}
+                disabled={inputDisabled}
                 rows={1}
                 className="w-full bg-white/5 border border-white/40 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/40 focus:outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
               />
@@ -284,7 +411,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
             <button
               type="button"
               onClick={toggle}
-              disabled={isStreaming || isTranscribing}
+              disabled={inputDisabled || isTranscribing}
               aria-label={isRecording ? "Stop recording" : "Start recording"}
               className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-background transition-all hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -303,7 +430,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
             <button
               onClick={handleSubmit}
-              disabled={!input.trim() || isStreaming}
+              disabled={!input.trim() || inputDisabled}
               aria-label="Send"
               className="shrink-0 flex h-14 w-14 items-center justify-center rounded-full bg-white text-black transition-all hover:bg-white/90 disabled:opacity-25 disabled:cursor-not-allowed"
             >
