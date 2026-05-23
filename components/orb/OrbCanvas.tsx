@@ -93,11 +93,11 @@ export default function OrbCanvas({ state = "idle", className }: Props) {
             <PlasmaOrb state={state} />
             <EffectComposer multisampling={0} enableNormalPass={false}>
               <Bloom
-                intensity={1.0}
-                luminanceThreshold={0.2}
-                luminanceSmoothing={0.85}
+                intensity={0.35}
+                luminanceThreshold={0.75}
+                luminanceSmoothing={0.4}
                 mipmapBlur
-                kernelSize={KernelSize.LARGE}
+                kernelSize={KernelSize.MEDIUM}
               />
             </EffectComposer>
           </Suspense>

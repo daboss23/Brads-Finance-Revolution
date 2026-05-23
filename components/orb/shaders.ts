@@ -320,8 +320,8 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
   float twinkle = 0.6 + 0.4 * sin(uTime * 2.0 + aSeed * 12.0);
-  gl_PointSize = (1.5 + (1.0 - life) * 2.5) * twinkle * (300.0 / -mv.z);
-  vAlpha = (1.0 - life) * (0.55 + uIntensity * 0.35);
+  gl_PointSize = (1.0 + (1.0 - life) * 1.8) * twinkle * (300.0 / -mv.z);
+  vAlpha = (1.0 - life) * (0.35 + uIntensity * 0.2);
 }
 `;
 
