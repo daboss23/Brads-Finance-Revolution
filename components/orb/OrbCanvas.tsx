@@ -2,8 +2,6 @@
 
 import { Suspense, Component, useState, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { KernelSize } from "postprocessing";
 import { PlasmaOrb, type OrbState } from "./PlasmaOrb";
 
 export type { OrbState } from "./PlasmaOrb";
@@ -23,7 +21,7 @@ function CssFallbackOrb({ state }: { state: OrbState }) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
-        className={`w-3/4 h-3/4 rounded-full bg-gradient-radial bg-gradient-to-br ${palette[state]} blur-2xl animate-pulse`}
+        className={`w-3/4 h-3/4 rounded-full bg-gradient-to-br ${palette[state]} blur-2xl animate-pulse`}
       />
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-1/2 h-1/2 rounded-full bg-gradient-to-br from-white/30 to-cyan-300/20 blur-md" />
@@ -91,15 +89,6 @@ export default function OrbCanvas({ state = "idle", className }: Props) {
         >
           <Suspense fallback={null}>
             <PlasmaOrb state={state} />
-            <EffectComposer multisampling={0} enableNormalPass={false}>
-              <Bloom
-                intensity={0.35}
-                luminanceThreshold={0.75}
-                luminanceSmoothing={0.4}
-                mipmapBlur
-                kernelSize={KernelSize.MEDIUM}
-              />
-            </EffectComposer>
           </Suspense>
         </Canvas>
       </OrbErrorBoundary>
