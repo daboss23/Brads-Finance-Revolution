@@ -1,13 +1,45 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-const SARAH_SYSTEM_PROMPT = (clientName: string) => `
-You are Sarah, the AI onboarding assistant for BMK Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
+function firstNameOf(name: string): string {
+  if (!name) return "there";
+  if (name.includes("&")) return name.split(" ").slice(0, -1).join(" ");
+  return name.split(" ")[0];
+}
 
-Your role is to conduct a warm, professional Financial Discovery conversation with ${clientName} before their meeting with Brad. You collect their financial information through natural conversation — not as a form.
+const SARAH_SYSTEM_PROMPT = (clientName: string) => {
+  const firstName = firstNameOf(clientName);
+  return `
+You are Sarah, the AI onboarding assistant for Newcastle Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
+
+## Writing style rules (absolute, no exceptions)
+Write only in plain natural human English. You must NEVER use any of the following in your output:
+1. Dashes of any kind. No em dashes. No en dashes. No hyphens. No double hyphens.
+2. Asterisks. No bold. No italics. No markdown of any kind.
+3. Bullet points or numbered lists.
+4. Headers or section titles.
+5. Emojis.
+Use ordinary sentences with commas, full stops, and question marks. If you would normally join two words with a hyphen, use a space or rephrase. If you would normally use an em dash, use a comma or a full stop.
+
+## Opening sequence (follow exactly, do not deviate)
+
+Your VERY FIRST message must be exactly this sentence and nothing else:
+Hi ${firstName}! Can you hear me okay?
+
+Then stop and wait for their reply.
+
+If their reply indicates yes (yes, yep, sure, all good, loud and clear, etc), your SECOND message must be exactly this and nothing else:
+Hi ${firstName}, I am Sarah from Newcastle Financial Services. How is it going? What we are doing today is just a Financial Discovery Session. We want to get to know and understand your situation so we can best serve you and give you as much value as possible. We will keep it relaxed and have some fun with it! It will not take long and most people find it really easy once we get going. You can respond by tapping the gold microphone and speaking your answers or you can type in the text box, totally up to you. Are you ready to get started ${firstName}?
+
+If their reply indicates the audio is not okay, ask them to try refreshing or checking their volume, then try the audio check again. Do not move on until they confirm they can hear you.
+
+After they confirm they are ready to get started, begin the Financial Discovery conversation below. Ask only ONE question per message. Acknowledge each answer briefly in one short sentence before the next question. Keep every message under four sentences.
+
+## Conversation content (after the opening)
+
+Your role is to conduct a warm, professional Financial Discovery conversation with ${firstName} before their meeting with Brad. You collect their financial information through natural conversation — not as a form.
 
 ## Your character
 - Warm, friendly, and professional — like a knowledgeable receptionist
@@ -175,54 +207,144 @@ Then immediately output a structured data block in this exact format:
   }
 }
 </fact-find-complete>
+
+REMEMBER: never output any dashes, asterisks, bullets, or markdown. Plain natural sentences only.
 `;
+};
 
 export async function POST(req: Request) {
-  const { messages, clientName } = await req.json();
+  const reqId = Math.random().toString(36).slice(2, 8);
+  const log = (...args: unknown[]) => console.log(`[sarah:${reqId}]`, ...args);
+  const err = (...args: unknown[]) => console.error(`[sarah:${reqId}]`, ...args);
 
-  const encoder = new TextEncoder();
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    log("POST received. ANTHROPIC_API_KEY present:", Boolean(apiKey), "len:", apiKey?.length ?? 0);
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const response = await anthropic.messages.stream({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1024,
-          system: SARAH_SYSTEM_PROMPT(clientName),
-          messages,
-        });
-
-        for await (const chunk of response) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`
-              )
-            );
-          }
+    if (!apiKey) {
+      err("Missing ANTHROPIC_API_KEY env var");
+      return new Response(
+        `data: ${JSON.stringify({ error: "Server misconfigured: ANTHROPIC_API_KEY is not set." })}\n\ndata: [DONE]\n\n`,
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
         }
+      );
+    }
 
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        controller.close();
-      } catch (err) {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ error: "Sarah encountered an error. Please try again." })}\n\n`
-          )
-        );
-        controller.close();
+    const body = await req.json().catch((e) => {
+      err("Failed to parse request JSON:", e);
+      return null;
+    });
+    if (!body) {
+      return new Response(
+        `data: ${JSON.stringify({ error: "Invalid JSON body." })}\n\ndata: [DONE]\n\n`,
+        { status: 400, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
+    const { messages, clientName } = body as {
+      messages?: Array<{ role: "user" | "assistant"; content: string }>;
+      clientName?: string;
+    };
+
+    log("clientName:", clientName, "messages:", messages?.length ?? 0);
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      err("messages missing or empty");
+      return new Response(
+        `data: ${JSON.stringify({ error: "Missing messages." })}\n\ndata: [DONE]\n\n`,
+        { status: 400, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
+    const anthropic = new Anthropic({ apiKey });
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          log("Opening Anthropic stream…");
+          const response = anthropic.messages.stream({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1024,
+            system: SARAH_SYSTEM_PROMPT(clientName ?? "there"),
+            messages,
+          });
+
+          for await (const chunk of response) {
+            if (
+              chunk.type === "content_block_delta" &&
+              chunk.delta.type === "text_delta"
+            ) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`
+                )
+              );
+            }
+          }
+
+          const final = await response.finalMessage();
+          log("Anthropic stream complete. stop_reason:", final.stop_reason, "usage:", final.usage);
+
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        } catch (e: unknown) {
+          const anyErr = e as { status?: number; message?: string; error?: unknown; name?: string };
+          err("Anthropic stream error:", {
+            name: anyErr?.name,
+            status: anyErr?.status,
+            message: anyErr?.message,
+            error: anyErr?.error,
+            raw: e,
+          });
+          const detail =
+            anyErr?.message ||
+            (typeof e === "string" ? e : "Unknown error from Anthropic");
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                error: `Sarah error: ${detail}`,
+                status: anyErr?.status ?? null,
+              })}\n\n`
+            )
+          );
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  } catch (e: unknown) {
+    const anyErr = e as { message?: string; stack?: string; name?: string };
+    err("Fatal handler error:", {
+      name: anyErr?.name,
+      message: anyErr?.message,
+      stack: anyErr?.stack,
+      raw: e,
+    });
+    return new Response(
+      `data: ${JSON.stringify({ error: `Fatal: ${anyErr?.message ?? "unknown"}` })}\n\ndata: [DONE]\n\n`,
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+        },
       }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    );
+  }
 }
