@@ -22,7 +22,7 @@ export function Sidebar() {
       {/* Brand */}
       <div className="px-5 pt-7 pb-6 border-b border-border">
         <div className="flex items-center justify-center mb-4">
-          <NewcastleLogoFull size={56} />
+          <NewcastleLogoFull size={88} />
         </div>
         <div className="h-px bg-gold/45" />
         <p className="mt-2.5 text-[7.5px] tracking-[0.2em] text-muted-foreground/60 uppercase font-semibold text-center">

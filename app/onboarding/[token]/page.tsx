@@ -19,5 +19,12 @@ export default function OnboardingPage({
     router.push("/dashboard");
   }
 
-  return <SarahChat clientName={clientName} onComplete={handleComplete} />;
+  return (
+    <SarahChat
+      clientName={clientName}
+      clientId={link?.clientId}
+      token={params.token}
+      onComplete={handleComplete}
+    />
+  );
 }

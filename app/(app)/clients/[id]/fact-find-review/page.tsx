@@ -9,11 +9,15 @@ import {
 import { CLIENTS, type SectionStatus } from "@/lib/data";
 import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
+import { getFactFind } from "@/lib/sarah-fact-find-store";
+import { sarahToReviewAnswers } from "@/lib/sarah-fact-find-schema";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_CONFIG } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { ReviewInteractive } from "@/components/fact-find-review/ReviewInteractive";
 import { ExportButtons } from "@/components/fact-find-review/ExportButtons";
+import { EditableFactFindValue } from "@/components/fact-find-review/EditableFactFindValue";
+import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -34,6 +38,16 @@ function getSectionStatus(client: (typeof CLIENTS)[0], sectionId: string): Secti
   return client.factFindSections.find((s) => s.name === name)?.status ?? "missing";
 }
 
+function sectionHasSarahData(
+  sarahAnswers: Record<string, Record<string, string>> | null,
+  sectionId: string,
+): boolean {
+  if (!sarahAnswers) return false;
+  const fields = sarahAnswers[sectionId];
+  if (!fields) return false;
+  return Object.values(fields).some((v) => v && v.trim() !== "");
+}
+
 export default function FactFindReviewPage({
   params,
 }: {
@@ -42,7 +56,22 @@ export default function FactFindReviewPage({
   const client = CLIENTS.find((c) => c.id === params.id);
   if (!client) notFound();
 
-  const answers = getClientAnswers(client.id);
+  const sampleAnswers = getClientAnswers(client.id);
+  const sarahEntry = getFactFind(client.id);
+  const sarahAnswers = sarahEntry ? sarahToReviewAnswers(sarahEntry.data) : null;
+
+  // Sarah's collected answers take precedence over sample data when present.
+  const answers: Record<string, Record<string, string>> = { ...sampleAnswers };
+  if (sarahAnswers) {
+    for (const [sec, fields] of Object.entries(sarahAnswers)) {
+      const merged = { ...(answers[sec] ?? {}) };
+      for (const [k, v] of Object.entries(fields)) {
+        if (v && v.trim()) merged[k] = v;
+      }
+      answers[sec] = merged;
+    }
+  }
+
   const today = new Date().toLocaleDateString("en-AU", {
     day: "numeric",
     month: "long",
@@ -90,6 +119,13 @@ export default function FactFindReviewPage({
         <ExportButtons clientId={client.id} />
       </div>
 
+      {/* Completion bar — Sarah's collected progress */}
+      <CompletionBar
+        percentage={sarahEntry?.data.completionPercentage ?? client.progress}
+        missingSections={sarahEntry?.data.missingSections}
+        source={sarahEntry ? "sarah" : "manual"}
+      />
+
       {/* Gaps summary — only when there are missing sections */}
       {missingSections.length > 0 && (
         <div className="mb-8 rounded-lg border border-red-500/30 bg-red-500/5 overflow-hidden">
@@ -123,7 +159,13 @@ export default function FactFindReviewPage({
         {/* Left — section cards */}
         <div className="space-y-5">
           {FACT_FIND_SECTIONS.map((section) => {
-            const status = getSectionStatus(client, section.id);
+            const baseStatus = getSectionStatus(client, section.id);
+            // If Sarah collected data for this section, escalate from "missing"
+            // so Brad still sees the fields (and can edit them).
+            const status: SectionStatus =
+              baseStatus === "missing" && sectionHasSarahData(sarahAnswers, section.id)
+                ? "in-progress"
+                : baseStatus;
             const sectionAnswers = answers[section.id] ?? {};
             const hasAnyAnswer = Object.keys(sectionAnswers).length > 0;
 
@@ -180,23 +222,21 @@ export default function FactFindReviewPage({
                   ) : (
                     <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                       {section.fields.map((field) => {
-                        const value = sectionAnswers[field.id];
-                        const isMissing = !value || value === "—";
+                        const value = sectionAnswers[field.id] ?? "";
+                        const multiline =
+                          field.type === "textarea" || value.length > 60;
                         return (
                           <div key={field.id}>
                             <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/45 mb-1">
                               {field.label}
                             </p>
-                            <p
-                              className={cn(
-                                "text-[13px] leading-snug",
-                                isMissing
-                                  ? "text-muted-foreground/35 italic"
-                                  : "text-foreground/85"
-                              )}
-                            >
-                              {value ?? "—"}
-                            </p>
+                            <EditableFactFindValue
+                              clientId={client.id}
+                              sectionId={section.id}
+                              fieldId={field.id}
+                              initialValue={value === "—" ? "" : value}
+                              multiline={multiline}
+                            />
                           </div>
                         );
                       })}

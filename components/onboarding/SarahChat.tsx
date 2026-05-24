@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { ArrowRight, Mic, Loader2 } from "lucide-react";
 import { useAudioRecorder } from "@/lib/hooks/use-audio-recorder";
+import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
 const OrbCanvas = dynamic(() => import("@/components/orb/OrbCanvas"), {
@@ -19,6 +19,8 @@ type Message = {
 
 type Props = {
   clientName: string;
+  clientId?: string;
+  token?: string;
   onComplete: (factFindData?: Record<string, unknown>) => void;
 };
 
@@ -36,7 +38,7 @@ function stripFactFindTag(text: string): string {
   return text.replace(/<fact-find-complete>[\s\S]*?<\/fact-find-complete>/, "").trim();
 }
 
-export function SarahChat({ clientName, onComplete }: Props) {
+export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
@@ -277,6 +279,20 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       if (factFindData) {
         setIsComplete(true);
+        if (clientId && token) {
+          fetch("/api/complete-fact-find", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clientId, token, data: factFindData }),
+          })
+            .then((r) => r.json())
+            .then((j) => console.log("[SarahChat] fact find webhook:", j))
+            .catch((e) =>
+              console.error("[SarahChat] fact find webhook failed:", e),
+            );
+        } else {
+          console.warn("[SarahChat] skipping webhook, missing clientId/token");
+        }
         setTimeout(() => onComplete(factFindData), 1800);
       }
     } catch (e: unknown) {
@@ -348,24 +364,8 @@ export function SarahChat({ clientName, onComplete }: Props) {
   if (!hasStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Image
-            src="/newcastle-logo.png"
-            alt="Newcastle Financial Services"
-            width={64}
-            height={64}
-            priority
-            unoptimized
-            className="h-16 w-16 object-cover object-left"
-          />
-          <div className="flex flex-col items-start leading-none">
-            <span className="text-[16px] tracking-[0.32em] uppercase text-white font-light">
-              Newcastle
-            </span>
-            <span className="text-[10px] tracking-[0.24em] uppercase text-white/55 font-semibold mt-1.5">
-              Financial Services
-            </span>
-          </div>
+        <div className="mb-8">
+          <NewcastleLogoFull size={120} />
         </div>
         <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white text-center mb-4">
           Financial Discovery Session
@@ -389,25 +389,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
     <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Header: logo lockup + headline + status — tight stack */}
       <header className="shrink-0 flex flex-col items-center pt-6 px-6">
-        <div className="flex items-center gap-2.5">
-          <Image
-            src="/newcastle-logo.png"
-            alt="Newcastle Financial Services"
-            width={64}
-            height={64}
-            priority
-            unoptimized
-            className="h-16 w-16 object-cover object-left"
-          />
-          <div className="flex flex-col items-start leading-none">
-            <span className="text-[12px] tracking-[0.32em] uppercase text-white font-light">
-              Newcastle
-            </span>
-            <span className="text-[8px] tracking-[0.24em] uppercase text-white/55 font-semibold mt-1">
-              Financial Services
-            </span>
-          </div>
-        </div>
+        <NewcastleLogoFull size={80} />
         <h1 className="mt-6 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
           Financial Discovery Session
         </h1>

@@ -78,74 +78,82 @@ You must cover all ten of these areas before you complete the session. Do not st
 Only after you have collected information across all ten areas above, wrap up warmly with this exact sentence:
 That is everything I need from you. You have done a great job. Brad will review all of this before your meeting and be fully prepared to help you. I will be in touch once he has had a chance to look everything over.
 
-Then immediately output a structured data block in this exact format:
+Then immediately output a structured data block in this EXACT format. Fill in every field you collected during the conversation using natural readable values (for example a dollar amount as "$95,000", a date as "12 March 1984"). Leave any field you did not collect as an empty string. Calculate completionPercentage based on how many of the listed fields you actually filled. List the human readable titles of any section that is mostly empty inside missingSections.
+
 <fact-find-complete>
 {
-  "personal": {
+  "personalDetails": {
     "fullName": "",
-    "dob": "",
+    "dateOfBirth": "",
     "address": "",
-    "maritalStatus": ""
+    "timeAtAddress": "",
+    "countryOfBirth": ""
   },
-  "contact": {
-    "phone": "",
+  "contactInformation": {
+    "mobile": "",
+    "homePhone": "",
     "email": "",
-    "preferredContact": ""
+    "preferredContact": "",
+    "bestTimeToContact": ""
   },
-  "family": {
+  "familyAndDependants": {
+    "relationshipStatus": "",
     "partnerName": "",
-    "dependants": "",
-    "otherSupported": ""
+    "partnerDOB": "",
+    "numberOfDependants": "",
+    "agesOfDependants": ""
   },
-  "employment": {
-    "status": "",
-    "employer": "",
-    "role": "",
-    "annualIncome": "",
-    "otherIncome": "",
-    "partnerIncome": ""
+  "employmentAndIncome": {
+    "employmentStatus": "",
+    "employerName": "",
+    "occupation": "",
+    "annualGrossIncome": "",
+    "otherIncomeSources": ""
   },
   "assets": {
-    "home": "",
-    "investmentProperties": "",
-    "savings": "",
-    "shares": "",
-    "vehicles": "",
-    "other": ""
+    "ownerOccupiedPropertyValue": "",
+    "investmentPropertyValue": "",
+    "savingsAndCash": "",
+    "sharesAndInvestments": "",
+    "vehicles": ""
   },
   "liabilities": {
-    "homeLoan": "",
+    "homeMortgage": "",
     "investmentLoans": "",
-    "carLoans": "",
     "personalLoans": "",
-    "hecs": "",
-    "creditCards": "",
-    "other": ""
+    "creditCardLimits": "",
+    "otherLiabilities": ""
   },
   "expenses": {
-    "monthly": "",
-    "commitments": "",
-    "monthlySavings": ""
+    "housingCosts": "",
+    "groceries": "",
+    "transport": "",
+    "education": "",
+    "lifestyleAndEntertainment": ""
   },
   "superannuation": {
-    "fund": "",
-    "balance": "",
-    "multipleFunds": "",
-    "contributions": "",
-    "retirementAge": ""
+    "fundName": "",
+    "memberNumber": "",
+    "estimatedBalance": "",
+    "employerContributionRate": "",
+    "personalContributions": ""
   },
   "insurance": {
-    "life": "",
-    "incomeProtection": "",
-    "tpd": "",
-    "privateHealth": "",
-    "healthNotes": ""
+    "lifeInsuranceSumInsured": "",
+    "lifeInsuranceProvider": "",
+    "incomeProtectionMonthlyBenefit": "",
+    "tpdCover": "",
+    "healthInsuranceProvider": ""
   },
-  "goals": {
-    "shortTerm": "",
-    "longTerm": "",
-    "concerns": ""
-  }
+  "goalsAndObjectives": {
+    "primaryFinancialGoals": "",
+    "targetRetirementAge": "",
+    "desiredRetirementIncome": "",
+    "investmentRiskPreference": "",
+    "otherConsiderations": ""
+  },
+  "completionPercentage": 0,
+  "missingSections": []
 }
 </fact-find-complete>
 
