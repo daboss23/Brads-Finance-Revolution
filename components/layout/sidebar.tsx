@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, ClipboardList, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -22,15 +22,7 @@ export function Sidebar() {
       {/* Brand */}
       <div className="px-5 pt-7 pb-6 border-b border-border">
         <div className="flex items-center justify-center mb-4">
-          <Image
-            src="/newcastle-logo.svg"
-            alt="Newcastle Financial Services"
-            width={48}
-            height={48}
-            priority
-            unoptimized
-            className="h-12 w-12 object-contain"
-          />
+          <NewcastleLogoFull size={56} />
         </div>
         <div className="h-px bg-gold/45" />
         <p className="mt-2.5 text-[7.5px] tracking-[0.2em] text-muted-foreground/60 uppercase font-semibold text-center">
