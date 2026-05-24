@@ -408,7 +408,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
             </span>
           </div>
         </div>
-        <h1 className="mt-3 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
+        <h1 className="mt-6 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
           Financial Discovery Session
         </h1>
         <div className="mt-1 flex items-center gap-1.5">
@@ -420,29 +420,31 @@ export function SarahChat({ clientName, onComplete }: Props) {
       </header>
 
       {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
-      <main className="shrink-0 flex flex-col items-center px-6 pt-6">
-        <OrbCanvas
-          state={orbState}
-          className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
-        />
+      <main className="shrink-0 flex flex-col items-center px-6 mt-8">
+        <div className="bg-[#111827] rounded-[28px] p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.08),inset_0_0_60px_rgba(50,100,255,0.06)]">
+          <OrbCanvas
+            state={orbState}
+            className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
+          />
 
-        <div className="mt-4 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
-          {errorMsg ? (
-            <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
-              {errorMsg}
-            </p>
-          ) : (
-            <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-white/75 text-center">
-              {visibleSubtitle}
-              {(isStreaming || isLoadingVoice) && (
-                <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />
-              )}
-            </p>
-          )}
+          <div className="mt-6 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
+            {errorMsg ? (
+              <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
+                {errorMsg}
+              </p>
+            ) : (
+              <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-white/75 text-center">
+                {visibleSubtitle}
+                {(isStreaming || isLoadingVoice) && (
+                  <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />
+                )}
+              </p>
+            )}
+          </div>
         </div>
 
         {recentAnswers.length > 0 && (
-          <div className="mt-2 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
+          <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
             {recentAnswers.map(({ m, i }) => (
               <div key={i} className="flex flex-col items-end max-w-full">
                 <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
@@ -466,7 +468,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       {/* Input bar — close below subtitle/answer, fixed-height to prevent shake */}
       {!isComplete && (
-        <div className="shrink-0 px-5 pt-4 pb-5">
+        <div className="shrink-0 px-5 mt-8 pb-5">
           <div className="flex items-end gap-3 max-w-2xl mx-auto">
             <div className="flex-1 relative">
               <textarea

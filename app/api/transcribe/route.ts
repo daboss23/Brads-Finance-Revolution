@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const ELEVENLABS_STT_URL = "https://api.elevenlabs.io/v1/speech-to-text";
-const SCRIBE_MODEL_ID = "scribe_v2";
+const SCRIBE_MODEL_ID = "scribe_v1";
 
 export async function POST(req: Request) {
   const reqId = Math.random().toString(36).slice(2, 8);

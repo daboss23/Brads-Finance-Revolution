@@ -129,10 +129,12 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
       chunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
+        console.log("[recorder] ondataavailable size:", e.data?.size ?? 0);
         if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
 
       recorder.onstop = async () => {
+        console.log("[recorder] onstop, chunks:", chunksRef.current.length);
         cleanupAnalyser();
         const tracks = streamRef.current?.getTracks() ?? [];
         tracks.forEach((t) => t.stop());
@@ -141,8 +143,11 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
         const blobType = recorder.mimeType || "audio/webm";
         const blob = new Blob(chunksRef.current, { type: blobType });
         chunksRef.current = [];
+        console.log("[recorder] blob size:", blob.size, "type:", blobType);
 
         if (blob.size === 0) {
+          console.warn("[recorder] empty blob, nothing to transcribe");
+          setError("No audio captured. Please try again.");
           setIsRecording(false);
           return;
         }
@@ -155,10 +160,13 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
             blob,
             `audio.${blobType.includes("mp4") ? "mp4" : "webm"}`
           );
+          console.log("[recorder] posting blob to /api/transcribe…");
           const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+          console.log("[recorder] /api/transcribe status:", res.status);
           const data = (await res.json().catch(() => null)) as
             | { text?: string; error?: string }
             | null;
+          console.log("[recorder] transcribe response:", data);
           if (!res.ok || !data || data.error) {
             const msg = data?.error ?? `Transcription failed (${res.status})`;
             console.error("[transcribe] error:", msg, data);
@@ -186,7 +194,8 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
         }
       };
 
-      recorder.start();
+      recorder.start(250);
+      console.log("[recorder] started, mime:", mimeType || "(default)");
       setIsRecording(true);
 
       const startedAt = performance.now();
