@@ -350,13 +350,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
         <div className="flex items-center gap-3 mb-6">
           <Image
-            src="/newcastle-logo.svg"
+            src="/newcastle-logo.png"
             alt="Newcastle Financial Services"
             width={64}
             height={64}
             priority
             unoptimized
-            className="h-16 w-16 object-contain"
+            className="h-16 w-16 object-cover object-left"
           />
           <div className="flex flex-col items-start leading-none">
             <span className="text-[16px] tracking-[0.32em] uppercase text-white font-light">
@@ -391,13 +391,13 @@ export function SarahChat({ clientName, onComplete }: Props) {
       <header className="shrink-0 flex flex-col items-center pt-6 px-6">
         <div className="flex items-center gap-2.5">
           <Image
-            src="/newcastle-logo.svg"
+            src="/newcastle-logo.png"
             alt="Newcastle Financial Services"
-            width={44}
-            height={44}
+            width={64}
+            height={64}
             priority
             unoptimized
-            className="h-11 w-11 object-contain"
+            className="h-16 w-16 object-cover object-left"
           />
           <div className="flex flex-col items-start leading-none">
             <span className="text-[12px] tracking-[0.32em] uppercase text-white font-light">
@@ -421,7 +421,7 @@ export function SarahChat({ clientName, onComplete }: Props) {
 
       {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
       <main className="shrink-0 flex flex-col items-center px-6 mt-8">
-        <div className="bg-[#111827] rounded-[28px] p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.08),inset_0_0_60px_rgba(50,100,255,0.06)]">
+        <div className="bg-[#1c1c1e] rounded-[28px] p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.08),inset_0_0_60px_rgba(50,100,255,0.06)]">
           <OrbCanvas
             state={orbState}
             className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
