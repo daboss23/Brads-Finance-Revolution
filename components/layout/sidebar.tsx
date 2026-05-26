@@ -27,9 +27,9 @@ export function Sidebar() {
       {/* Brand */}
       <div className="px-5 pt-8 pb-6">
         <div className="flex items-center justify-center">
-          <NewcastleLogoFull size={160} />
+          <NewcastleLogoFull size={200} />
         </div>
-        <p className="bmk-letter-pulse mt-4 text-[11px] tracking-[0.32em] text-gold/80 uppercase font-semibold text-center">
+        <p className="bmk-letter-pulse mt-3 text-[9px] tracking-[0.3em] text-gold/75 uppercase font-semibold text-center">
           Plan · Grow · Prosper
         </p>
       </div>
