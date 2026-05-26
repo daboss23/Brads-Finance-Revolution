@@ -27,7 +27,7 @@ export default function DashboardPage() {
     <div className="pl-6 pr-10 py-12">
 
       {/* Page header */}
-      <header className="flex items-end justify-between pb-10 mb-12 border-b border-border/55">
+      <header className="flex items-end justify-between mb-12">
         <div>
           <p className="text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/60 mb-4">
             BMK Financial Services
