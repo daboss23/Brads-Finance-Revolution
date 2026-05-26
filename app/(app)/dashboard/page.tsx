@@ -24,38 +24,38 @@ export default function DashboardPage() {
   const metrics = getMetrics();
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1440px] px-16 py-14">
 
       {/* Page header */}
-      <div className="flex items-end justify-between mb-12">
+      <header className="flex items-end justify-between pb-10 mb-12 border-b border-border/55">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground/75 mb-3">
+          <p className="text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/60 mb-4">
             BMK Financial Services
           </p>
-          <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none">
+          <h1 className="text-[34px] font-semibold tracking-tight text-foreground leading-[1.05]">
             Good morning, Brad.
           </h1>
-          <p className="mt-3 text-[14px] text-muted-foreground">
+          <p className="mt-4 text-[14px] text-muted-foreground/80 tracking-tight">
             Tuesday, 19 May 2026 &nbsp;·&nbsp; Client Fact Find Command Centre
           </p>
         </div>
         <Link
           href="/clients"
-          className="inline-flex items-center gap-2 rounded bg-gold px-5 py-3 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-wide"
+          className="inline-flex items-center gap-2 rounded-md bg-gold px-5 py-2.5 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-tight shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_4px_14px_-4px_rgba(212,175,55,0.45)]"
         >
           New Client
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
-      </div>
+      </header>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-4 gap-5 mb-12">
+      <section className="grid grid-cols-4 gap-5 mb-14">
         <KpiCard
           label="Active Clients"
           value={metrics.active}
           icon={Users}
           iconColor="text-gold"
-          iconBg="bg-gold/15"
+          iconBg="bg-gold/12"
           accentFrom="from-gold/50"
         />
         <KpiCard
@@ -63,7 +63,7 @@ export default function DashboardPage() {
           value={metrics.inProgress}
           icon={ClipboardList}
           iconColor="text-blue-accent"
-          iconBg="bg-blue-accent/15"
+          iconBg="bg-blue-accent/12"
           accentFrom="from-blue-accent/50"
         />
         <KpiCard
@@ -71,7 +71,7 @@ export default function DashboardPage() {
           value={metrics.ready}
           icon={Calendar}
           iconColor="text-amber-300"
-          iconBg="bg-amber-400/15"
+          iconBg="bg-amber-400/12"
           accentFrom="from-amber-400/50"
         />
         <KpiCard
@@ -79,59 +79,61 @@ export default function DashboardPage() {
           value={metrics.needsReview}
           icon={AlertCircle}
           iconColor="text-orange-300"
-          iconBg="bg-orange-400/15"
+          iconBg="bg-orange-400/12"
           accentFrom="from-orange-400/50"
         />
-      </div>
+      </section>
 
       {/* Sarah brief */}
-      <div className="mb-12 rounded-lg border border-border bg-card overflow-hidden">
+      <section className="mb-14 rounded-xl border border-border/70 bg-card overflow-hidden">
         <div className="flex">
-          <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/80 via-gold/35 to-transparent" />
-          <div className="flex-1 px-8 py-7">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/15 border border-gold/35">
-                <Sparkles className="h-4 w-4 text-gold" />
+          <div className="w-[2px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
+          <div className="flex-1 px-9 py-8">
+            <div className="flex items-center gap-3.5 mb-6">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/12 border border-gold/30">
+                <Sparkles className="h-[15px] w-[15px] text-gold" />
               </div>
               <div>
-                <p className="text-[11px] font-bold tracking-[0.22em] text-gold uppercase leading-none">
+                <p className="text-[10px] font-semibold tracking-[0.26em] text-gold/90 uppercase leading-none">
                   Sarah
                 </p>
-                <p className="text-[11px] text-muted-foreground tracking-wide mt-0.5">
+                <p className="text-[11px] text-muted-foreground/75 tracking-tight mt-1.5">
                   AI Adviser Intelligence &nbsp;·&nbsp; Today's Brief
                 </p>
               </div>
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-3.5">
               {[
                 `${metrics.notStarted} client${metrics.notStarted !== 1 ? "s have" : " has"} not started their fact find — a follow-up call is recommended.`,
                 "Sarah Mitchell is 85% complete and ready for meeting prep ahead of 28 May.",
                 "David Okafor and Angela Forsyth both require adviser review before they can progress.",
               ].map((insight, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="mt-[8px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/60" />
-                  <p className="text-[14px] text-foreground/85 leading-relaxed">{insight}</p>
+                <li key={i} className="flex items-start gap-3.5">
+                  <span className="mt-[9px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/55" />
+                  <p className="text-[14px] text-foreground/82 leading-relaxed tracking-tight">
+                    {insight}
+                  </p>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Client pipeline table */}
-      <div>
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-[15px] font-semibold text-foreground">
+      {/* Client pipeline */}
+      <section>
+        <div className="flex items-end justify-between mb-6">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-[17px] font-semibold tracking-tight text-foreground">
               Client Pipeline
             </h2>
-            <p className="text-[12px] text-muted-foreground mt-1">
-              {CLIENTS.length} active clients
-            </p>
+            <span className="inline-flex items-center rounded-full bg-white/[0.04] border border-border/70 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground/80 tabular-nums">
+              {CLIENTS.length}
+            </span>
           </div>
           <Link
             href="/clients"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-gold transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/75 hover:text-gold transition-colors tracking-tight"
           >
             View all
             <ArrowRight className="h-3 w-3" />
@@ -139,7 +141,7 @@ export default function DashboardPage() {
         </div>
 
         <PipelineTable />
-      </div>
+      </section>
     </div>
   );
 }
@@ -160,18 +162,23 @@ function KpiCard({
   accentFrom: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="group rounded-xl border border-border/70 bg-card overflow-hidden transition-colors hover:border-border">
       <div className={cn("h-[2px] bg-gradient-to-r to-transparent", accentFrom)} />
       <div className="px-7 pt-7 pb-7">
-        <div className="flex items-start justify-between mb-7">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground leading-snug max-w-[120px]">
+        <div className="flex items-start justify-between mb-8">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70 leading-snug max-w-[140px]">
             {label}
           </p>
-          <div className={cn("flex h-8 w-8 items-center justify-center rounded-full shrink-0", iconBg)}>
-            <Icon className={cn("h-3.5 w-3.5", iconColor)} />
+          <div
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-full shrink-0 transition-transform group-hover:scale-105",
+              iconBg
+            )}
+          >
+            <Icon className={cn("h-[15px] w-[15px]", iconColor)} />
           </div>
         </div>
-        <p className="text-[52px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
+        <p className="text-[56px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
           {value}
         </p>
       </div>
