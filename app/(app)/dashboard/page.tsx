@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const metrics = getMetrics();
 
   return (
-    <div className="pl-6 pr-10 py-12">
+    <div className="px-10 py-12">
 
       {/* Page header */}
       <header className="flex items-end justify-between mb-12">
