@@ -22,23 +22,23 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[272px] shrink-0 flex-col border-r border-border/70 bg-card">
+    <aside className="flex h-screen w-[260px] shrink-0 flex-col border-r border-border/70 bg-card">
 
       {/* Brand */}
-      <div className="px-7 pt-10 pb-8">
+      <div className="px-5 pt-8 pb-6">
         <div className="flex items-center justify-center">
-          <NewcastleLogoFull size={104} />
+          <NewcastleLogoFull size={160} />
         </div>
-        <p className="mt-5 text-[9px] tracking-[0.34em] text-muted-foreground/55 uppercase font-semibold text-center">
+        <p className="bmk-letter-pulse mt-4 text-[11px] tracking-[0.32em] text-gold/80 uppercase font-semibold text-center">
           Plan · Grow · Prosper
         </p>
       </div>
 
-      <div className="mx-6 h-px bg-border/60" />
+      <div className="mx-6 h-px bg-border/55" />
 
       {/* Nav */}
-      <nav className="flex flex-col gap-0.5 px-4 pt-7 pb-3 flex-1">
-        <p className="px-3 pb-4 text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/50">
+      <nav className="flex flex-col gap-0 px-3 pt-5 pb-3 flex-1">
+        <p className="px-3 pb-3 text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/50">
           Navigation
         </p>
         {navItems.map(({ href, label, icon: Icon }) => {
@@ -50,7 +50,7 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[14px] font-medium transition-colors duration-150",
+                "group relative flex items-center gap-3 rounded-md px-3 py-2 text-[14px] font-medium transition-colors duration-150",
                 active
                   ? "bg-gold/[0.08] text-gold"
                   : "text-muted-foreground/85 hover:bg-white/[0.04] hover:text-foreground"
@@ -75,7 +75,7 @@ export function Sidebar() {
 
       {/* Profile */}
       <div className="px-4 pb-5">
-        <div className="mx-2 mb-4 h-px bg-border/60" />
+        <div className="mx-2 mb-4 h-px bg-border/55" />
         <div className="flex items-center gap-3 px-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/15 border border-gold/30">
             <span className="text-[12px] font-bold text-gold tracking-tight">
