@@ -22,12 +22,12 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[240px] shrink-0 flex-col border-r border-border/70 bg-card">
+    <aside className="flex h-screen w-[260px] shrink-0 flex-col border-r border-border/70 bg-card">
 
       {/* Brand */}
-      <div className="px-3 pt-6 pb-5">
+      <div className="px-5 pt-8 pb-6">
         <div className="flex items-center justify-center">
-          <NewcastleLogoFull size={260} />
+          <NewcastleLogoFull size={200} />
         </div>
         <p className="bmk-letter-pulse mt-3 text-[9px] tracking-[0.3em] text-gold/75 uppercase font-semibold text-center">
           Plan · Grow · Prosper
