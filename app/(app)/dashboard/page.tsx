@@ -10,6 +10,7 @@ import {
 import { CLIENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { PipelineTable } from "@/components/dashboard/PipelineTable";
+import { TodayLabel } from "@/components/dashboard/TodayLabel";
 
 function getMetrics() {
   const active = CLIENTS.length;
@@ -36,7 +37,7 @@ export default function DashboardPage() {
             Good morning, Brad.
           </h1>
           <p className="mt-4 text-[14px] text-muted-foreground/80 tracking-tight">
-            Tuesday, 19 May 2026 &nbsp;·&nbsp; Client Fact Find Command Centre
+            <TodayLabel /> &nbsp;·&nbsp; Client Fact Find Command Centre
           </p>
         </div>
         <Link

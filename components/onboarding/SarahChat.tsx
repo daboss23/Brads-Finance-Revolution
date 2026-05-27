@@ -363,24 +363,32 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
   if (!hasStarted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6">
-        <div className="mb-8">
-          <NewcastleLogoFull size={120} />
+      <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 overflow-hidden">
+        {/* Ambient depth — soft layered radial glows */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(50,100,255,0.10),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_75%,rgba(201,168,76,0.08),transparent_60%)]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,rgba(80,140,255,0.06),transparent_70%)] onboarding-glow-a" />
+
+        {/* Card */}
+        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 py-14 flex flex-col items-center text-center">
+          <div className="mb-8">
+            <NewcastleLogoFull size={220} />
+          </div>
+          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-5">
+            Financial Discovery Session
+          </h1>
+          <p className="text-lg text-white/70 max-w-[520px] mb-10 leading-relaxed">
+            Sarah will guide you through a short conversation so Brad can prepare
+            for your meeting. Make sure your sound is on.
+          </p>
+          <button
+            type="button"
+            onClick={() => setHasStarted(true)}
+            className="px-8 py-4 rounded-full bg-gold text-background text-[15px] font-semibold tracking-wide hover:bg-gold/90 transition-colors shadow-[0_10px_30px_-8px_rgba(201,168,76,0.55),inset_0_1px_0_rgba(255,255,255,0.15)]"
+          >
+            Begin My Financial Discovery
+          </button>
         </div>
-        <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white text-center mb-4">
-          Financial Discovery Session
-        </h1>
-        <p className="text-lg text-white/70 text-center max-w-[520px] mb-10 leading-relaxed">
-          Sarah will guide you through a short conversation so Brad can prepare
-          for your meeting. Make sure your sound is on.
-        </p>
-        <button
-          type="button"
-          onClick={() => setHasStarted(true)}
-          className="px-8 py-4 rounded-full bg-gold text-background text-[15px] font-semibold tracking-wide hover:bg-gold/90 transition-colors"
-        >
-          Begin My Financial Discovery
-        </button>
       </div>
     );
   }

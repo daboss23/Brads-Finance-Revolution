@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 const MAX_DURATION_MS = 30_000;
-const SILENCE_HANGOVER_MS = 1500;
-const SILENCE_RMS_THRESHOLD = 0.025;
-const SPEECH_RMS_THRESHOLD = 0.05;
-const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 800;
-const TRANSCRIPT_REVEAL_DELAY_MS = 2500;
+const SILENCE_HANGOVER_MS = 2200;
+const SILENCE_RMS_THRESHOLD = 0.015;
+const SPEECH_RMS_THRESHOLD = 0.025;
+const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 1200;
+const TRANSCRIPT_REVEAL_DELAY_MS = 350;
 
 export function useAudioRecorder(onTranscript: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
@@ -183,6 +183,7 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
               setIsRecording(false);
             }, TRANSCRIPT_REVEAL_DELAY_MS);
           } else {
+            setError("Didn't catch that. Please try again.");
             setIsTranscribing(false);
             setIsRecording(false);
           }
