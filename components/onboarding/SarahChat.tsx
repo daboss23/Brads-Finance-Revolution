@@ -378,8 +378,8 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             Financial Discovery Session
           </h1>
           <p className="text-lg text-white/70 max-w-[520px] mb-10 leading-relaxed">
-            Sarah will guide you through a short conversation so Brad can prepare
-            for your meeting. Make sure your sound is on.
+            Sarah will guide you through your discovery session so Brad can
+            prepare for your meeting.
           </p>
           <button
             type="button"
@@ -396,9 +396,9 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Header: logo lockup + headline + status — tight stack */}
-      <header className="shrink-0 flex flex-col items-center pt-6 px-6">
-        <NewcastleLogoFull size={80} />
-        <h1 className="mt-6 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
+      <header className="shrink-0 flex flex-col items-center pt-4 px-6">
+        <NewcastleLogoFull size={180} />
+        <h1 className="-mt-2 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
           Financial Discovery Session
         </h1>
         <div className="mt-1 flex items-center gap-1.5">
