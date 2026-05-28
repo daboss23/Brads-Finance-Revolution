@@ -226,15 +226,4 @@
     100% { transform: translateX(120%); }
   }
 
-  /* Teleprompter chunk fade for Sarah's second greeting */
-  .teleprompter-chunk {
-    animation: teleprompter-chunk-fade 600ms ease-in-out both;
-  }
-
-  @keyframes teleprompter-chunk-fade {
-    0%   { opacity: 0; transform: translateY(4px); }
-    20%  { opacity: 1; transform: translateY(0); }
-    80%  { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-4px); }
-  }
 }
