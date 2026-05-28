@@ -25,11 +25,11 @@ export function Sidebar() {
     <aside className="flex h-screen w-[260px] shrink-0 flex-col border-r border-border/70 bg-card">
 
       {/* Brand */}
-      <div className="px-5 pt-8 pb-6">
+      <div className="px-5 pt-3 pb-4">
         <div className="flex items-center justify-center">
           <NewcastleLogoFull size={200} />
         </div>
-        <p className="bmk-letter-pulse mt-3 text-[9px] tracking-[0.3em] text-gold/75 uppercase font-semibold text-center">
+        <p className="bmk-letter-pulse -mt-2 text-[9px] tracking-[0.3em] text-gold/75 uppercase font-semibold text-center">
           Plan · Grow · Prosper
         </p>
       </div>
@@ -37,10 +37,7 @@ export function Sidebar() {
       <div className="mx-6 h-px bg-border/55" />
 
       {/* Nav */}
-      <nav className="flex flex-col gap-0 px-3 pt-5 pb-3 flex-1">
-        <p className="px-3 pb-3 text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/50">
-          Navigation
-        </p>
+      <nav className="flex flex-col gap-0.5 px-3 pt-3 pb-3 flex-1">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active =
             pathname === href ||
