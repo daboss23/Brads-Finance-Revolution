@@ -7,6 +7,7 @@ import {
   Users,
   ClipboardList,
   Sparkles,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
@@ -14,6 +15,7 @@ import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clients", label: "Clients", icon: Users },
+  { href: "/compliance", label: "Compliance", icon: Shield },
   { href: "/fact-find", label: "Fact Find", icon: ClipboardList },
   { href: "/sarah", label: "Sarah", icon: Sparkles },
 ];

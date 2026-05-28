@@ -16,6 +16,12 @@ import {
 import { CLIENTS, STATUS_CONFIG, type SectionStatus } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { checkCompliance } from "@/lib/compliance/compliance-checker";
+import { ClientTabs } from "@/components/clients/ClientTabs";
+import {
+  PipelineStagesClient,
+  SoaGateClient,
+} from "@/components/compliance/SoaGateClient";
 
 export default function ClientDetailPage({
   params,
@@ -29,6 +35,8 @@ export default function ClientDetailPage({
     (s) => s.status === "complete"
   ).length;
   const total = client.factFindSections.length;
+  const factFindComplete = completeSections === total;
+  const complianceResult = checkCompliance(client.id);
 
   return (
     <div className="px-14 py-12">
@@ -43,7 +51,7 @@ export default function ClientDetailPage({
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-12 pb-9 border-b border-border/60">
+      <div className="flex items-start justify-between mb-8 pb-8 border-b border-border/60">
         <div className="flex items-center gap-5">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted border border-border text-[14px] font-bold text-muted-foreground/70 tracking-tight">
             {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
@@ -90,9 +98,14 @@ export default function ClientDetailPage({
         </div>
       </div>
 
+      <ClientTabs clientId={client.id} />
+
       <div className="grid grid-cols-[1fr_380px] gap-8">
         {/* Left */}
         <div className="space-y-6">
+
+          {/* SOA gate */}
+          <SoaGateClient clientId={client.id} result={complianceResult} />
 
           {/* Contact */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -194,6 +207,14 @@ export default function ClientDetailPage({
 
         {/* Right */}
         <div className="space-y-6">
+
+          {/* Pipeline stages */}
+          <PipelineStagesClient
+            clientId={client.id}
+            factFindComplete={factFindComplete}
+            factFindProgress={client.progress}
+            result={complianceResult}
+          />
 
           {/* Progress */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">

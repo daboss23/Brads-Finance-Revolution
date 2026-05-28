@@ -18,6 +18,7 @@ import { ReviewInteractive } from "@/components/fact-find-review/ReviewInteracti
 import { ExportButtons } from "@/components/fact-find-review/ExportButtons";
 import { EditableFactFindValue } from "@/components/fact-find-review/EditableFactFindValue";
 import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
+import { ClientTabs } from "@/components/clients/ClientTabs";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -118,6 +119,8 @@ export default function FactFindReviewPage({
         </div>
         <ExportButtons clientId={client.id} />
       </div>
+
+      <ClientTabs clientId={client.id} />
 
       {/* Completion bar — Sarah's collected progress */}
       <CompletionBar

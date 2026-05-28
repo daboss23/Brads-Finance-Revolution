@@ -6,6 +6,7 @@ import { getClientProfile } from "@/lib/client-profiles";
 import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
 import { recommendStrategies } from "@/lib/strategy-recommender";
 import { ClientFormsWorkspace } from "@/components/forms/ClientFormsWorkspace";
+import { ClientTabs } from "@/components/clients/ClientTabs";
 
 export default function FormsPage({ params }: { params: { id: string } }) {
   const client = CLIENTS.find((c) => c.id === params.id);
@@ -29,7 +30,7 @@ export default function FormsPage({ params }: { params: { id: string } }) {
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-10 pb-9 border-b border-border/60">
+      <div className="flex items-start justify-between mb-8 pb-8 border-b border-border/60">
         <div>
           <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-2.5">
             Strategies
@@ -44,6 +45,8 @@ export default function FormsPage({ params }: { params: { id: string } }) {
           </p>
         </div>
       </div>
+
+      <ClientTabs clientId={client.id} />
 
       <ClientFormsWorkspace
         clientId={client.id}
