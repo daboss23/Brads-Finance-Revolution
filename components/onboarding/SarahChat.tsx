@@ -42,6 +42,10 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const [subtitleMode, setSubtitleMode] = useState<"normal" | "teleprompter">(
+    "normal",
+  );
+  const [teleprompterChunkIndex, setTeleprompterChunkIndex] = useState(-1);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -105,10 +109,21 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     setIsPlayingAudio(false);
   }
 
-  async function playSarahVoice(text: string, showSubtitle: boolean) {
+  async function playSarahVoice(
+    text: string,
+    mode: "normal" | "teleprompter" | "hidden",
+  ) {
     const cleaned = text.trim();
     if (!cleaned) return;
     stopAudioPlayback();
+
+    const showSubtitle = mode !== "hidden";
+    const isTeleprompter = mode === "teleprompter";
+    const words = cleaned.split(/\s+/);
+    const chunkCount = Math.max(1, Math.ceil(words.length / 3));
+
+    setSubtitleMode(isTeleprompter ? "teleprompter" : "normal");
+    setTeleprompterChunkIndex(isTeleprompter ? 0 : -1);
 
     setIsLoadingVoice(true);
     try {
@@ -121,9 +136,9 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
         console.error("[SarahChat] voice route failed", res.status, errBody);
-        if (showSubtitle) {
+        if (showSubtitle && !isTeleprompter) {
           setCurrentSubtitle(cleaned);
-          setVisibleWordCount(cleaned.split(/\s+/).length);
+          setVisibleWordCount(words.length);
         }
         return;
       }
@@ -131,9 +146,9 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       const blob = await res.blob();
       if (blob.size === 0) {
         console.error("[SarahChat] voice route returned empty audio");
-        if (showSubtitle) {
+        if (showSubtitle && !isTeleprompter) {
           setCurrentSubtitle(cleaned);
-          setVisibleWordCount(cleaned.split(/\s+/).length);
+          setVisibleWordCount(words.length);
         }
         return;
       }
@@ -144,7 +159,6 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       audioRef.current = audio;
       audio.preload = "auto";
 
-      const words = cleaned.split(/\s+/);
       if (showSubtitle) {
         setCurrentSubtitle(cleaned);
         setVisibleWordCount(0);
@@ -158,10 +172,15 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
           if (!audioRef.current) return;
           const dur = audioRef.current.duration;
           const t = audioRef.current.currentTime;
-          if (showSubtitle && dur && isFinite(dur) && dur > 0) {
+          if (dur && isFinite(dur) && dur > 0) {
             const ratio = Math.min(1, t / dur);
-            const n = Math.min(words.length, Math.ceil(ratio * words.length));
-            setVisibleWordCount(n);
+            if (isTeleprompter) {
+              const idx = Math.min(chunkCount - 1, Math.floor(ratio * chunkCount));
+              setTeleprompterChunkIndex(idx);
+            } else if (showSubtitle) {
+              const n = Math.min(words.length, Math.ceil(ratio * words.length));
+              setVisibleWordCount(n);
+            }
           }
           rafRef.current = requestAnimationFrame(tick);
         };
@@ -173,10 +192,16 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         startSync();
       };
       audio.onended = () => {
-        if (showSubtitle) setVisibleWordCount(words.length);
         if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
         setIsPlayingAudio(false);
+        if (isTeleprompter) {
+          setTeleprompterChunkIndex(-1);
+          setCurrentSubtitle("");
+          setSubtitleMode("normal");
+        } else if (showSubtitle) {
+          setVisibleWordCount(words.length);
+        }
         if (audioUrlRef.current) {
           URL.revokeObjectURL(audioUrlRef.current);
           audioUrlRef.current = null;
@@ -185,21 +210,27 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       audio.onerror = (e) => {
         console.error("[SarahChat] audio playback error:", e, audio.error);
         setIsPlayingAudio(false);
-        if (showSubtitle) setVisibleWordCount(words.length);
+        if (isTeleprompter) {
+          setTeleprompterChunkIndex(-1);
+          setCurrentSubtitle("");
+          setSubtitleMode("normal");
+        } else if (showSubtitle) {
+          setVisibleWordCount(words.length);
+        }
       };
 
       try {
         await audio.play();
       } catch (e) {
         console.warn("[SarahChat] autoplay blocked, falling back to text-only:", e);
-        if (showSubtitle) setVisibleWordCount(words.length);
+        if (showSubtitle && !isTeleprompter) setVisibleWordCount(words.length);
         setIsPlayingAudio(false);
       }
     } catch (e) {
       console.error("[SarahChat] playSarahVoice fatal:", e);
-      if (showSubtitle) {
+      if (showSubtitle && !isTeleprompter) {
         setCurrentSubtitle(cleaned);
-        setVisibleWordCount(cleaned.split(/\s+/).length);
+        setVisibleWordCount(words.length);
       }
     } finally {
       setIsLoadingVoice(false);
@@ -211,6 +242,8 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     setErrorMsg(null);
     setCurrentSubtitle("");
     setVisibleWordCount(0);
+    setTeleprompterChunkIndex(-1);
+    setSubtitleMode("normal");
     stopAudioPlayback();
 
     let full = "";
@@ -269,12 +302,13 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       const spoken = stripFactFindTag(full);
       if (spoken) {
         // Sarah turn number = number of prior assistant messages + 1.
-        // 1 = audio check (show subtitle), 2 = full greeting (NO subtitle),
-        // 3+ = normal (show subtitle).
+        // 1 = audio check (normal subtitle), 2 = full greeting (teleprompter),
+        // 3+ = normal closed-caption subtitle.
         const sarahTurnNumber =
           apiMessages.filter((m) => m.role === "assistant").length + 1;
-        const showSubtitle = sarahTurnNumber !== 2;
-        await playSarahVoice(spoken, showSubtitle);
+        const mode: "normal" | "teleprompter" =
+          sarahTurnNumber === 2 ? "teleprompter" : "normal";
+        await playSarahVoice(spoken, mode);
       }
 
       if (factFindData) {
@@ -353,6 +387,23 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     return currentSubtitle.split(/\s+/).slice(0, visibleWordCount).join(" ");
   }, [currentSubtitle, visibleWordCount]);
 
+  const teleprompterChunks = useMemo(() => {
+    if (subtitleMode !== "teleprompter" || !currentSubtitle) return [];
+    const words = currentSubtitle.split(/\s+/);
+    const chunks: string[] = [];
+    for (let i = 0; i < words.length; i += 3) {
+      chunks.push(words.slice(i, i + 3).join(" "));
+    }
+    return chunks;
+  }, [subtitleMode, currentSubtitle]);
+
+  const teleprompterText =
+    subtitleMode === "teleprompter" &&
+    teleprompterChunkIndex >= 0 &&
+    teleprompterChunkIndex < teleprompterChunks.length
+      ? teleprompterChunks[teleprompterChunkIndex]
+      : "";
+
   const pastUserAnswers = messages
     .map((m, i) => ({ m, i }))
     .filter(({ m }) => m.role === "user" && m.content !== "[START]");
@@ -363,7 +414,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
   if (!hasStarted) {
     return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 overflow-hidden">
+      <div className="relative flex flex-col items-center justify-start min-h-screen bg-black text-white px-6 pt-10 overflow-hidden">
         {/* Ambient depth — soft layered radial glows */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(50,100,255,0.10),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_75%,rgba(201,168,76,0.08),transparent_60%)]" />
@@ -421,6 +472,13 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             {errorMsg ? (
               <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
                 {errorMsg}
+              </p>
+            ) : subtitleMode === "teleprompter" ? (
+              <p
+                key={teleprompterChunkIndex}
+                className="teleprompter-chunk text-[28px] font-light tracking-[0.04em] text-white text-center max-w-[680px]"
+              >
+                {teleprompterText}
               </p>
             ) : (
               <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-white/75 text-center">
