@@ -98,7 +98,7 @@ export default function DashboardPage() {
                 <p className="text-[10px] font-semibold tracking-[0.26em] text-gold/90 uppercase leading-none">
                   Sarah
                 </p>
-                <p className="text-[11px] text-muted-foreground/75 tracking-tight mt-1.5">
+                <p className="text-[12.5px] text-muted-foreground/90 tracking-tight mt-1.5">
                   AI Adviser Intelligence &nbsp;·&nbsp; Today's Brief
                 </p>
               </div>

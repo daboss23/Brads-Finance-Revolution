@@ -36,7 +36,7 @@ export default function ClientDetailPage({
       {/* Back */}
       <Link
         href="/clients"
-        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/55 hover:text-foreground transition-colors mb-9 tracking-wide"
+        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Clients
@@ -56,11 +56,11 @@ export default function ClientDetailPage({
               <Badge className={STATUS_CONFIG[client.status].className}>
                 {STATUS_CONFIG[client.status].label}
               </Badge>
-              <span className="text-[12px] text-muted-foreground/50">
+              <span className="text-[12px] text-muted-foreground/85">
                 {client.meetingStage}
               </span>
               <span className="text-muted-foreground/30">·</span>
-              <span className="text-[12px] text-muted-foreground/50">
+              <span className="text-[12px] text-muted-foreground/85">
                 Updated {client.lastActivity}
               </span>
             </div>
@@ -68,7 +68,7 @@ export default function ClientDetailPage({
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right mr-2">
-            <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/40 mb-1.5">
+            <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/75 mb-1.5">
               Adviser
             </p>
             <p className="text-[13px] font-medium text-foreground/80">{client.adviser}</p>
@@ -97,26 +97,26 @@ export default function ClientDetailPage({
           {/* Contact */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Contact Information
               </h2>
             </div>
             <div className="px-6 py-5 grid grid-cols-2 gap-5">
               <div className="flex items-center gap-3">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                <Mail className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.email}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                <Phone className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.mobile}</span>
               </div>
               <div className="flex items-center gap-3">
-                <User className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                <User className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.adviser}</span>
               </div>
               {client.meetingDate && (
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                   <span className="text-[13px] text-foreground/80">{client.meetingDate}</span>
                 </div>
               )}
@@ -140,7 +140,7 @@ export default function ClientDetailPage({
           {client.notes && (
             <div className="rounded-lg border border-border bg-card overflow-hidden">
               <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+                <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   Adviser Notes
                 </h2>
               </div>
@@ -155,7 +155,7 @@ export default function ClientDetailPage({
           {/* Timeline */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Activity Timeline
               </h2>
             </div>
@@ -180,7 +180,7 @@ export default function ClientDetailPage({
                     </div>
                     <div className={cn(i < arr.length - 1 ? "pb-5" : "")}>
                       <p className="text-[13px] text-foreground/80 leading-snug">{event.event}</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-1">
+                      <p className="text-[11px] text-muted-foreground/85 mt-1">
                         {event.date}&nbsp;·&nbsp;
                         <span className="capitalize">{event.type}</span>
                       </p>
@@ -198,7 +198,7 @@ export default function ClientDetailPage({
           {/* Progress */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Fact Find Progress
               </h2>
             </div>
@@ -211,7 +211,7 @@ export default function ClientDetailPage({
                 max={100}
                 className="bmk-progress w-full mb-3"
               />
-              <p className="text-[12px] text-muted-foreground/55">
+              <p className="text-[12px] text-muted-foreground">
                 {completeSections} of {total} sections complete
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function ClientDetailPage({
           {/* Section breakdown */}
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Section Breakdown
               </h2>
             </div>

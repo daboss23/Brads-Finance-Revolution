@@ -88,7 +88,7 @@ export default function FactFindReviewPage({
       {/* Back */}
       <Link
         href={`/clients/${client.id}`}
-        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/55 hover:text-foreground transition-colors mb-9 tracking-wide"
+        className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to {client.name}
@@ -97,21 +97,21 @@ export default function FactFindReviewPage({
       {/* Header */}
       <div className="flex items-start justify-between mb-10 pb-9 border-b border-border/60">
         <div>
-          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-foreground/45 mb-2">
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-2.5">
             Fact Find Review
           </p>
-          <h1 className="text-[26px] font-semibold tracking-tight text-foreground">
+          <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
             {client.name}
           </h1>
-          <div className="flex items-center gap-3 mt-2.5">
+          <div className="flex items-center gap-3 mt-3">
             <Badge className={STATUS_CONFIG[client.status].className}>
               {STATUS_CONFIG[client.status].label}
             </Badge>
-            <span className="text-[12px] text-muted-foreground/50">
+            <span className="text-[13px] text-muted-foreground/85">
               {client.progress}% complete
             </span>
-            <span className="text-muted-foreground/30">·</span>
-            <span className="text-[12px] text-muted-foreground/50">
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-[13px] text-muted-foreground/85">
               Generated {today}
             </span>
           </div>
@@ -207,10 +207,10 @@ export default function FactFindReviewPage({
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-400/70 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-[13px] text-red-300/80 mb-2">
+                        <p className="text-[14px] text-red-300/95 mb-2">
                           This section was not completed by the client.
                         </p>
-                        <p className="text-[11px] text-muted-foreground/50">
+                        <p className="text-[12.5px] text-muted-foreground/85">
                           Required fields outstanding:{" "}
                           {section.fields
                             .filter((f) => f.required)
@@ -227,7 +227,7 @@ export default function FactFindReviewPage({
                           field.type === "textarea" || value.length > 60;
                         return (
                           <div key={field.id}>
-                            <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/45 mb-1">
+                            <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/85 mb-1.5">
                               {field.label}
                             </p>
                             <EditableFactFindValue

@@ -132,8 +132,8 @@ export function FormsPanel({
   if (requiredForms.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border/70 bg-card/30 px-8 py-10 text-center">
-        <FileText className="h-7 w-7 text-muted-foreground/25 mx-auto mb-3" />
-        <p className="text-[12.5px] text-muted-foreground/55">
+        <FileText className="h-7 w-7 text-muted-foreground/45 mx-auto mb-3" />
+        <p className="text-[13.5px] text-muted-foreground/85">
           No forms attached to this strategy yet.
         </p>
       </div>
@@ -169,35 +169,35 @@ export function FormsPanel({
                   <FileText className="h-4 w-4 text-muted-foreground/55" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2.5 mb-1.5">
                     <span
                       className={cn(
-                        "rounded border px-2 py-0.5 text-[9.5px] font-bold tracking-[0.12em] uppercase shrink-0",
+                        "rounded border px-2 py-0.5 text-[10px] font-bold tracking-[0.12em] uppercase shrink-0",
                         PROVIDER_STYLES[form.provider],
                       )}
                     >
                       {provider.name}
                     </span>
-                    <h3 className="text-[13px] font-semibold text-foreground truncate tracking-tight">
+                    <h3 className="text-[14.5px] font-semibold text-foreground truncate tracking-tight">
                       {form.name}
                     </h3>
                   </div>
-                  <p className="text-[11.5px] text-muted-foreground/65 truncate">
+                  <p className="text-[13px] text-muted-foreground/90 truncate">
                     {form.description}
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground/45 mt-0.5 truncate">
+                  <p className="text-[12px] text-muted-foreground/75 mt-1 truncate">
                     Send to: {provider.team} · {provider.email}
                   </p>
                   {missing.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1.5 text-amber-300/85 text-[11px]">
-                      <AlertCircle className="h-3 w-3 shrink-0" />
+                    <div className="mt-2 flex items-center gap-1.5 text-amber-300 text-[12px]">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">
-                        {missing.length} field{missing.length === 1 ? "" : "s"} missing — fill manually
+                        {missing.length} field{missing.length === 1 ? "" : "s"} missing, fill manually
                       </span>
                     </div>
                   )}
                   {entry.updatedAt && (
-                    <p className="text-[10.5px] text-muted-foreground/40 mt-1">
+                    <p className="text-[11.5px] text-muted-foreground/70 mt-1.5">
                       {sc.label} {timeAgo(entry.updatedAt)}
                       {entry.actionedBy ? ` by ${entry.actionedBy}` : ""}
                     </p>
@@ -209,7 +209,7 @@ export function FormsPanel({
               <div className="flex items-center gap-2 shrink-0">
                 <span
                   className={cn(
-                    "rounded border px-2.5 py-1 text-[10.5px] font-medium tracking-tight",
+                    "rounded border px-2.5 py-1 text-[11.5px] font-medium tracking-tight",
                     sc.className,
                   )}
                 >
@@ -220,7 +220,7 @@ export function FormsPanel({
                   <button
                     onClick={() => handleGenerate(form.id)}
                     disabled={isGenerating}
-                    className="inline-flex items-center gap-2 rounded-md border border-gold/35 bg-gold/[0.05] px-3 py-1.5 text-[11.5px] font-medium text-gold/85 hover:text-gold hover:border-gold/55 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-md border border-gold/35 bg-gold/[0.05] px-3 py-1.5 text-[12.5px] font-medium text-gold/85 hover:text-gold hover:border-gold/55 transition-colors disabled:opacity-50"
                   >
                     {isGenerating ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -235,7 +235,7 @@ export function FormsPanel({
                   <>
                     <button
                       onClick={() => handleDownload(form.id)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[11.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[12.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
                     >
                       <Download className="h-3.5 w-3.5" />
                       Download
@@ -243,7 +243,7 @@ export function FormsPanel({
                     <a
                       href={mailto}
                       onClick={() => updateStatus(form.id, "sent")}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/35 bg-amber-500/[0.06] px-3 py-1.5 text-[11.5px] font-medium text-amber-300/85 hover:text-amber-200 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/35 bg-amber-500/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-amber-300/85 hover:text-amber-200 transition-colors"
                     >
                       <Mail className="h-3.5 w-3.5" />
                       Email
@@ -255,14 +255,14 @@ export function FormsPanel({
                   <>
                     <button
                       onClick={() => handleDownload(form.id)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[11.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[12.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
                     >
                       <Download className="h-3.5 w-3.5" />
                       Download
                     </button>
                     <button
                       onClick={() => updateStatus(form.id, "completed")}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/35 bg-emerald-500/[0.06] px-3 py-1.5 text-[11.5px] font-medium text-emerald-300/90 hover:text-emerald-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/35 bg-emerald-500/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-emerald-300/90 hover:text-emerald-300 transition-colors"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Mark Complete
@@ -275,7 +275,7 @@ export function FormsPanel({
                     <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                     <button
                       onClick={() => handleDownload(form.id)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[11.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[12.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"
                     >
                       <Download className="h-3.5 w-3.5" />
                       Download

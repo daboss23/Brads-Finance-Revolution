@@ -22,7 +22,7 @@ export default function FormsPage({ params }: { params: { id: string } }) {
       {/* Back */}
       <Link
         href={`/clients/${client.id}`}
-        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/55 hover:text-foreground transition-colors mb-9 tracking-wide"
+        className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to {client.name}
@@ -31,13 +31,13 @@ export default function FormsPage({ params }: { params: { id: string } }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-10 pb-9 border-b border-border/60">
         <div>
-          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-foreground/45 mb-2">
+          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-2.5">
             Strategies
           </p>
-          <h1 className="text-[26px] font-semibold tracking-tight text-foreground">
+          <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
             {client.name}
           </h1>
-          <p className="mt-2 text-[13px] text-muted-foreground/65 max-w-[560px]">
+          <p className="mt-3 text-[14.5px] text-muted-foreground/90 max-w-[620px] leading-relaxed">
             Sarah suggests strategies based on the fact find. Brad approves
             what is relevant and the matching provider forms appear ready to
             generate and send.

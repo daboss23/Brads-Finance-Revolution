@@ -90,7 +90,7 @@ export function EditableFactFindValue({
               if (e.key === "Escape") cancel();
             }}
             rows={3}
-            className="flex-1 bg-white/5 border border-gold/40 rounded px-2 py-1.5 text-[13px] text-foreground focus:outline-none focus:border-gold resize-y"
+            className="flex-1 bg-white/5 border border-gold/40 rounded px-2 py-1.5 text-[14px] text-foreground focus:outline-none focus:border-gold resize-y"
           />
         ) : (
           <input
@@ -103,7 +103,7 @@ export function EditableFactFindValue({
               if (e.key === "Enter") commit();
               if (e.key === "Escape") cancel();
             }}
-            className="flex-1 bg-white/5 border border-gold/40 rounded px-2 py-1 text-[13px] text-foreground focus:outline-none focus:border-gold"
+            className="flex-1 bg-white/5 border border-gold/40 rounded px-2 py-1 text-[14px] text-foreground focus:outline-none focus:border-gold"
           />
         )}
         <button
@@ -133,7 +133,7 @@ export function EditableFactFindValue({
       type="button"
       onClick={() => setEditing(true)}
       className={cn(
-        "group inline-flex items-start gap-1.5 text-left text-[13px] leading-snug",
+        "group inline-flex items-start gap-1.5 text-left text-[14px] leading-snug",
         empty
           ? "text-amber-400/85 italic"
           : "text-foreground/90 hover:text-gold transition-colors",
