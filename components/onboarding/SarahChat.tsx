@@ -370,14 +370,14 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,rgba(80,140,255,0.06),transparent_70%)] onboarding-glow-a" />
 
         {/* Card */}
-        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 pt-8 pb-10 flex flex-col items-center text-center">
-          <div className="mb-4">
+        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 pt-4 pb-8 flex flex-col items-center text-center">
+          <div className="mb-2">
             <NewcastleLogoFull size={220} />
           </div>
-          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-4">
+          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-3">
             Financial Discovery Session
           </h1>
-          <p className="text-lg text-white/70 max-w-[520px] mb-8 leading-relaxed">
+          <p className="text-lg text-white/70 max-w-[520px] mb-7 leading-relaxed">
             Sarah will guide you through your discovery session so Brad can
             prepare for your meeting.
           </p>
