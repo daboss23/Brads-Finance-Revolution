@@ -401,9 +401,9 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         <h1 className="-mt-2 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
           Financial Discovery Session
         </h1>
-        <div className="mt-1 flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] text-white/40 tracking-wide">
+        <div className="mt-2 flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+          <span className="text-[13px] text-white/55 tracking-wide">
             Sarah is online
           </span>
         </div>
