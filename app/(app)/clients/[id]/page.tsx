@@ -78,7 +78,7 @@ export default function ClientDetailPage({
             className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors whitespace-nowrap"
           >
             <FileText className="h-3.5 w-3.5" />
-            Forms
+            Strategies
           </Link>
           <Link
             href={`/clients/${client.id}/fact-find-review`}

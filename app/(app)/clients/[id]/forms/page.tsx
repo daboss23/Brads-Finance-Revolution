@@ -32,7 +32,7 @@ export default function FormsPage({ params }: { params: { id: string } }) {
       <div className="flex items-start justify-between mb-10 pb-9 border-b border-border/60">
         <div>
           <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-foreground/45 mb-2">
-            Provider Forms
+            Strategies
           </p>
           <h1 className="text-[26px] font-semibold tracking-tight text-foreground">
             {client.name}
