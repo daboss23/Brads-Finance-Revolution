@@ -203,4 +203,26 @@
     transform-box: fill-box;
     transform-origin: center bottom;
   }
+
+  /* CTA shine sweep */
+  .onboarding-cta-shine::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    animation: onboarding-cta-shine 3.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes onboarding-cta-shine {
+    0%   { transform: translateX(-120%); }
+    55%  { transform: translateX(120%); }
+    100% { transform: translateX(120%); }
+  }
 }

@@ -370,21 +370,21 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,rgba(80,140,255,0.06),transparent_70%)] onboarding-glow-a" />
 
         {/* Card */}
-        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 py-14 flex flex-col items-center text-center">
-          <div className="mb-8">
+        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 pt-8 pb-10 flex flex-col items-center text-center">
+          <div className="mb-4">
             <NewcastleLogoFull size={220} />
           </div>
-          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-5">
+          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-4">
             Financial Discovery Session
           </h1>
-          <p className="text-lg text-white/70 max-w-[520px] mb-10 leading-relaxed">
+          <p className="text-lg text-white/70 max-w-[520px] mb-8 leading-relaxed">
             Sarah will guide you through your discovery session so Brad can
             prepare for your meeting.
           </p>
           <button
             type="button"
             onClick={() => setHasStarted(true)}
-            className="px-8 py-4 rounded-full bg-gold text-background text-[15px] font-semibold tracking-wide hover:bg-gold/90 transition-colors shadow-[0_10px_30px_-8px_rgba(201,168,76,0.55),inset_0_1px_0_rgba(255,255,255,0.15)]"
+            className="onboarding-cta-shine relative overflow-hidden rounded-xl px-12 py-5 text-[17px] font-bold tracking-[0.05em] uppercase text-background bg-[linear-gradient(120deg,#c9a84c_0%,#e0c266_28%,#a8d4ff_72%,#6fb7f5_100%)] hover:brightness-105 transition-[filter] shadow-[0_14px_40px_-10px_rgba(201,168,76,0.55),0_8px_30px_-12px_rgba(120,180,255,0.45),inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(0,0,0,0.18)]"
           >
             Begin My Financial Discovery
           </button>
