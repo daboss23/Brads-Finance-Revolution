@@ -121,6 +121,19 @@ const SEED_AUDIT: Record<string, AuditEntry[]> = {
       },
       complianceVersion: "1.0.0",
     },
+    {
+      id: "seed-sm-3",
+      clientId: "sarah-mitchell",
+      action: "sign-off-given",
+      actor: "Brad",
+      timestamp: "2026-05-26T09:35:00.000Z",
+      details: {
+        score: 78,
+        acknowledgement:
+          "Best interests duty met. Risk profile to be confirmed at meeting.",
+      },
+      complianceVersion: "1.0.0",
+    },
   ],
   "james-fiona-carr": [
     {

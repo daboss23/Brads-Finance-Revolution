@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, ClipboardList, FileText, Shield } from "lucide-react";
+import { User, ClipboardList, FileText, Shield, FileSignature } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -18,6 +18,7 @@ export function ClientTabs({ clientId }: Props) {
     { href: `${base}/fact-find-review`, label: "Fact Find", icon: ClipboardList },
     { href: `${base}/forms`, label: "Strategies", icon: FileText },
     { href: `${base}/compliance`, label: "Compliance", icon: Shield },
+    { href: `${base}/soa`, label: "SOA", icon: FileSignature },
   ];
 
   return (

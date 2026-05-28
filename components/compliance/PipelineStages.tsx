@@ -185,12 +185,20 @@ export function SoaGate({ clientId, result, signedOff }: SoaGateProps) {
               Compliance score {result.complianceScore} / 100, adviser sign-off
               recorded. SOA generation is unlocked for this client.
             </p>
-            <Link
-              href={`/clients/${clientId}/compliance`}
-              className="inline-flex items-center gap-2 rounded border border-emerald-500/35 bg-emerald-500/5 px-3 py-1.5 text-[12px] font-medium text-emerald-300 hover:text-emerald-200 hover:border-emerald-500/55 transition-colors"
-            >
-              View certificate
-            </Link>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                href={`/clients/${clientId}/soa/generate`}
+                className="inline-flex items-center gap-2 rounded border border-gold/45 bg-gold/10 px-3 py-1.5 text-[12px] font-medium text-gold hover:border-gold/65 transition-colors"
+              >
+                Generate SOA
+              </Link>
+              <Link
+                href={`/clients/${clientId}/compliance`}
+                className="inline-flex items-center gap-2 rounded border border-emerald-500/35 bg-emerald-500/5 px-3 py-1.5 text-[12px] font-medium text-emerald-300 hover:text-emerald-200 hover:border-emerald-500/55 transition-colors"
+              >
+                View certificate
+              </Link>
+            </div>
           </div>
         </div>
       </div>

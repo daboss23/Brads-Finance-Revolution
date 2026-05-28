@@ -8,6 +8,8 @@ import {
   ClipboardList,
   Sparkles,
   Shield,
+  FileSignature,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
@@ -16,8 +18,10 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/compliance", label: "Compliance", icon: Shield },
+  { href: "/soa", label: "SOA", icon: FileSignature },
   { href: "/fact-find", label: "Fact Find", icon: ClipboardList },
   { href: "/sarah", label: "Sarah", icon: Sparkles },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {

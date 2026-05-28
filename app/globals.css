@@ -105,6 +105,22 @@
     background: hsl(var(--blue-accent));
   }
 
+  progress.bmk-progress-amber::-webkit-progress-value {
+    background: rgb(251 191 36);
+  }
+
+  progress.bmk-progress-amber::-moz-progress-bar {
+    background: rgb(251 191 36);
+  }
+
+  progress.bmk-progress-emerald::-webkit-progress-value {
+    background: rgb(52 211 153);
+  }
+
+  progress.bmk-progress-emerald::-moz-progress-bar {
+    background: rgb(52 211 153);
+  }
+
   /* BMK letter glow pulse — slow, premium, breathing */
   .bmk-letter-pulse {
     animation: bmk-letter-glow 4s ease-in-out infinite;

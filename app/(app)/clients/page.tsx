@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, ArrowRight, CheckCircle2 } from "lucide-react";
 import { CLIENTS, STATUS_CONFIG, type Client, type FactFindStatus } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
+import { ClientSoaBadge } from "@/components/soa/ClientSoaBadge";
 import {
   Dialog,
   DialogContent,
@@ -159,7 +160,10 @@ export default function ClientsPage() {
                       </div>
                       <div>
                         <p className="font-medium text-[13px] text-foreground">{client.name}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1.5">{client.email}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <p className="text-[11px] text-muted-foreground">{client.email}</p>
+                          <ClientSoaBadge clientId={client.id} />
+                        </div>
                       </div>
                     </div>
                   </td>

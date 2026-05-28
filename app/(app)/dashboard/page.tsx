@@ -6,11 +6,16 @@ import {
   AlertCircle,
   ArrowRight,
   Sparkles,
+  FileSignature,
+  Clock,
+  CheckCircle2,
+  Send,
 } from "lucide-react";
 import { CLIENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { PipelineTable } from "@/components/dashboard/PipelineTable";
 import { TodayLabel } from "@/components/dashboard/TodayLabel";
+import { getPipelineMetrics } from "@/lib/soa/soa-pipeline";
 
 function getMetrics() {
   const active = CLIENTS.length;
@@ -23,6 +28,7 @@ function getMetrics() {
 
 export default function DashboardPage() {
   const metrics = getMetrics();
+  const soa = getPipelineMetrics();
 
   return (
     <div className="px-10 py-12">
@@ -50,7 +56,7 @@ export default function DashboardPage() {
       </header>
 
       {/* KPI cards */}
-      <section className="grid grid-cols-4 gap-5 mb-14">
+      <section className="grid grid-cols-4 gap-5 mb-8">
         <KpiCard
           label="Active Clients"
           value={metrics.active}
@@ -83,6 +89,59 @@ export default function DashboardPage() {
           iconBg="bg-orange-400/12"
           accentFrom="from-orange-400/50"
         />
+      </section>
+
+      {/* SOA pipeline KPIs */}
+      <section className="mb-14">
+        <div className="flex items-end justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <FileSignature className="h-3.5 w-3.5 text-gold" />
+            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
+              SOA Pipeline
+            </p>
+          </div>
+          <Link
+            href="/soa"
+            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/75 hover:text-gold transition-colors tracking-tight"
+          >
+            Open SOA pipeline
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-4 gap-5">
+          <KpiCard
+            label="In Generation"
+            value={soa.inGeneration}
+            icon={Sparkles}
+            iconColor="text-blue-accent"
+            iconBg="bg-blue-accent/12"
+            accentFrom="from-blue-accent/50"
+          />
+          <KpiCard
+            label="Awaiting Brad Review"
+            value={soa.awaitingReview}
+            icon={Clock}
+            iconColor="text-amber-300"
+            iconBg="bg-amber-400/12"
+            accentFrom="from-amber-400/50"
+          />
+          <KpiCard
+            label="Approved · Ready to Send"
+            value={soa.approvedReady}
+            icon={CheckCircle2}
+            iconColor="text-emerald-300"
+            iconBg="bg-emerald-500/12"
+            accentFrom="from-emerald-500/50"
+          />
+          <KpiCard
+            label="Signed This Month"
+            value={soa.signedThisMonth}
+            icon={Send}
+            iconColor="text-gold"
+            iconBg="bg-gold/12"
+            accentFrom="from-gold/50"
+          />
+        </div>
       </section>
 
       {/* Sarah brief */}
