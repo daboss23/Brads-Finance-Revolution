@@ -3,6 +3,7 @@
 // to a database when integrations come online.
 
 import type { SarahFactFind } from "./sarah-fact-find-schema";
+import { getDemoFactFind } from "./sarah-fact-find-demo";
 
 export interface StoredFactFind {
   clientId: string;
@@ -35,6 +36,14 @@ export function saveFactFind(entry: StoredFactFind): void {
 
 export function getFactFind(clientId: string): StoredFactFind | undefined {
   return getStore().map.get(clientId);
+}
+
+// Returns the live fact find when present, otherwise the demo payload so
+// the recommender and form pre-fill have something to work with.
+export function getFactFindOrDemo(clientId: string): SarahFactFind | undefined {
+  const live = getStore().map.get(clientId);
+  if (live) return live.data;
+  return getDemoFactFind(clientId);
 }
 
 export function listFactFinds(): StoredFactFind[] {

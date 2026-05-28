@@ -20,7 +20,25 @@ const PROFILES: Record<string, ClientProfile> = {
     occupation: "Senior Nurse Practitioner",
     employer: "Hunter Valley Health Network",
     annualIncome: 118000,
-    strategies: ["super-consolidation", "insurance-review"],
+    strategies: ["insurance-review", "super-consolidation"],
+  },
+  "james-fiona-carr": {
+    strategies: ["ttr-strategy", "investment-strategy"],
+  },
+  "tony-nguyen": {
+    strategies: ["platform-setup", "super-consolidation"],
+  },
+  "david-okafor": {
+    strategies: ["insurance-review"],
+  },
+  "priya-sharma": {
+    strategies: ["super-consolidation", "investment-strategy"],
+  },
+  "robert-sue-tanner": {
+    strategies: ["ttr-strategy", "aged-care"],
+  },
+  "helen-davies": {
+    strategies: ["estate-planning", "insurance-review"],
   },
 };
 

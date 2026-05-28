@@ -3,8 +3,9 @@ import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFIm
 import { CLIENTS } from "@/lib/data";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getClientProfile } from "@/lib/client-profiles";
+import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
 import { getLogoPng } from "@/lib/export-logo";
-import type { FormId } from "@/lib/forms";
+import { FORMS, PROVIDERS, type FormId } from "@/lib/forms";
 
 // ── Layout (A4) ─────────────────────────────────────────────────────────────
 const PW = 595, PH = 842;
@@ -53,156 +54,309 @@ function buildFormSpec(formId: FormId, clientId: string): FormSpec | null {
   const client = CLIENTS.find((c) => c.id === clientId);
   if (!client) return null;
 
+  const definition = FORMS.find((f) => f.id === formId);
+  if (!definition) return null;
+
+  // Prefer Sarah's collected fact find (or demo fallback), with the older
+  // sample answers and client-profile data as final back-stops.
+  const sarah    = getFactFindOrDemo(clientId);
   const answers  = getClientAnswers(clientId);
   const profile  = getClientProfile(clientId);
 
-  const fullName     = answers["personal-details"]?.["full-name"] ?? client.name;
-  const dob          = answers["personal-details"]?.["dob"] ?? "";
-  const address      = answers["contact-information"]?.["address"] ??
-                       answers["contact-information"]?.["street-address"] ?? "";
-  const occupation   = answers["employment-income"]?.["occupation"] ?? profile?.occupation ?? "";
-  const employer     = answers["employment-income"]?.["employer"]   ?? profile?.employer   ?? "";
-  const incomeStr    = answers["employment-income"]?.["annual-income"] ??
+  const fullName     = sarah?.personalDetails.fullName ||
+                       answers["personal-details"]?.["full-name"] ||
+                       client.name;
+  const dob          = sarah?.personalDetails.dateOfBirth ||
+                       answers["personal-details"]?.["dob"] || "";
+  const address      = sarah?.personalDetails.address ||
+                       answers["contact-information"]?.["address"] ||
+                       answers["contact-information"]?.["street-address"] || "";
+  const email        = sarah?.contactInformation.email ||
+                       answers["contact-information"]?.["email"] || "";
+  const mobile       = sarah?.contactInformation.mobile ||
+                       answers["contact-information"]?.["mobile"] || "";
+  const occupation   = sarah?.employmentAndIncome.occupation ||
+                       answers["employment-income"]?.["occupation"] ||
+                       profile?.occupation || "";
+  const employer     = sarah?.employmentAndIncome.employerName ||
+                       answers["employment-income"]?.["employer"] ||
+                       profile?.employer || "";
+  const incomeStr    = sarah?.employmentAndIncome.annualGrossIncome ||
+                       answers["employment-income"]?.["annual-income"] ||
                        (profile?.annualIncome ? `$${profile.annualIncome.toLocaleString()}` : "");
-  const superFund    = answers["superannuation"]?.["fund-name"]      ?? profile?.superFund ?? "";
-  const memberNo     = answers["superannuation"]?.["member-number"]  ?? profile?.superMemberNumber ?? "";
-  const superBal     = answers["superannuation"]?.["balance"] ??
+  const superFund    = sarah?.superannuation.fundName ||
+                       answers["superannuation"]?.["fund-name"] ||
+                       profile?.superFund || "";
+  const memberNo     = sarah?.superannuation.memberNumber ||
+                       answers["superannuation"]?.["member-number"] ||
+                       profile?.superMemberNumber || "";
+  const superBal     = sarah?.superannuation.estimatedBalance ||
+                       answers["superannuation"]?.["balance"] ||
                        (profile?.superBalance ? `$${profile.superBalance.toLocaleString()}` : "");
-  const tfn          = profile?.tfn ?? "";
+  const dependants   = sarah?.familyAndDependants.numberOfDependants || "";
+  const partnerName  = sarah?.familyAndDependants.partnerName || "";
+  const relationship = sarah?.familyAndDependants.relationshipStatus || "";
+  const homeValue    = sarah?.assets.ownerOccupiedPropertyValue || "";
+  const savings      = sarah?.assets.savingsAndCash || "";
+  const shares       = sarah?.assets.sharesAndInvestments || "";
+  const riskPref     = sarah?.goalsAndObjectives.investmentRiskPreference || "Balanced";
+  const tfn          = profile?.tfn || "";
   const today        = new Date().toLocaleDateString("en-AU", {
     day: "numeric", month: "long", year: "numeric",
   });
 
-  if (formId === "mlc-super") {
-    return {
-      formTitle: "Super Application",
-      providerName: "MLC",
-      providerSubtitle: "MLC MasterKey Super Fundamentals",
-      clientName: fullName,
-      sections: [
-        {
-          title: "Applicant Details",
-          fields: [
-            { label: "Full Name",            value: fullName },
-            { label: "Date of Birth",        value: dob },
-            { label: "Tax File Number",      value: tfn },
-            { label: "Residential Address",  value: address, fullWidth: true },
-          ],
-        },
-        {
-          title: "Employment Details",
-          fields: [
-            { label: "Employer Name",             value: employer },
-            { label: "Occupation",                value: occupation },
-            { label: "Super Contribution Rate",   value: "11.5% (SG Rate)" },
-            { label: "Annual Income",             value: incomeStr },
-          ],
-        },
+  const adviserBlock = {
+    title: "Adviser Details",
+    fields: [
+      { label: "Adviser Name",   value: "Brad Lonergan" },
+      { label: "AFSL Number",    value: "234665" },
+      { label: "Licence Name",   value: "Newcastle Financial Services" },
+      { label: "Adviser Email",  value: "brad@bmkfs.com.au" },
+      { label: "Date Prepared",  value: today },
+    ],
+  };
+
+  const provider = PROVIDERS[definition.provider];
+  const providerSubtitle =
+    `${provider.name} — ${provider.team} (${provider.website})`;
+
+  const applicantSection = {
+    title: "Applicant Details",
+    fields: [
+      { label: "Full Name",            value: fullName },
+      { label: "Date of Birth",        value: dob },
+      { label: "Relationship Status",  value: relationship },
+      { label: "Partner Name",         value: partnerName },
+      { label: "Dependants",           value: dependants },
+      { label: "Residential Address",  value: address, fullWidth: true },
+      { label: "Email",                value: email },
+      { label: "Mobile",               value: mobile },
+    ],
+  };
+
+  const superSection = {
+    title: "Superannuation Details",
+    fields: [
+      { label: "Existing Super Fund",     value: superFund },
+      { label: "Existing Member Number",  value: memberNo },
+      { label: "Estimated Balance",       value: superBal },
+      { label: "Tax File Number",         value: tfn },
+    ],
+  };
+
+  const employmentSection = {
+    title: "Employment & Income",
+    fields: [
+      { label: "Employer Name",   value: employer },
+      { label: "Occupation",      value: occupation },
+      { label: "Annual Income",   value: incomeStr },
+    ],
+  };
+
+  const baseTitle = definition.name;
+
+  // Per-form custom sections layered on top of the shared blocks.
+  let middleSections: SectionSpec[] = [];
+
+  switch (formId) {
+    case "mlc-super":
+      middleSections = [
+        superSection,
+        employmentSection,
         {
           title: "Investment Selection",
           fields: [
-            { label: "Investment Option",        value: "Balanced — MLC Balanced" },
-            { label: "Risk Profile",             value: "Balanced Growth" },
-            { label: "Rollover From Fund",       value: superFund },
-            { label: "Existing Member Number",   value: memberNo },
+            { label: "Investment Option",      value: "Balanced — MLC Balanced" },
+            { label: "Risk Profile",           value: riskPref },
+            { label: "Rollover From Fund",     value: superFund },
+            { label: "Existing Member Number", value: memberNo },
           ],
         },
-        {
-          title: "Adviser Details",
-          fields: [
-            { label: "Adviser Name",    value: client.adviser },
-            { label: "AFSL Number",     value: "234665" },
-            { label: "Licence Name",    value: "Newcastle Financial Services" },
-            { label: "Date Prepared",   value: today },
-          ],
-        },
-      ],
-    };
-  }
+      ];
+      break;
 
-  if (formId === "aia-insurance") {
-    const incomeNum  = profile?.annualIncome ?? 118000;
-    const ipBenefit  = `$${Math.round(incomeNum * 0.75 / 12).toLocaleString()} per month`;
-    return {
-      formTitle: "Insurance Application",
-      providerName: "AIA",
-      providerSubtitle: "Life, TPD and Income Protection",
-      clientName: fullName,
-      sections: [
+    case "mlc-ttr-super":
+    case "mlc-ttr-income-stream":
+      middleSections = [
+        superSection,
+        employmentSection,
         {
-          title: "Life Insured Details",
+          title: "Transition to Retirement Plan",
           fields: [
-            { label: "Full Name",           value: fullName },
-            { label: "Date of Birth",       value: dob },
-            { label: "Residential Address", value: address, fullWidth: true },
-            { label: "Occupation",          value: occupation },
+            { label: "Commencement Balance",   value: superBal },
+            { label: "Pension Frequency",      value: "Fortnightly" },
+            { label: "Investment Option",      value: "Balanced — MLC Balanced" },
+            { label: "Risk Profile",           value: riskPref },
+          ],
+        },
+      ];
+      break;
+
+    case "aia-life":
+      middleSections = [
+        employmentSection,
+        {
+          title: "Life Cover Requested",
+          fields: [
+            { label: "Sum Insured",          value: "$1,200,000" },
+            { label: "Cover Structure",      value: "Standalone" },
+            { label: "Beneficiary",          value: partnerName || "Estate" },
+          ],
+        },
+      ];
+      break;
+
+    case "aia-tpd":
+      middleSections = [
+        employmentSection,
+        {
+          title: "TPD Cover Requested",
+          fields: [
+            { label: "Sum Insured",          value: "$1,000,000" },
+            { label: "Definition",           value: "Any Occupation" },
+            { label: "Structure",            value: "Linked to Life Cover" },
+          ],
+        },
+      ];
+      break;
+
+    case "aia-ip": {
+      const incomeNum =
+        Number((incomeStr || "").replace(/[^0-9.]/g, "")) ||
+        profile?.annualIncome ||
+        100000;
+      const ipBenefit = `$${Math.round((incomeNum * 0.75) / 12).toLocaleString()} per month`;
+      middleSections = [
+        employmentSection,
+        {
+          title: "Income Protection Cover",
+          fields: [
+            { label: "Monthly Benefit",  value: ipBenefit },
+            { label: "Waiting Period",   value: "90 Days" },
+            { label: "Benefit Period",   value: "To Age 65" },
+            { label: "Cover Type",       value: "Agreed Value" },
+          ],
+        },
+      ];
+      break;
+    }
+
+    case "centrelink-aged-care-fee":
+      middleSections = [
+        {
+          title: "Assets",
+          fields: [
+            { label: "Owner Occupied Home",   value: homeValue },
+            { label: "Savings and Cash",      value: savings },
+            { label: "Shares and Investments", value: shares },
+            { label: "Superannuation Balance", value: superBal },
+          ],
+        },
+      ];
+      break;
+
+    case "amp-aged-care-pension":
+      middleSections = [
+        superSection,
+        {
+          title: "Pension Setup",
+          fields: [
+            { label: "Pension Frequency",   value: "Fortnightly" },
+            { label: "Investment Profile", value: "Conservative" },
+          ],
+        },
+      ];
+      break;
+
+    case "estate-loa":
+      middleSections = [
+        {
+          title: "Family and Dependants",
+          fields: [
+            { label: "Relationship Status",  value: relationship },
+            { label: "Partner Name",         value: partnerName },
+            { label: "Number of Dependants", value: dependants },
+          ],
+        },
+        {
+          title: "Estate Planning Notes",
+          fields: [
+            { label: "Will in Place",                value: "" },
+            { label: "Power of Attorney",            value: "" },
+            { label: "Beneficiary Nominations",      value: "" },
+          ],
+        },
+      ];
+      break;
+
+    case "beneficiary-nomination":
+      middleSections = [
+        superSection,
+        {
+          title: "Nominated Beneficiaries",
+          fields: [
+            { label: "Beneficiary 1",  value: partnerName || "" },
+            { label: "Allocation 1",   value: "100%" },
+            { label: "Beneficiary 2",  value: "" },
+            { label: "Allocation 2",   value: "" },
+          ],
+        },
+      ];
+      break;
+
+    case "ato-rollover":
+      middleSections = [
+        superSection,
+        {
+          title: "Rollover Instruction",
+          fields: [
+            { label: "From Fund",         value: superFund },
+            { label: "From Member Number", value: memberNo },
+            { label: "To Fund",           value: "MLC MasterKey Super Fundamentals" },
+            { label: "Rollover Amount",   value: "Full Balance" },
+          ],
+        },
+      ];
+      break;
+
+    case "amp-mynorth":
+    case "bt-panorama":
+      middleSections = [
+        {
+          title: "Investment Account Setup",
+          fields: [
+            { label: "Initial Investment",  value: savings || superBal },
+            { label: "Investment Profile",  value: riskPref },
+            { label: "Source of Funds",     value: "Savings / Rollover" },
+            { label: "Rollover From Fund",  value: superFund || "AustralianSuper" },
+          ],
+        },
+      ];
+      break;
+
+    case "mlc-investment":
+    case "cfs-firstchoice":
+      middleSections = [
+        {
+          title: "Investment Application",
+          fields: [
+            { label: "Initial Investment",  value: savings },
+            { label: "Risk Profile",        value: riskPref },
+            { label: "Additional Shares",   value: shares },
             { label: "Annual Income",       value: incomeStr },
           ],
         },
-        {
-          title: "Cover Requested",
-          fields: [
-            { label: "Life Cover Amount",   value: "$1,200,000" },
-            { label: "TPD Cover Amount",    value: "$1,000,000" },
-            { label: "IP Monthly Benefit",  value: ipBenefit },
-            { label: "IP Waiting Period",   value: "90 Days" },
-            { label: "IP Benefit Period",   value: "To Age 65" },
-            { label: "Super Fund Link",     value: superFund || "AustralianSuper" },
-          ],
-        },
-        {
-          title: "Adviser Details",
-          fields: [
-            { label: "Adviser Name",   value: client.adviser },
-            { label: "AFSL Number",    value: "234665" },
-            { label: "Licence Name",   value: "Newcastle Financial Services" },
-            { label: "Date Prepared",  value: today },
-          ],
-        },
-      ],
-    };
+      ];
+      break;
   }
 
-  if (formId === "amp-mynorth") {
-    const balance = profile?.superBalance ?? 142000;
-    return {
-      formTitle: "MyNorth Account Opening",
-      providerName: "AMP",
-      providerSubtitle: "AMP MyNorth Investment Platform",
-      clientName: fullName,
-      sections: [
-        {
-          title: "Investor Details",
-          fields: [
-            { label: "Full Name",           value: fullName },
-            { label: "Date of Birth",       value: dob },
-            { label: "Tax File Number",     value: tfn },
-            { label: "Residential Address", value: address, fullWidth: true },
-          ],
-        },
-        {
-          title: "Investment Details",
-          fields: [
-            { label: "Initial Investment Amount", value: `$${balance.toLocaleString()}` },
-            { label: "Investment Profile",        value: "Balanced Growth" },
-            { label: "Source of Funds",           value: "Superannuation Rollover" },
-            { label: "Rollover From Fund",        value: superFund || "AustralianSuper" },
-          ],
-        },
-        {
-          title: "Adviser Details",
-          fields: [
-            { label: "Adviser Name",   value: client.adviser },
-            { label: "AFSL Number",    value: "234665" },
-            { label: "Licence Name",   value: "Newcastle Financial Services" },
-            { label: "Date Prepared",  value: today },
-          ],
-        },
-      ],
-    };
-  }
-
-  return null;
+  return {
+    formTitle: baseTitle,
+    providerName: provider.name,
+    providerSubtitle,
+    clientName: fullName,
+    sections: [applicantSection, ...middleSections, adviserBlock],
+  };
 }
 
 // ── PDF builder ──────────────────────────────────────────────────────────────
@@ -420,7 +574,7 @@ export async function GET(
 ) {
   const { clientId, formId } = params;
 
-  const validIds: FormId[] = ["mlc-super", "aia-insurance", "amp-mynorth"];
+  const validIds: FormId[] = FORMS.map((f) => f.id);
   if (!validIds.includes(formId as FormId)) {
     return new NextResponse("Invalid form ID", { status: 400 });
   }
