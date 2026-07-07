@@ -15,6 +15,9 @@ import { CLIENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { PipelineTable } from "@/components/dashboard/PipelineTable";
 import { TodayLabel } from "@/components/dashboard/TodayLabel";
+import { AgentActivityStrip } from "@/components/dashboard/AgentActivityStrip";
+import { ActionQueue } from "@/components/dashboard/ActionQueue";
+import { PipelineVitals } from "@/components/dashboard/PipelineVitals";
 import { getPipelineMetrics } from "@/lib/soa/soa-pipeline";
 
 function getMetrics() {
@@ -54,6 +57,25 @@ export default function DashboardPage() {
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </header>
+
+      {/* Today's Operating Brief */}
+      <section className="mb-8">
+        <div className="flex items-center gap-2.5 mb-5">
+          <span className="h-3.5 w-[2px] rounded-full bg-gold/80" />
+          <h2 className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
+            Today&apos;s Operating Brief
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_1fr]">
+          <AgentActivityStrip />
+          <ActionQueue />
+        </div>
+      </section>
+
+      {/* Pipeline vitals */}
+      <section className="mb-14">
+        <PipelineVitals />
+      </section>
 
       {/* KPI cards */}
       <section className="grid grid-cols-4 gap-5 mb-8">
