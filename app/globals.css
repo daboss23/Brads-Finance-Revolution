@@ -243,3 +243,138 @@
   }
 
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Liquid glass command centre — premium surface system
+   ═══════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* Ambient page atmosphere — deep black with restrained radial glow */
+  .cmd-atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 45% at 18% 8%, hsl(43 68% 52% / 0.06), transparent 70%),
+      radial-gradient(50% 40% at 88% 4%, hsl(224 80% 60% / 0.05), transparent 72%),
+      radial-gradient(55% 50% at 92% 96%, hsl(268 70% 60% / 0.045), transparent 74%),
+      radial-gradient(70% 60% at 50% 120%, hsl(210 80% 55% / 0.04), transparent 70%);
+  }
+
+  /* Frosted translucent glass panel */
+  .glass-panel {
+    position: relative;
+    background:
+      linear-gradient(158deg, hsl(220 26% 13% / 0.72), hsl(222 30% 7% / 0.55));
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid hsl(220 30% 60% / 0.12);
+    border-radius: 1rem;
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / 0.06) inset,
+      0 0 0 1px hsl(0 0% 0% / 0.2),
+      0 24px 60px -28px hsl(0 0% 0% / 0.85);
+  }
+
+  /* Inner top highlight — the "liquid" light catch */
+  .glass-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      150deg,
+      hsl(0 0% 100% / 0.16),
+      transparent 32%,
+      transparent 70%,
+      hsl(0 0% 100% / 0.04)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .glass-hover {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .glass-hover:hover {
+    border-color: hsl(43 68% 55% / 0.28);
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / 0.08) inset,
+      0 0 0 1px hsl(43 68% 55% / 0.12),
+      0 30px 70px -30px hsl(0 0% 0% / 0.9),
+      0 0 40px -12px hsl(43 68% 52% / 0.18);
+  }
+
+  /* Accent edge glows — per agent / per metric */
+  .edge-gold   { box-shadow: 0 0 0 1px hsl(43 68% 55% / 0.14), 0 20px 50px -26px hsl(43 68% 50% / 0.35); }
+  .edge-blue   { box-shadow: 0 0 0 1px hsl(210 82% 66% / 0.16), 0 20px 50px -26px hsl(210 82% 60% / 0.35); }
+  .edge-violet { box-shadow: 0 0 0 1px hsl(268 70% 66% / 0.16), 0 20px 50px -26px hsl(268 70% 60% / 0.35); }
+  .edge-emerald{ box-shadow: 0 0 0 1px hsl(160 60% 50% / 0.16), 0 20px 50px -26px hsl(160 60% 45% / 0.32); }
+  .edge-orange { box-shadow: 0 0 0 1px hsl(24 88% 58% / 0.16), 0 20px 50px -26px hsl(24 88% 52% / 0.32); }
+
+  /* Gold liquid primary button */
+  .btn-gold {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, hsl(45 72% 62%), hsl(41 66% 48%));
+    box-shadow:
+      0 1px 0 0 hsl(48 90% 82% / 0.55) inset,
+      0 -1px 0 0 hsl(30 60% 30% / 0.5) inset,
+      0 10px 28px -10px hsl(43 68% 50% / 0.5);
+  }
+
+  /* Glass ghost button */
+  .btn-glass {
+    background: hsl(220 26% 20% / 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(220 30% 60% / 0.16);
+    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.06) inset;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .btn-glass:hover {
+    border-color: hsl(43 68% 55% / 0.3);
+    background: hsl(220 26% 22% / 0.6);
+  }
+
+  /* Live status dot pulse */
+  .status-live { position: relative; }
+  .status-live::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.35;
+    animation: status-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes status-ping {
+    0%   { transform: scale(0.6); opacity: 0.4; }
+    75%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Telemetry sheen sweep for hero rails */
+  @keyframes rail-flow {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  .rail-flow::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 33%;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.55), transparent);
+    animation: rail-flow 2.8s ease-in-out infinite;
+  }
+
+  .cmd-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+}

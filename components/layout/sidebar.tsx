@@ -30,7 +30,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[260px] shrink-0 flex-col border-r border-border/70 bg-card">
+    <aside className="relative z-20 flex h-screen w-[260px] shrink-0 flex-col border-r border-white/[0.06] bg-[hsl(222_28%_5%_/_0.72)] backdrop-blur-xl">
 
       {/* Brand */}
       <div className="px-5 pt-3 pb-4">
@@ -55,14 +55,14 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "group relative flex items-center gap-3 rounded-md px-3 py-2 text-[14px] font-medium transition-colors duration-150",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-medium transition-all duration-150",
                 active
-                  ? "bg-gold/[0.08] text-gold"
-                  : "text-muted-foreground/85 hover:bg-white/[0.04] hover:text-foreground"
+                  ? "border border-gold/20 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] text-gold shadow-[0_0_20px_-8px_hsl(43_68%_52%/0.5)]"
+                  : "border border-transparent text-muted-foreground/85 hover:bg-white/[0.04] hover:text-foreground"
               )}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-r-full bg-gold/80" />
+                <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-gold shadow-[0_0_8px_0_hsl(43_68%_52%/0.8)]" />
               )}
               <Icon
                 className={cn(

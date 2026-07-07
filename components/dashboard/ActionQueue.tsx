@@ -5,16 +5,14 @@ import { cn } from "@/lib/utils";
 
 export function ActionQueue() {
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden h-full">
-      <div className="flex items-center justify-between px-7 pt-6 pb-4 border-b border-border/55">
-        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
-          Action Queue
-        </p>
+    <div className="glass-panel h-full overflow-hidden">
+      <div className="flex items-center justify-between px-7 pt-6 pb-4 border-b border-white/[0.06]">
+        <p className="cmd-label text-gold/90">Action Queue</p>
         <span className="inline-flex items-center rounded-full bg-white/[0.04] border border-border/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground/80 tabular-nums">
           {ACTION_QUEUE.length}
         </span>
       </div>
-      <ul className="divide-y divide-border/45">
+      <ul className="divide-y divide-white/[0.05]">
         {ACTION_QUEUE.map((item) => {
           const priority = PRIORITY_META[item.priority];
           const agent = getAgent(item.agentId);

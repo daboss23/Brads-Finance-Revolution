@@ -6,12 +6,20 @@ export type AgentStatus = "active" | "monitoring" | "blocked" | "ready";
 
 export type AgentPriority = "low" | "medium" | "high" | "critical";
 
+export type AgentTone = "blue" | "orange" | "gold" | "emerald" | "violet";
+
 export type Agent = {
   id: AgentId;
   name: string;
   role: string;
   tagline: string;
   domain: string;
+  /** visual identity accent */
+  tone: AgentTone;
+  /** single-line "call sign" describing the agent's edge */
+  callsign: string;
+  /** position in the advice assembly line, 1-indexed */
+  flowStep: number;
   status: AgentStatus;
   /** 0 - 100 workload utilisation */
   workload: number;
@@ -23,6 +31,10 @@ export type Agent = {
   /** rolling metrics for the command centre */
   queueDepth: number;
   completedToday: number;
+  /** recent throughput sparkline (last 8 intervals) */
+  throughput: number[];
+  /** headline reliability / confidence metric, 0-100 */
+  confidence: number;
 };
 
 function clientName(id: string | null): string | null {
@@ -37,6 +49,9 @@ export const AGENTS: Agent[] = [
     role: "Client Research Agent",
     tagline: "Client Intelligence",
     domain: "Research and pre meeting context",
+    tone: "blue",
+    callsign: "Reads every file before Brad walks in the room",
+    flowStep: 1,
     status: "active",
     workload: 68,
     activeTask: "Preparing pre meeting brief for Sarah Mitchell",
@@ -46,6 +61,8 @@ export const AGENTS: Agent[] = [
     nextAction: "Surface insurance and goals priorities before 28 May meeting",
     queueDepth: 3,
     completedToday: 5,
+    throughput: [3, 4, 2, 5, 4, 6, 5, 7],
+    confidence: 94,
   },
   {
     id: "vanta",
@@ -53,6 +70,9 @@ export const AGENTS: Agent[] = [
     role: "Risk and Compliance Agent",
     tagline: "Compliance Gate",
     domain: "Best interests duty and advice risk",
+    tone: "orange",
+    callsign: "Nothing reaches advice without clearing the gate",
+    flowStep: 2,
     status: "blocked",
     workload: 81,
     activeTask: "Reviewing best interests duty evidence for David Okafor",
@@ -62,13 +82,18 @@ export const AGENTS: Agent[] = [
     nextAction: "Request outstanding fact find evidence before SOA can proceed",
     queueDepth: 4,
     completedToday: 2,
+    throughput: [4, 3, 5, 2, 3, 2, 4, 3],
+    confidence: 88,
   },
   {
     id: "orion",
     name: "ORION",
     role: "Strategy and SOA Agent",
-    tagline: "Strategy and Assembly",
+    tagline: "Strategy and Final Assembly",
     domain: "SOA drafting and strategy logic",
+    tone: "gold",
+    callsign: "Brings every signal together into the final SOA draft",
+    flowStep: 3,
     status: "ready",
     workload: 54,
     activeTask: "SOA draft assembled for Robert and Sue Tanner",
@@ -78,6 +103,8 @@ export const AGENTS: Agent[] = [
     nextAction: "Hand SOA draft to Brad for review and approval",
     queueDepth: 2,
     completedToday: 1,
+    throughput: [1, 2, 1, 3, 2, 2, 3, 2],
+    confidence: 91,
   },
   {
     id: "pulse",
@@ -85,6 +112,9 @@ export const AGENTS: Agent[] = [
     role: "Client Follow Up Agent",
     tagline: "Pipeline Momentum",
     domain: "Follow ups and pipeline movement",
+    tone: "emerald",
+    callsign: "Keeps every client moving, never lets one go quiet",
+    flowStep: 6,
     status: "monitoring",
     workload: 47,
     activeTask: "Tracking stalled clients across the pipeline",
@@ -94,6 +124,8 @@ export const AGENTS: Agent[] = [
     nextAction: "Draft reminder for Michael and Kate Reynolds — no fact find activity",
     queueDepth: 6,
     completedToday: 8,
+    throughput: [6, 5, 7, 6, 8, 7, 9, 8],
+    confidence: 96,
   },
 ];
 

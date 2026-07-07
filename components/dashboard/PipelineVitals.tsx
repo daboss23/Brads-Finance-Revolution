@@ -1,5 +1,6 @@
 import { TrendingUp, Gauge, AlertOctagon } from "lucide-react";
 import { CLIENTS } from "@/lib/data";
+import { TelemetryRing } from "@/components/ui/telemetry-ring";
 import { cn } from "@/lib/utils";
 
 export function PipelineVitals() {
@@ -16,80 +17,63 @@ export function PipelineVitals() {
   );
 
   return (
-    <div className="grid grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
       {/* Pipeline velocity */}
-      <div className="rounded-xl border border-border/70 bg-card px-7 py-6">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-accent/12">
-            <TrendingUp className="h-[14px] w-[14px] text-blue-accent" />
+      <div className="glass-panel glass-hover flex items-center gap-6 px-7 py-6">
+        <TelemetryRing value={avgProgress} tone="blue" size={104} stroke={8} />
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5 text-blue-accent" />
+            <p className="cmd-label text-muted-foreground/65">Pipeline Velocity</p>
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
-            Pipeline Velocity
+          <p className="text-[13px] leading-snug tracking-tight text-foreground/80">
+            Average fact find completion across {total} active clients
           </p>
-        </div>
-        <p className="text-[40px] font-semibold tracking-tight text-foreground leading-none tabular-nums mb-2">
-          {avgProgress}
-          <span className="text-[22px] text-muted-foreground/60">%</span>
-        </p>
-        <p className="text-[12px] text-muted-foreground/70 tracking-tight">
-          Average fact find completion across {total} active clients
-        </p>
-        <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
-          <div
-            className="h-full rounded-full bg-blue-accent/70"
-            style={{ width: `${avgProgress}%` }}
-          />
         </div>
       </div>
 
       {/* Client readiness */}
-      <div className="rounded-xl border border-border/70 bg-card px-7 py-6">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/12">
-            <Gauge className="h-[14px] w-[14px] text-emerald-300" />
+      <div className="glass-panel glass-hover flex items-center gap-6 px-7 py-6">
+        <TelemetryRing
+          value={readyPct}
+          tone="emerald"
+          size={104}
+          stroke={8}
+          label={`${readyForSoa}/${total}`}
+          sublabel="Ready"
+        />
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2">
+            <Gauge className="h-3.5 w-3.5 text-emerald-300" />
+            <p className="cmd-label text-muted-foreground/65">Client Readiness</p>
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
-            Client Readiness
+          <p className="text-[13px] leading-snug tracking-tight text-foreground/80">
+            Files ready to progress toward SOA generation
           </p>
-        </div>
-        <p className="text-[40px] font-semibold tracking-tight text-foreground leading-none tabular-nums mb-2">
-          {readyForSoa}
-          <span className="text-[22px] text-muted-foreground/60">/{total}</span>
-        </p>
-        <p className="text-[12px] text-muted-foreground/70 tracking-tight">
-          Files ready to progress toward SOA generation
-        </p>
-        <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
-          <div
-            className="h-full rounded-full bg-emerald-500/70"
-            style={{ width: `${readyPct}%` }}
-          />
         </div>
       </div>
 
       {/* Bottleneck */}
-      <div className="rounded-xl border border-orange-500/25 bg-card px-7 py-6">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/12">
-            <AlertOctagon className="h-[14px] w-[14px] text-orange-300" />
+      <div className="glass-panel edge-orange px-7 py-6">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertOctagon className="h-3.5 w-3.5 text-orange-300" />
+            <p className="cmd-label text-muted-foreground/65">Bottlenecks</p>
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
-            Bottlenecks
+          <p className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-orange-200">
+            {stalled.length}
           </p>
         </div>
-        <p className="text-[40px] font-semibold tracking-tight text-foreground leading-none tabular-nums mb-4">
-          {stalled.length}
-        </p>
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {stalled.slice(0, 3).map((c) => (
             <li key={c.id} className="flex items-center justify-between gap-2">
-              <span className="text-[12.5px] text-foreground/80 tracking-tight truncate">
+              <span className="truncate text-[12.5px] tracking-tight text-foreground/80">
                 {c.name}
               </span>
               <span
                 className={cn(
-                  "shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em]",
-                  c.status === "review-required" ? "text-orange-300" : "text-muted-foreground/60"
+                  "shrink-0 cmd-label",
+                  c.status === "review-required" ? "text-orange-300" : "text-muted-foreground/55"
                 )}
               >
                 {c.status === "review-required" ? "Review" : "Not started"}
