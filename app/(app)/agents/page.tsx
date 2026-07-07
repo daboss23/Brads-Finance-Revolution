@@ -10,13 +10,24 @@ import {
 } from "lucide-react";
 import {
   AGENT_FLOW,
-  AGENT_SYSTEM_SUMMARY,
   AGENTS,
   ORION_FINAL_SOA_NOTE,
   type AgentPriority,
   type AgentStatus,
 } from "@/lib/agents";
 import { cn } from "@/lib/utils";
+
+const agentSystemSummary = {
+  active: AGENTS.filter((agent) => agent.status === "Active").length,
+  blocked: AGENTS.filter((agent) => agent.status === "Blocked").length,
+  averageWorkload: Math.round(
+    AGENTS.reduce((total, agent) => total + agent.workload, 0) /
+      Math.max(AGENTS.length, 1),
+  ),
+  criticalTasks: AGENTS.filter(
+    (agent) => agent.activeTask.priority === "Critical",
+  ).length,
+};
 
 const statusTone: Record<AgentStatus, string> = {
   Active: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
@@ -68,10 +79,10 @@ export default function AgentsPage() {
               System telemetry
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <Telemetry label="Active" value={AGENT_SYSTEM_SUMMARY.active} />
-              <Telemetry label="Blocked" value={AGENT_SYSTEM_SUMMARY.blocked} />
-              <Telemetry label="Load" value={`${AGENT_SYSTEM_SUMMARY.averageWorkload}%`} />
-              <Telemetry label="Critical" value={AGENT_SYSTEM_SUMMARY.criticalTasks} />
+              <Telemetry label="Active" value={agentSystemSummary.active} />
+              <Telemetry label="Blocked" value={agentSystemSummary.blocked} />
+              <Telemetry label="Load" value={`${agentSystemSummary.averageWorkload}%`} />
+              <Telemetry label="Critical" value={agentSystemSummary.criticalTasks} />
             </div>
             <div className="mt-5 rounded-xl border border-gold/20 bg-gold/[0.06] p-4">
               <div className="mb-2 flex items-center gap-2 text-gold">

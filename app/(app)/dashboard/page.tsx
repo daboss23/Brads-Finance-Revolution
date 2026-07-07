@@ -21,7 +21,16 @@ import { cn } from "@/lib/utils";
 import { PipelineTable } from "@/components/dashboard/PipelineTable";
 import { TodayLabel } from "@/components/dashboard/TodayLabel";
 import { getPipelineMetrics } from "@/lib/soa/soa-pipeline";
-import { AGENT_SYSTEM_SUMMARY, AGENTS, type AgentPriority } from "@/lib/agents";
+import { AGENTS, type AgentPriority } from "@/lib/agents";
+
+function getAgentSystemSummary() {
+  return {
+    averageWorkload: Math.round(
+      AGENTS.reduce((total, agent) => total + agent.workload, 0) /
+        Math.max(AGENTS.length, 1),
+    ),
+  };
+}
 
 function getMetrics() {
   const active = CLIENTS.length;
@@ -69,6 +78,7 @@ const actionQueue = [
 export default function DashboardPage() {
   const metrics = getMetrics();
   const soa = getPipelineMetrics();
+  const agentSummary = getAgentSystemSummary();
   const pipelineVelocity = Math.round(
     ((metrics.ready + soa.approvedReady + soa.signedThisMonth) /
       Math.max(metrics.active + soa.total, 1)) *
@@ -138,7 +148,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid sm:grid-cols-3">
-              <BottomStat label="Fleet Load" value={`${AGENT_SYSTEM_SUMMARY.averageWorkload}%`} />
+              <BottomStat label="Fleet Load" value={`${agentSummary.averageWorkload}%`} />
               <BottomStat label="In Queue" value={actionQueue.length + metrics.needsReview} />
               <BottomStat label="Cleared Today" value={metrics.ready + soa.approvedReady} accent />
             </div>
