@@ -10,6 +10,7 @@ import {
   Shield,
   FileSignature,
   Settings,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/soa", label: "SOA", icon: FileSignature },
   { href: "/fact-find", label: "Fact Find", icon: ClipboardList },
   { href: "/sarah", label: "Sarah", icon: Sparkles },
+  { href: "/agents", label: "Agents", icon: Bot },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
