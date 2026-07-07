@@ -1,25 +1,21 @@
 import Link from "next/link";
 import {
-  Users,
-  ClipboardList,
-  Calendar,
-  AlertCircle,
+  Activity,
+  AlertTriangle,
   ArrowRight,
-  Sparkles,
+  Cpu,
   FileSignature,
-  Clock,
-  CheckCircle2,
-  Send,
+  Search,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import { CLIENTS } from "@/lib/data";
-import { cn } from "@/lib/utils";
-import { PipelineTable } from "@/components/dashboard/PipelineTable";
-import { TodayLabel } from "@/components/dashboard/TodayLabel";
-import { AgentActivityStrip } from "@/components/dashboard/AgentActivityStrip";
-import { ActionQueue } from "@/components/dashboard/ActionQueue";
-import { PipelineVitals } from "@/components/dashboard/PipelineVitals";
-import { TelemetryRing } from "@/components/ui/telemetry-ring";
+import { ACTION_QUEUE, AGENTS, PRIORITY_META, getAgent } from "@/lib/agents";
+import { CLIENTS, STATUS_CONFIG } from "@/lib/data";
 import { getPipelineMetrics } from "@/lib/soa/soa-pipeline";
+import { TodayLabel } from "@/components/dashboard/TodayLabel";
+import { Badge } from "@/components/ui/badge";
+import { TelemetryRing } from "@/components/ui/telemetry-ring";
+import { cn } from "@/lib/utils";
 
 function getMetrics() {
   const active = CLIENTS.length;
@@ -27,8 +23,42 @@ function getMetrics() {
   const ready = CLIENTS.filter((c) => c.status === "ready-for-meeting").length;
   const needsReview = CLIENTS.filter((c) => c.status === "review-required").length;
   const notStarted = CLIENTS.filter((c) => c.status === "link-sent").length;
-  return { active, inProgress, ready, needsReview, notStarted };
+  const avgProgress = Math.round(
+    CLIENTS.reduce((sum, client) => sum + client.progress, 0) /
+      Math.max(CLIENTS.length, 1),
+  );
+  return { active, inProgress, ready, needsReview, notStarted, avgProgress };
 }
+
+const mapRows = [
+  "0000000011110000000000000011100000000",
+  "0000001112221110000000011122211100000",
+  "0000111223332211100000112233332111000",
+  "0001122233333322111001122333333221000",
+  "0000112223333221100011222333322110000",
+  "0000001122221110000011112221110000000",
+  "0000000011110000000000111110000000000",
+  "0000000000000000000011122211100000000",
+  "0000000000000000000112233332110000000",
+  "0000000000000000000011222211000000000",
+];
+
+const graphBars = [
+  "h-12",
+  "h-20",
+  "h-28",
+  "h-16",
+  "h-24",
+  "h-32",
+  "h-14",
+  "h-36",
+];
+
+const advisorPulse = [
+  { label: "Discovery", value: 78, tone: "gold" },
+  { label: "Compliance", value: 63, tone: "orange" },
+  { label: "SOA", value: 91, tone: "emerald" },
+];
 
 export default function DashboardPage() {
   const metrics = getMetrics();
@@ -38,204 +68,586 @@ export default function DashboardPage() {
   const soaReadyPct = soaTotal
     ? Math.round(((soa.approvedReady + soa.signedThisMonth) / soaTotal) * 100)
     : 0;
+  const clearedToday = AGENTS.reduce((sum, agent) => sum + agent.completedToday, 0);
+  const queued = AGENTS.reduce((sum, agent) => sum + agent.queueDepth, 0);
+  const fleetLoad = Math.round(
+    AGENTS.reduce((sum, agent) => sum + agent.workload, 0) / Math.max(AGENTS.length, 1),
+  );
+  const reviewClients = CLIENTS.filter((client) => client.status === "review-required");
+  const heroClient = CLIENTS.find((client) => client.id === "sarah-mitchell") ?? CLIENTS[0];
 
   return (
-    <div className="px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
-      {/* Hero header */}
-      <header className="mb-9 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="cmd-label mb-4 text-muted-foreground/60">BMK Financial Services</p>
-          <h1 className="text-[30px] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-[34px]">
-            Good morning, Brad.
-          </h1>
-          <p className="mt-4 text-[14px] tracking-tight text-muted-foreground/80">
-            <TodayLabel /> &nbsp;·&nbsp; Financial Advice Command Centre
+    <main className="relative isolate min-h-[100dvh] overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,hsl(var(--gold)/0.18),transparent_26%),radial-gradient(circle_at_86%_8%,hsl(39_50%_64%/0.10),transparent_22%),linear-gradient(145deg,hsl(32_13%_16%),hsl(220_28%_4%)_54%,hsl(34_20%_8%))]" />
+      <div className="absolute inset-x-8 top-5 -z-10 h-28 rounded-full bg-gold/10 blur-3xl" />
+
+      <section className="mx-auto max-w-[1480px] overflow-hidden rounded-[24px] border border-white/[0.08] bg-[linear-gradient(135deg,hsl(220_18%_11%/0.98),hsl(220_24%_5%/0.99))] shadow-[0_26px_80px_-32px_rgba(0,0,0,0.92)]">
+        <TopBar metrics={metrics} />
+
+        <div className="grid gap-3 p-3 lg:grid-cols-[300px_minmax(0,1fr)_330px] xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+          <aside className="grid gap-3">
+            <CommandPanel className="min-h-[310px]" eyebrow="Telemetry" title="Advice signal">
+              <div className="mt-3 grid place-items-center">
+                <RadarDial value={metrics.avgProgress} />
+              </div>
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                <TinyStat label="Active" value={metrics.active} />
+                <TinyStat label="Ready" value={metrics.ready} />
+                <TinyStat label="Review" value={metrics.needsReview} danger />
+              </div>
+            </CommandPanel>
+
+            <CommandPanel eyebrow="Sarah" title="Operating brief">
+              <div className="mt-4 space-y-3">
+                <BriefLine
+                  label="Priority file"
+                  value={`${heroClient.name} at ${heroClient.progress}%`}
+                />
+                <BriefLine
+                  label="Client movement"
+                  value={`${metrics.inProgress} fact finds currently progressing`}
+                />
+                <BriefLine
+                  label="Follow up"
+                  value={`${metrics.notStarted} client${metrics.notStarted === 1 ? "" : "s"} still not started`}
+                />
+              </div>
+            </CommandPanel>
+
+            <CommandPanel eyebrow="Momentum" title="Fact find curve">
+              <MiniAreaChart />
+              <div className="mt-4 flex items-end justify-between">
+                <div>
+                  <p className="text-[34px] font-semibold leading-none tracking-normal text-gold">
+                    {metrics.avgProgress}%
+                  </p>
+                  <p className="mt-1 cmd-label text-muted-foreground/55">Average completion</p>
+                </div>
+                <Link
+                  href="/clients"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground/70 transition hover:text-gold"
+                >
+                  Clients <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </CommandPanel>
+          </aside>
+
+          <section className="grid gap-3">
+            <div className="grid gap-3 md:grid-cols-3">
+              <HeroMetric
+                label="Client files"
+                value={`${metrics.active}/3`}
+                detail="Three files need Brad-level attention today"
+                icon={Users}
+              />
+              <HeroMetric
+                label="SOA readiness"
+                value={`${soaReadyPct}%`}
+                detail={`${soa.approvedReady + soa.signedThisMonth} of ${soaTotal} files approved or signed`}
+                icon={FileSignature}
+                tone="gold"
+              />
+              <HeroMetric
+                label="Agent fleet"
+                value={`${fleetLoad}%`}
+                detail={`${queued} queued, ${clearedToday} cleared today`}
+                icon={Cpu}
+                tone="orange"
+              />
+            </div>
+
+            <div className="grid gap-3 xl:grid-cols-[1fr_260px]">
+              <CommandPanel
+                eyebrow="Pipeline"
+                title="Revenue and advice movement"
+                className="min-h-[338px]"
+                action={
+                  <Link
+                    href="/soa"
+                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground/70 transition hover:text-gold"
+                  >
+                    SOA <ArrowRight className="h-3 w-3" />
+                  </Link>
+                }
+              >
+                <div className="mt-6 grid gap-6 sm:grid-cols-[1fr_1.1fr]">
+                  <div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <DataPlate label="In generation" value={soa.inGeneration} />
+                      <DataPlate label="Awaiting review" value={soa.awaitingReview} />
+                      <DataPlate label="Approved" value={soa.approvedReady} />
+                      <DataPlate label="Signed" value={soa.signedThisMonth} />
+                    </div>
+                    <div className="mt-5 rounded-lg border border-gold/15 bg-gold/[0.04] p-4">
+                      <div className="flex items-center gap-2 text-gold">
+                        <Sparkles className="h-4 w-4" />
+                        <p className="cmd-label">Sarah recommendation</p>
+                      </div>
+                      <p className="mt-3 text-[13px] leading-6 text-foreground/78">
+                        Start with David Okafor evidence, then move Sarah Mitchell into
+                        meeting prep once insurance context is confirmed.
+                      </p>
+                    </div>
+                  </div>
+                  <BarCluster />
+                </div>
+              </CommandPanel>
+
+              <CommandPanel eyebrow="Pulse" title="Advisor load">
+                <div className="mt-5 space-y-5">
+                  {advisorPulse.map((item) => (
+                    <LoadRow key={item.label} {...item} />
+                  ))}
+                </div>
+                <div className="mt-6 rounded-lg border border-white/[0.07] bg-black/20 p-4">
+                  <p className="text-[12px] leading-5 text-muted-foreground/70">
+                    Review pressure is concentrated in compliance and pre-SOA evidence.
+                  </p>
+                </div>
+              </CommandPanel>
+            </div>
+
+            <CommandPanel
+              eyebrow="Client matrix"
+              title="Files moving now"
+              action={
+                <Link
+                  href="/clients"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground/70 transition hover:text-gold"
+                >
+                  View all <ArrowRight className="h-3 w-3" />
+                </Link>
+              }
+            >
+              <ClientMatrix />
+            </CommandPanel>
+          </section>
+
+          <aside className="grid gap-3">
+            <CommandPanel eyebrow="Territory" title="Newcastle advice map">
+              <MapMatrix />
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <TinyStat label="Booked" value={metrics.ready} />
+                <TinyStat label="SOA" value={soa.inGeneration} />
+                <TinyStat label="Risk" value={reviewClients.length} danger />
+              </div>
+            </CommandPanel>
+
+            <CommandPanel eyebrow="Compliance" title="Gate pressure">
+              <div className="mt-5 grid place-items-center">
+                <TelemetryRing
+                  value={83}
+                  tone="orange"
+                  size={152}
+                  stroke={12}
+                  label="83"
+                  sublabel="Score"
+                />
+              </div>
+              <div className="mt-5 space-y-2">
+                {reviewClients.slice(0, 3).map((client) => (
+                  <Link
+                    key={client.id}
+                    href={`/clients/${client.id}/compliance`}
+                    className="group flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.025] px-3 py-2.5 transition hover:border-gold/25 hover:bg-gold/[0.04]"
+                  >
+                    <span className="truncate text-[12px] text-foreground/80">
+                      {client.name}
+                    </span>
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-300" />
+                  </Link>
+                ))}
+              </div>
+            </CommandPanel>
+
+            <CommandPanel eyebrow="Action queue" title="Brad next">
+              <ul className="mt-4 space-y-2.5">
+                {ACTION_QUEUE.slice(0, 4).map((item) => {
+                  const priority = PRIORITY_META[item.priority];
+                  const agent = getAgent(item.agentId);
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        href={item.href}
+                        className="group flex items-start gap-3 rounded-lg border border-white/[0.06] bg-white/[0.025] px-3 py-3 transition hover:border-gold/25 hover:bg-gold/[0.04]"
+                      >
+                        <span
+                          className={cn(
+                            "mt-0.5 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase",
+                            priority.bg,
+                            priority.border,
+                            priority.text,
+                          )}
+                        >
+                          {priority.label}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="line-clamp-2 text-[12px] leading-5 text-foreground/82">
+                            {item.label}
+                          </span>
+                          <span className="mt-1 block text-[10px] font-semibold uppercase text-muted-foreground/45">
+                            {agent?.name}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CommandPanel>
+          </aside>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function TopBar({ metrics }: { metrics: ReturnType<typeof getMetrics> }) {
+  return (
+    <header className="flex flex-col gap-4 border-b border-white/[0.07] bg-black/25 px-4 py-4 backdrop-blur md:flex-row md:items-center md:justify-between lg:px-5">
+      <div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="grid h-7 w-7 place-items-center rounded-full border border-gold/25 bg-gold/15 text-[11px] font-bold text-gold">
+            B
+          </span>
+          <p className="cmd-label text-muted-foreground/60">BMK Financial Services</p>
+          <span className="h-1 w-1 rounded-full bg-gold/50" />
+          <p className="text-[12px] text-muted-foreground/70">
+            <TodayLabel />
           </p>
         </div>
+        <h1 className="mt-3 text-[28px] font-semibold leading-none tracking-normal text-foreground sm:text-[34px]">
+          Advice command dashboard
+        </h1>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="hidden items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-muted-foreground/65 sm:flex">
+          <Search className="h-3.5 w-3.5" />
+          <span className="text-[12px]">Search clients, SOAs, evidence</span>
+        </div>
+        <TopPill icon={Activity} label="Live" value={`${metrics.active} files`} />
         <Link
           href="/clients"
-          className="btn-gold inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold tracking-tight text-gold-foreground transition-transform hover:scale-[1.02]"
+          className="inline-flex h-9 items-center gap-2 rounded-full bg-gold px-4 text-[12px] font-semibold text-gold-foreground transition hover:bg-gold/90"
         >
-          New Client
-          <ArrowRight className="h-3.5 w-3.5" />
+          New client <ArrowRight className="h-3.5 w-3.5" />
         </Link>
-      </header>
+      </div>
+    </header>
+  );
+}
 
-      {/* Today's Operating Brief */}
-      <section className="mb-6">
-        <div className="mb-5 flex items-center gap-2.5">
-          <span className="h-3.5 w-[2px] rounded-full bg-gold/80" />
-          <h2 className="cmd-label text-gold/90">Today&apos;s Operating Brief</h2>
+function CommandPanel({
+  eyebrow,
+  title,
+  action,
+  className,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  action?: React.ReactNode;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      className={cn(
+        "relative overflow-hidden rounded-lg border border-white/[0.08] bg-[linear-gradient(150deg,hsl(222_18%_13%/0.92),hsl(222_24%_7%/0.96))] p-4 shadow-[0_18px_42px_-30px_rgba(0,0,0,0.95)]",
+        "before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[linear-gradient(135deg,rgba(255,255,255,0.10),transparent_34%,rgba(202,151,78,0.04))]",
+        className,
+      )}
+    >
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <p className="cmd-label text-gold/75">{eyebrow}</p>
+          <h2 className="mt-1 text-[17px] font-semibold tracking-normal text-foreground">
+            {title}
+          </h2>
         </div>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
-          <AgentActivityStrip />
-          <ActionQueue />
-        </div>
-      </section>
+        {action}
+      </div>
+      <div className="relative">{children}</div>
+    </section>
+  );
+}
 
-      {/* Pipeline vitals */}
-      <section className="mb-12">
-        <PipelineVitals />
-      </section>
-
-      {/* KPI cards */}
-      <section className="mb-8">
-        <div className="mb-5 flex items-center gap-2.5">
-          <Users className="h-3.5 w-3.5 text-muted-foreground/60" />
-          <p className="cmd-label text-muted-foreground/70">Client Overview</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
-          <KpiCard label="Active Clients" value={metrics.active} icon={Users} tone="gold" />
-          <KpiCard label="Fact Finds In Progress" value={metrics.inProgress} icon={ClipboardList} tone="blue" />
-          <KpiCard label="Ready for Meeting" value={metrics.ready} icon={Calendar} tone="amber" />
-          <KpiCard label="Needs Review" value={metrics.needsReview} icon={AlertCircle} tone="orange" />
-        </div>
-      </section>
-
-      {/* SOA readiness */}
-      <section className="mb-12">
-        <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <FileSignature className="h-3.5 w-3.5 text-gold" />
-            <p className="cmd-label text-gold/90">SOA Readiness</p>
-          </div>
-          <Link
-            href="/soa"
-            className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-muted-foreground/75 transition-colors hover:text-gold"
-          >
-            Open SOA pipeline
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[auto_1fr]">
-          <div className="glass-panel edge-gold flex items-center gap-6 px-8 py-6">
-            <TelemetryRing value={soaReadyPct} tone="gold" size={116} stroke={9} sublabel="Ready to Send" />
-            <div className="max-w-[150px]">
-              <p className="text-[13px] font-medium leading-snug tracking-tight text-foreground/85">
-                Advice files approved or signed this cycle
-              </p>
-              <p className="mt-2 text-[12px] tracking-tight text-muted-foreground/60">
-                {soa.approvedReady + soa.signedThisMonth} of {soaTotal} in the SOA pipeline
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
-            <KpiCard label="In Generation" value={soa.inGeneration} icon={Sparkles} tone="blue" compact />
-            <KpiCard label="Awaiting Review" value={soa.awaitingReview} icon={Clock} tone="amber" compact />
-            <KpiCard label="Approved · Ready" value={soa.approvedReady} icon={CheckCircle2} tone="emerald" compact />
-            <KpiCard label="Signed This Month" value={soa.signedThisMonth} icon={Send} tone="gold" compact />
-          </div>
-        </div>
-      </section>
-
-      {/* Sarah brief */}
-      <section className="glass-panel mb-12 overflow-hidden">
-        <div className="flex">
-          <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
-          <div className="flex-1 px-7 py-7 sm:px-9 sm:py-8">
-            <div className="mb-6 flex items-center gap-3.5">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/30 bg-gold/12">
-                <Sparkles className="h-[15px] w-[15px] text-gold" />
-              </div>
-              <div>
-                <p className="cmd-label leading-none text-gold/90">Sarah</p>
-                <p className="mt-1.5 text-[12.5px] tracking-tight text-muted-foreground/90">
-                  AI Adviser Intelligence &nbsp;·&nbsp; Today&apos;s Brief
-                </p>
-              </div>
-            </div>
-            <ul className="space-y-3.5">
-              {[
-                `${metrics.notStarted} client${metrics.notStarted !== 1 ? "s have" : " has"} not started their fact find — a follow-up call is recommended.`,
-                "Sarah Mitchell is 85% complete and ready for meeting prep ahead of 28 May.",
-                "David Okafor and Angela Forsyth both require adviser review before they can progress.",
-              ].map((insight, i) => (
-                <li key={i} className="flex items-start gap-3.5">
-                  <span className="mt-[9px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/55" />
-                  <p className="text-[14px] leading-relaxed tracking-tight text-foreground/82">
-                    {insight}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Client pipeline */}
-      <section>
-        <div className="mb-6 flex items-end justify-between">
-          <div className="flex items-baseline gap-3">
-            <h2 className="text-[17px] font-semibold tracking-tight text-foreground">
-              Client Pipeline
-            </h2>
-            <span className="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground/80">
-              {CLIENTS.length}
-            </span>
-          </div>
-          <Link
-            href="/clients"
-            className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-muted-foreground/75 transition-colors hover:text-gold"
-          >
-            View all
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <PipelineTable />
-      </section>
+function TopPill({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] px-3">
+      <Icon className="h-3.5 w-3.5 text-gold" />
+      <span className="text-[10px] font-bold uppercase text-muted-foreground/55">
+        {label}
+      </span>
+      <span className="text-[12px] font-semibold text-foreground/85">{value}</span>
     </div>
   );
 }
 
-const KPI_TONE: Record<string, { text: string; soft: string; glow: string }> = {
-  gold: { text: "text-gold", soft: "bg-gold/12", glow: "from-gold/50" },
-  blue: { text: "text-blue-accent", soft: "bg-blue-accent/12", glow: "from-blue-accent/50" },
-  amber: { text: "text-amber-300", soft: "bg-amber-400/12", glow: "from-amber-400/50" },
-  orange: { text: "text-orange-300", soft: "bg-orange-500/12", glow: "from-orange-400/50" },
-  emerald: { text: "text-emerald-300", soft: "bg-emerald-500/12", glow: "from-emerald-500/50" },
-};
-
-function KpiCard({
+function HeroMetric({
   label,
   value,
+  detail,
   icon: Icon,
-  tone,
-  compact = false,
+  tone = "blue",
 }: {
   label: string;
-  value: number;
+  value: string;
+  detail: string;
   icon: React.ElementType;
-  tone: keyof typeof KPI_TONE;
-  compact?: boolean;
+  tone?: "blue" | "gold" | "orange";
 }) {
-  const t = KPI_TONE[tone];
+  const toneClass = {
+    blue: "text-blue-accent bg-blue-accent/10 border-blue-accent/20",
+    gold: "text-gold bg-gold/10 border-gold/25",
+    orange: "text-orange-300 bg-orange-500/10 border-orange-500/25",
+  }[tone];
+
   return (
-    <div className="glass-panel glass-hover group overflow-hidden">
-      <div className={cn("h-[2px] bg-gradient-to-r to-transparent", t.glow)} />
-      <div className={cn("px-6", compact ? "pt-5 pb-5" : "pt-7 pb-7 sm:px-7")}>
-        <div className={cn("flex items-start justify-between", compact ? "mb-4" : "mb-7 sm:mb-8")}>
-          <p className="cmd-label max-w-[130px] leading-snug text-muted-foreground/70">
-            {label}
-          </p>
-          <div
-            className={cn(
-              "grid place-items-center rounded-full transition-transform group-hover:scale-105",
-              t.soft,
-              compact ? "h-8 w-8" : "h-9 w-9"
-            )}
-          >
-            <Icon className={cn("h-[14px] w-[14px]", t.text)} />
-          </div>
-        </div>
-        <p
-          className={cn(
-            "font-semibold leading-none tracking-tight tabular-nums text-foreground",
-            compact ? "text-[34px]" : "text-[44px] sm:text-[52px]"
-          )}
-        >
-          {value}
+    <CommandPanel eyebrow={label} title={value}>
+      <div className="mt-5 flex items-end justify-between gap-4">
+        <p className="max-w-[190px] text-[12px] leading-5 text-muted-foreground/70">
+          {detail}
         </p>
+        <div className={cn("grid h-12 w-12 place-items-center rounded-lg border", toneClass)}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+    </CommandPanel>
+  );
+}
+
+function RadarDial({ value }: { value: number }) {
+  return (
+    <div className="relative grid h-48 w-48 place-items-center rounded-full border border-gold/25 bg-[radial-gradient(circle,hsl(43_62%_54%/0.20),transparent_58%)]">
+      <div className="absolute inset-4 rounded-full border border-gold/20" />
+      <div className="absolute inset-10 rounded-full border border-gold/20" />
+      <div className="absolute left-1/2 top-5 h-[152px] w-px -translate-x-1/2 bg-gold/25" />
+      <div className="absolute left-5 top-1/2 h-px w-[152px] -translate-y-1/2 bg-gold/25" />
+      <div className="absolute inset-7 rounded-full border border-dashed border-gold/35" />
+      <div className="absolute h-24 w-24 rotate-45 rounded-lg border border-white/10 bg-[linear-gradient(135deg,hsl(43_68%_60%/0.18),transparent)] shadow-[0_0_45px_-12px_hsl(43_68%_52%/0.65)]" />
+      <div className="relative text-center">
+        <p className="text-[38px] font-semibold leading-none tracking-normal text-foreground">
+          {value}
+          <span className="text-[17px] text-gold/70">%</span>
+        </p>
+        <p className="mt-2 cmd-label text-muted-foreground/55">File health</p>
       </div>
     </div>
   );
+}
+
+function TinyStat({
+  label,
+  value,
+  danger = false,
+}: {
+  label: string;
+  value: number;
+  danger?: boolean;
+}) {
+  return (
+    <div className="rounded-lg border border-white/[0.07] bg-black/20 px-3 py-3">
+      <p className={cn("text-[22px] font-semibold leading-none", danger ? "text-orange-300" : "text-foreground")}>
+        {value}
+      </p>
+      <p className="mt-1.5 cmd-label text-muted-foreground/45">{label}</p>
+    </div>
+  );
+}
+
+function BriefLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.025] px-3.5 py-3">
+      <p className="cmd-label text-muted-foreground/45">{label}</p>
+      <p className="mt-1.5 text-[13px] leading-5 text-foreground/82">{value}</p>
+    </div>
+  );
+}
+
+function MiniAreaChart() {
+  return (
+    <div className="mt-5 h-32 rounded-lg border border-white/[0.06] bg-[linear-gradient(180deg,transparent,hsl(43_68%_52%/0.06))] p-3">
+      <svg viewBox="0 0 260 100" className="h-full w-full" aria-hidden="true">
+        <path
+          d="M0 82 L32 66 L64 72 L96 42 L128 52 L160 28 L192 38 L224 18 L260 26 L260 100 L0 100 Z"
+          className="fill-gold/15"
+        />
+        <path
+          d="M0 82 L32 66 L64 72 L96 42 L128 52 L160 28 L192 38 L224 18 L260 26"
+          className="fill-none stroke-gold/75"
+          strokeWidth="2"
+        />
+        <path
+          d="M0 88 L260 88"
+          className="stroke-white/10"
+          strokeWidth="1"
+        />
+      </svg>
+    </div>
+  );
+}
+
+function DataPlate({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-white/[0.07] bg-black/25 px-4 py-3">
+      <p className="cmd-label text-muted-foreground/45">{label}</p>
+      <p className="mt-3 text-[28px] font-semibold leading-none tracking-normal text-foreground">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function BarCluster() {
+  return (
+    <div className="flex h-60 items-end gap-3 rounded-lg border border-white/[0.06] bg-[linear-gradient(180deg,hsl(220_18%_12%/0.8),hsl(220_22%_6%/0.88))] px-5 pb-5 pt-8">
+      {graphBars.map((height, index) => (
+        <div key={index} className="flex flex-1 flex-col items-center gap-2">
+          <div
+            className={cn(
+              "w-full rounded-t-full border border-gold/25 bg-[linear-gradient(180deg,hsl(39_90%_72%),hsl(34_72%_48%))] shadow-[0_0_22px_-9px_hsl(38_80%_58%/0.75)]",
+              height,
+            )}
+          />
+          <span className="text-[9px] font-semibold uppercase text-muted-foreground/40">
+            {index + 1}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LoadRow({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: string;
+}) {
+  const fill = {
+    gold: "bg-gold",
+    orange: "bg-orange-400",
+    emerald: "bg-emerald-400",
+  }[tone] ?? "bg-gold";
+  const width = getWidthClass(value);
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <p className="cmd-label text-muted-foreground/55">{label}</p>
+        <p className="text-[12px] font-semibold text-foreground/85">{value}%</p>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+        <div className={cn("h-full rounded-full", fill, width)} />
+      </div>
+    </div>
+  );
+}
+
+function MapMatrix() {
+  return (
+    <div className="mt-5 rounded-lg border border-white/[0.06] bg-[radial-gradient(circle_at_68%_36%,hsl(43_68%_52%/0.18),transparent_26%),linear-gradient(180deg,hsl(220_18%_12%),hsl(220_22%_6%))] p-4">
+      <div className="grid gap-[3px]">
+        {mapRows.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex gap-[3px]">
+            {row.split("").map((cell, cellIndex) => (
+              <span
+                key={`${rowIndex}-${cellIndex}`}
+                className={cn(
+                  "h-1.5 w-1.5 rounded-[1px]",
+                  cell === "0" && "bg-transparent",
+                  cell === "1" && "bg-white/[0.12]",
+                  cell === "2" && "bg-gold/35",
+                  cell === "3" && "bg-gold/70",
+                )}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex items-center justify-between">
+        <span className="cmd-label text-muted-foreground/45">Regional flow</span>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gold">
+          <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+          Live
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ClientMatrix() {
+  return (
+    <div className="mt-4 overflow-hidden rounded-lg border border-white/[0.06]">
+      <div className="grid grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] gap-3 border-b border-white/[0.06] bg-black/25 px-4 py-3 text-[10px] font-bold uppercase text-muted-foreground/45">
+        <span>Client</span>
+        <span>Progress</span>
+        <span>Status</span>
+        <span>Next action</span>
+        <span />
+      </div>
+      <div className="divide-y divide-white/[0.055]">
+        {CLIENTS.slice(0, 6).map((client) => (
+          <Link
+            key={client.id}
+            href={`/clients/${client.id}`}
+            className="grid grid-cols-1 gap-3 px-4 py-3 transition hover:bg-white/[0.025] md:grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] md:items-center"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gold/20 bg-gold/10 text-[10px] font-bold text-gold">
+                {client.name
+                  .split(" ")
+                  .map((part) => part[0])
+                  .slice(0, 2)
+                  .join("")}
+              </span>
+              <span className="truncate text-[13px] font-medium text-foreground/88">
+                {client.name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
+                <div className={cn("h-full rounded-full bg-gold", getWidthClass(client.progress))} />
+              </div>
+              <span className="w-9 text-right text-[11px] text-muted-foreground/65">
+                {client.progress}%
+              </span>
+            </div>
+            <Badge className={STATUS_CONFIG[client.status].className}>
+              {STATUS_CONFIG[client.status].label}
+            </Badge>
+            <p className="truncate text-[12px] text-muted-foreground/68">
+              {client.nextAction}
+            </p>
+            <ArrowRight className="hidden h-3.5 w-3.5 text-muted-foreground/45 md:block" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function getWidthClass(value: number) {
+  if (value >= 95) return "w-full";
+  if (value >= 85) return "w-11/12";
+  if (value >= 75) return "w-4/5";
+  if (value >= 65) return "w-2/3";
+  if (value >= 55) return "w-3/5";
+  if (value >= 45) return "w-1/2";
+  if (value >= 35) return "w-2/5";
+  if (value >= 20) return "w-1/4";
+  return "w-1/6";
 }
