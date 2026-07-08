@@ -8,14 +8,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import {
-  ACTION_QUEUE,
-  AGENTS,
-  PRIORITY_META,
-  STATUS_META,
-  getActionClientName,
-  getAgent,
-} from "@/lib/agents";
+import { ACTION_QUEUE, PRIORITY_META, getActionClientName, getAgent } from "@/lib/agents";
 import { TodayLabel } from "@/components/dashboard/TodayLabel";
 import { Badge } from "@/components/ui/badge";
 import { CLIENTS, STATUS_CONFIG, type Client } from "@/lib/data";
@@ -27,12 +20,6 @@ import {
   type PipelineStage,
 } from "@/lib/soa/soa-pipeline";
 import { cn } from "@/lib/utils";
-
-const advisorPulse = [
-  { label: "Discovery", value: 78, tone: "gold" as const },
-  { label: "Compliance", value: 63, tone: "orange" as const },
-  { label: "SOA", value: 91, tone: "emerald" as const },
-];
 
 const liquidTile =
   "border border-white/[0.10] bg-[linear-gradient(135deg,rgba(255,255,255,0.13),rgba(34,211,238,0.10)_34%,rgba(217,70,239,0.08)_66%,rgba(5,10,20,0.42))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_32px_-20px_rgba(34,211,238,0.95),0_16px_36px_-26px_rgba(0,0,0,0.95)] backdrop-blur-xl";
@@ -106,7 +93,6 @@ function getDashboardState() {
   const nextMeetingClients = [...readyMeetingClients].sort(
     (a, b) => getTime(a.meetingDate) - getTime(b.meetingDate),
   );
-  const blockedCount = complianceRows.length + reviewRequiredClients.length;
   const needsAttention = attentionClients.length;
   const completedOrSigned = new Set(
     CLIENTS.filter((client) => client.status === "complete").map((client) => client.id),
@@ -125,13 +111,13 @@ function getDashboardState() {
     linkSentClients,
     complianceRows,
     reviewRows,
-    blockedCount,
     pipelineRows,
     rowMap,
     stageCounts,
     attentionClients,
     nextMeetingClients,
     completedOrSignedCount: completedOrSigned.size,
+    liveQueueCount: ACTION_QUEUE.length,
   };
 }
 
@@ -301,6 +287,15 @@ export default function DashboardPage() {
             </CommandPanel>
 
             <CommandPanel eyebrow="Sarah" title="Brief">
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="status-live size-1.5 rounded-full bg-gold text-gold" />
+                  <span className="cmd-label text-muted-foreground/50">Live brief</span>
+                </div>
+                <span className="text-[11px] text-muted-foreground/60">
+                  {state.liveQueueCount} active priorities
+                </span>
+              </div>
               <div className="mt-5 flex flex-col gap-3">
                 <BriefLine
                   label="What changed"
@@ -318,111 +313,6 @@ export default function DashboardPage() {
                   label="What is ready next"
                   value={getReadyNextLine(state)}
                 />
-              </div>
-            </CommandPanel>
-          </section>
-
-          <section className="grid gap-3 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="grid gap-3">
-              <CommandPanel eyebrow="Workload" title="Adviser Load">
-                <div className="mt-5 flex flex-col gap-5">
-                  {advisorPulse.map((item) => (
-                    <LoadRow key={item.label} {...item} />
-                  ))}
-                </div>
-                <div className={cn("mt-5 rounded-xl p-4", liquidTile)}>
-                  <p className="text-[12px] leading-5 text-muted-foreground/70">
-                    Discovery remains steady. Compliance is the tightest operational
-                    pressure point before more files can shift into SOA.
-                  </p>
-                </div>
-              </CommandPanel>
-
-              <CommandPanel eyebrow="Compliance" title="Pressure">
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  <CompactTruth
-                    label="Blocked"
-                    value={state.blockedCount}
-                    tone="orange"
-                  />
-                  <CompactTruth
-                    label="Awaiting review"
-                    value={state.reviewRows.length}
-                    tone="gold"
-                  />
-                </div>
-                <div className="mt-4 flex flex-col gap-2">
-                  {state.attentionClients.slice(0, 3).map((client) => (
-                    <Link
-                      key={client.id}
-                      href={`/clients/${client.id}`}
-                      className={cn("rounded-xl px-3 py-3", liquidLink)}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="truncate text-[12px] text-foreground/82">
-                          {client.name}
-                        </span>
-                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-300" />
-                      </div>
-                      <p className="mt-1 text-[11px] leading-5 text-muted-foreground/60">
-                        {getAttentionReason(client, state.rowMap.get(client.id))}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              </CommandPanel>
-            </div>
-
-            <CommandPanel eyebrow="Operations" title="Agent Activity">
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {AGENTS.map((agent) => {
-                  const status = STATUS_META[agent.status];
-                  return (
-                    <div
-                      key={agent.id}
-                      className="dashboard-event-glow rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-4"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[13px] font-semibold text-foreground/86">
-                            {agent.name}
-                          </p>
-                          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/45">
-                            {agent.role}
-                          </p>
-                        </div>
-                        <span className={cn("inline-flex items-center gap-1.5 cmd-label", status.text)}>
-                          <span className={cn("status-live size-1.5 rounded-full", status.dot)} />
-                          {status.label}
-                        </span>
-                      </div>
-
-                      <p className="mt-3 line-clamp-2 min-h-[40px] text-[12px] leading-5 text-muted-foreground/68">
-                        {agent.activeTask}
-                      </p>
-
-                      <div className="mt-4 flex items-center gap-3">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                          <div
-                            className={cn(
-                              "dashboard-activity-rail h-full rounded-full bg-[linear-gradient(90deg,hsl(180_86%_58%),hsl(220_90%_68%)_52%,hsl(286_88%_64%))]",
-                              getWidthClass(agent.workload),
-                            )}
-                          />
-                        </div>
-                        <span className="text-[11px] font-semibold text-foreground/75">
-                          {agent.workload}%
-                        </span>
-                      </div>
-
-                      <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase text-muted-foreground/45">
-                        <span>{agent.queueDepth} queued</span>
-                        <span className="size-1 rounded-full bg-white/25" />
-                        <span>{agent.completedToday} cleared</span>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </CommandPanel>
           </section>
@@ -689,64 +579,6 @@ function BriefLine({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CompactTruth({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "gold" | "orange";
-}) {
-  return (
-    <div className={cn("rounded-xl px-3 py-3", liquidTile)}>
-      <p
-        className={cn(
-          "text-[22px] font-semibold leading-none",
-          tone === "orange" ? "text-orange-300" : "text-gold",
-        )}
-      >
-        {value}
-      </p>
-      <p className="mt-1.5 cmd-label text-muted-foreground/45">{label}</p>
-    </div>
-  );
-}
-
-function LoadRow({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "gold" | "orange" | "emerald";
-}) {
-  const fill = {
-    gold: "bg-gold",
-    orange: "bg-orange-400",
-    emerald: "bg-emerald-400",
-  }[tone];
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <p className="cmd-label text-muted-foreground/55">{label}</p>
-        <p className="text-[12px] font-semibold text-foreground/85">{value}%</p>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
-        <div
-          className={cn(
-            "dashboard-activity-rail h-full rounded-full",
-            fill,
-            getWidthClass(value),
-          )}
-        />
-      </div>
-    </div>
-  );
-}
-
 function TopPill({
   icon: Icon,
   label,
@@ -811,6 +643,10 @@ function getStageLabel(stage: PipelineStage) {
 function getPipelineSummary(state: ReturnType<typeof getDashboardState>) {
   if (state.complianceRows.length > 0) {
     return `${state.complianceRows.length} file${state.complianceRows.length === 1 ? "" : "s"} are sitting between meeting readiness and SOA generation. Clearing those blockers unlocks the next wave fastest.`;
+  }
+
+  if (state.reviewRows.length > 0) {
+    return `${state.reviewRows.length} SOA file${state.reviewRows.length === 1 ? "" : "s"} are waiting for Brad review before they can be completed or sent.`;
   }
 
   if (state.readyForSoA > 0) {
