@@ -1,12 +1,20 @@
+import {
+  CORE_AGENT_BLUEPRINTS,
+  CORE_AGENT_ORDER,
+  type CommandAgentId,
+  type CommandAgentPriority,
+  type CommandAgentStatus,
+  type CommandAgentTone,
+} from "@/lib/agent-system";
 import { CLIENTS } from "@/lib/data";
 
-export type AgentId = "nova" | "vanta" | "atlas" | "pulse";
+export type AgentId = CommandAgentId;
 
-export type AgentStatus = "active" | "monitoring" | "blocked" | "ready";
+export type AgentStatus = CommandAgentStatus;
 
-export type AgentPriority = "low" | "medium" | "high" | "critical";
+export type AgentPriority = CommandAgentPriority;
 
-export type AgentTone = "blue" | "orange" | "gold" | "emerald" | "violet";
+export type AgentTone = CommandAgentTone;
 
 export type Agent = {
   id: AgentId;
@@ -14,44 +22,40 @@ export type Agent = {
   role: string;
   tagline: string;
   domain: string;
-  /** visual identity accent */
+  description: string;
   tone: AgentTone;
-  /** single-line "call sign" describing the agent's edge */
   callsign: string;
-  /** position in the advice assembly line, 1-indexed */
   flowStep: number;
+  runtimeAgents: string[];
   status: AgentStatus;
-  /** 0 - 100 workload utilisation */
   workload: number;
   activeTask: string;
   blockedItem: string | null;
   linkedClientId: string | null;
   priority: AgentPriority;
   nextAction: string;
-  /** rolling metrics for the command centre */
   queueDepth: number;
   completedToday: number;
-  /** recent throughput sparkline (last 8 intervals) */
   throughput: number[];
-  /** headline reliability / confidence metric, 0-100 */
   confidence: number;
 };
 
-function clientName(id: string | null): string | null {
-  if (!id) return null;
-  return CLIENTS.find((c) => c.id === id)?.name ?? null;
-}
+type AgentState = Omit<
+  Agent,
+  | "id"
+  | "name"
+  | "role"
+  | "tagline"
+  | "domain"
+  | "description"
+  | "tone"
+  | "callsign"
+  | "flowStep"
+  | "runtimeAgents"
+>;
 
-export const AGENTS: Agent[] = [
-  {
-    id: "nova",
-    name: "NOVA",
-    role: "Client Research Agent",
-    tagline: "Client Intelligence",
-    domain: "Research and pre meeting context",
-    tone: "blue",
-    callsign: "Reads every file before Brad walks in the room",
-    flowStep: 1,
+const AGENT_STATE: Record<AgentId, AgentState> = {
+  nova: {
     status: "active",
     workload: 68,
     activeTask: "Preparing pre meeting brief for Sarah Mitchell",
@@ -64,15 +68,7 @@ export const AGENTS: Agent[] = [
     throughput: [3, 4, 2, 5, 4, 6, 5, 7],
     confidence: 94,
   },
-  {
-    id: "vanta",
-    name: "VANTA",
-    role: "Risk and Compliance Agent",
-    tagline: "Compliance Gate",
-    domain: "Best interests duty and advice risk",
-    tone: "orange",
-    callsign: "Nothing reaches advice without clearing the gate",
-    flowStep: 2,
+  vanta: {
     status: "blocked",
     workload: 81,
     activeTask: "Reviewing best interests duty evidence for David Okafor",
@@ -85,15 +81,7 @@ export const AGENTS: Agent[] = [
     throughput: [4, 3, 5, 2, 3, 2, 4, 3],
     confidence: 88,
   },
-  {
-    id: "atlas",
-    name: "ATLAS",
-    role: "Strategy and Final SOA Agent",
-    tagline: "Strategy and Final Assembly",
-    domain: "SOA drafting and strategy logic",
-    tone: "gold",
-    callsign: "Pulls approved facts, projections and knowledge fragments into a tailored SOA draft",
-    flowStep: 3,
+  atlas: {
     status: "ready",
     workload: 59,
     activeTask: "Synthesising tailored SOA plan for Robert and Sue Tanner",
@@ -106,31 +94,36 @@ export const AGENTS: Agent[] = [
     throughput: [1, 2, 2, 3, 2, 3, 3, 2],
     confidence: 93,
   },
-  {
-    id: "pulse",
-    name: "PULSE",
-    role: "Client Follow Up Agent",
-    tagline: "Pipeline Momentum",
-    domain: "Follow ups and pipeline movement",
-    tone: "emerald",
-    callsign: "Keeps every client moving, never lets one go quiet",
-    flowStep: 6,
+  pulse: {
     status: "monitoring",
     workload: 47,
     activeTask: "Tracking stalled clients across the pipeline",
     blockedItem: null,
     linkedClientId: "michael-kate-reynolds",
     priority: "medium",
-    nextAction: "Draft reminder for Michael and Kate Reynolds — no fact find activity",
+    nextAction: "Draft reminder for Michael and Kate Reynolds with no fact find activity",
     queueDepth: 6,
     completedToday: 8,
     throughput: [6, 5, 7, 6, 8, 7, 9, 8],
     confidence: 96,
   },
-];
+};
+
+function clientName(id: string | null): string | null {
+  if (!id) return null;
+  return CLIENTS.find((c) => c.id === id)?.name ?? null;
+}
+
+export const AGENTS: Agent[] = CORE_AGENT_ORDER.map((id) => {
+  const blueprint = CORE_AGENT_BLUEPRINTS[id];
+  return {
+    ...blueprint,
+    ...AGENT_STATE[id],
+  };
+});
 
 export function getAgent(id: AgentId): Agent | undefined {
-  return AGENTS.find((a) => a.id === id);
+  return AGENTS.find((agent) => agent.id === id);
 }
 
 export function getAgentLinkedClientName(agent: Agent): string | null {
@@ -210,7 +203,6 @@ export type ActionQueueItem = {
   href: string;
 };
 
-/** Prioritised list of what needs Brad's attention today. */
 export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-1",

@@ -1,98 +1,79 @@
 import {
   Activity,
-  AlertTriangle,
+  ArrowRight,
+  Bot,
   CheckCircle2,
-  Cpu,
-  Database,
-  FileSignature,
-  Gauge,
   Mic,
-  RadioTower,
-  ShieldCheck,
-  Sparkles,
-  Zap,
 } from "lucide-react";
-import { AgentRunButton } from "@/components/agents/AgentRunButton";
-import { listAgentDefinitions } from "@/lib/agents/registry";
+import Link from "next/link";
+import {
+  CORE_AGENT_ORDER,
+  getRuntimeBlueprintsForCore,
+  listRuntimeBlueprints,
+} from "@/lib/agent-system";
+import { AGENTS } from "@/lib/agents";
+import { AgentCard } from "@/components/agents/AgentCard";
 import { getAgentTelemetry } from "@/lib/agents/events";
-import type { AgentDefinition, AgentId, CostLevel } from "@/lib/agents/types";
-import { CLIENTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
   title: "Agents - BMK Command Centre",
 };
 
-const ICONS: Record<AgentId, React.ElementType> = {
-  sarah: Mic,
-  beacon: RadioTower,
-  guardian: ShieldCheck,
-  scribe: Activity,
-  orion: FileSignature,
-  atlas: Sparkles,
-  cipher: Zap,
-  nexus: Database,
-};
-
-const COST_META: Record<CostLevel, string> = {
-  none: "border-emerald-400/25 bg-emerald-500/10 text-emerald-300",
-  low: "border-blue-accent/25 bg-blue-accent/10 text-blue-accent",
-  medium: "border-gold/30 bg-gold/10 text-gold",
-  high: "border-orange-400/35 bg-orange-500/10 text-orange-300",
-};
-
-const FLOW_LABELS = [
-  "Sarah",
-  "Beacon",
-  "Guardian",
-  "Scribe",
-  "Orion",
-  "ATLAS",
-  "Cipher",
-  "Nexus",
-];
-
 export default function AgentsPage() {
-  const agents = listAgentDefinitions();
   const telemetry = getAgentTelemetry();
+  const runtimeBlueprints = listRuntimeBlueprints();
   const latestByAgent = new Map(telemetry.map((event) => [event.agentId, event]));
-  const processedClients = CLIENTS.filter((client) => client.progress > 0).length;
-  const mockMode = !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY;
+  const autoRunnable = runtimeBlueprints.filter((agent) => agent.autoRunModes.length > 0).length;
+  const coreFlow = ["Sarah", ...AGENTS.map((agent) => agent.name)];
 
   return (
     <div className="px-6 py-8 sm:px-8 lg:px-10 xl:px-14 xl:py-12">
       <header className="mb-10 grid gap-6 xl:grid-cols-[1fr_360px]">
         <div>
-          <p className="cmd-label mb-4 text-muted-foreground/60">Agent Infrastructure</p>
+          <p className="cmd-label mb-4 text-muted-foreground/60">Command Layer</p>
           <h1 className="text-[34px] font-semibold leading-[1.05] text-foreground sm:text-[46px]">
             BMK Agent Command Centre
           </h1>
           <p className="mt-4 max-w-[760px] text-[14px] leading-7 text-muted-foreground/80">
-            The platform now has a lightweight agent layer for fact-find structuring,
-            compliance checks, meeting intelligence, SOA evidence assembly,
-            final strategy synthesis, follow-ups and integration health.
+            Four core agents now define the platform language everywhere. Sarah handles
+            discovery, then NOVA, VANTA, ATLAS and PULSE move the file through
+            research, compliance, strategy synthesis and follow-up.
           </p>
         </div>
         <div className="rounded-xl border border-border/70 bg-card p-5">
           <p className="cmd-label text-gold/85">System intelligence</p>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <Summary label="Agents" value={agents.length} />
-            <Summary label="Processed" value={processedClients} />
-            <Summary label="Mode" value={mockMode ? "Mock" : "Live"} />
-            <Summary label="Runs" value={telemetry.length} />
+            <Summary label="Core agents" value={AGENTS.length} />
+            <Summary label="Runtime modules" value={runtimeBlueprints.length} />
+            <Summary label="Auto-runnable" value={autoRunnable} />
+            <Summary label="Runs logged" value={telemetry.length} />
           </div>
         </div>
       </header>
 
       <section className="mb-10 rounded-xl border border-border/70 bg-card px-6 py-6 sm:px-8">
-        <p className="cmd-label mb-5 text-gold/85">Actual Flow</p>
-        <div className="flex flex-wrap items-center gap-2 text-[12.5px]">
-          {FLOW_LABELS.map((step, index) => (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="cmd-label text-gold/85">Unified flow</p>
+            <p className="mt-2 text-[13px] leading-6 text-muted-foreground/75">
+              One source of truth now maps the client journey from discovery to SOA.
+            </p>
+          </div>
+          <Link
+            href="/soa"
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground/70 transition hover:text-gold"
+          >
+            Open SOA pipeline <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-[12.5px]">
+          {coreFlow.map((step, index) => (
             <div key={step} className="flex items-center gap-2">
               <span className="rounded-md border border-border/70 bg-white/[0.03] px-3 py-1.5 font-medium text-foreground/80">
                 {step}
               </span>
-              {index < FLOW_LABELS.length - 1 && (
+              {index < coreFlow.length - 1 && (
                 <span className="text-muted-foreground/40">-&gt;</span>
               )}
             </div>
@@ -101,83 +82,73 @@ export default function AgentsPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        {agents.map((agent) => (
-          <AgentSystemCard
-            key={agent.id}
-            agent={agent}
-            lastRun={latestByAgent.get(agent.id)}
-            demoClientId={CLIENTS[0]?.id}
-          />
+        {AGENTS.map((agent) => (
+          <div key={agent.id} className="space-y-3">
+            <AgentCard agent={agent} featured={agent.id === "atlas"} />
+            <div className="rounded-xl border border-border/70 bg-card p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Bot className="h-4 w-4 text-gold" />
+                <p className="cmd-label text-gold/85">Supporting modules</p>
+              </div>
+              <div className="space-y-2.5">
+                {getRuntimeBlueprintsForCore(agent.id).map((runtime) => {
+                  const latest = latestByAgent.get(runtime.id);
+                  return (
+                    <div
+                      key={runtime.id}
+                      className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-white/[0.025] px-3 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[12.5px] font-semibold text-foreground">
+                          {runtime.name}
+                        </p>
+                        <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground/68">
+                          {runtime.role}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          "rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase",
+                          latest?.status === "success"
+                            ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
+                            : "border-border/70 bg-white/[0.03] text-muted-foreground",
+                        )}
+                      >
+                        {latest?.status ?? "idle"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         ))}
       </section>
+
+      <section className="mt-10 rounded-xl border border-border/70 bg-card p-6">
+        <div className="flex items-center gap-2">
+          <Mic className="h-4 w-4 text-gold" />
+          <p className="cmd-label text-gold/85">Platform support modules</p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <SupportModuleCard
+            name="Sarah"
+            role="Client discovery intake"
+            detail="Collects the fact find and feeds the rest of the system."
+          />
+          <SupportModuleCard
+            name="Nexus"
+            role="Integration health"
+            detail="Tracks environment readiness for Vercel, providers and future integrations."
+          />
+          <SupportModuleCard
+            name="Telemetry"
+            role="Run history"
+            detail="Captures cache, model and runtime history across the underlying modules."
+          />
+        </div>
+      </section>
     </div>
-  );
-}
-
-function AgentSystemCard({
-  agent,
-  lastRun,
-  demoClientId,
-}: {
-  agent: AgentDefinition;
-  lastRun?: ReturnType<typeof getAgentTelemetry>[number];
-  demoClientId?: string;
-}) {
-  const Icon = ICONS[agent.id];
-  const runnable = agent.id !== "sarah";
-  const clientScoped = !["cipher", "nexus"].includes(agent.id);
-
-  return (
-    <article className="glass-panel glass-hover overflow-hidden">
-      <div className="grid gap-5 p-6 md:grid-cols-[auto_1fr_auto]">
-        <div className="grid h-12 w-12 place-items-center rounded-xl border border-gold/25 bg-gold/10 text-gold">
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-[20px] font-semibold text-foreground">{agent.name}</h2>
-            <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase", COST_META[agent.costLevel])}>
-              {agent.costLevel} cost
-            </span>
-            <span className="rounded-full border border-border/70 bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
-              {agent.usesAI ? "AI gated" : "Deterministic"}
-            </span>
-          </div>
-          <p className="mt-1 text-[13px] font-medium text-gold/85">{agent.role}</p>
-          <p className="mt-3 max-w-2xl text-[13px] leading-6 text-muted-foreground/82">
-            {agent.description}
-          </p>
-          <p className="mt-3 text-[12px] leading-5 text-muted-foreground/62">
-            Trigger: {agent.trigger}
-          </p>
-        </div>
-        <div className="flex flex-col items-start gap-2 md:items-end">
-          {runnable ? (
-            <AgentRunButton
-              agentId={agent.id}
-              clientId={clientScoped ? demoClientId : undefined}
-              label={clientScoped ? "Run demo client" : "Refresh"}
-            />
-          ) : (
-            <span className="rounded-md border border-border/70 bg-white/[0.03] px-3 py-2 text-[11px] text-muted-foreground">
-              Runs in onboarding
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-px border-t border-white/[0.06] bg-white/[0.06] md:grid-cols-4">
-        <TelemetryCell
-          icon={lastRun?.status === "error" ? AlertTriangle : CheckCircle2}
-          label="Health"
-          value={lastRun?.status ?? "idle"}
-          tone={lastRun?.status === "error" ? "orange" : "emerald"}
-        />
-        <TelemetryCell icon={Gauge} label="Cached" value={lastRun ? (lastRun.cached ? "yes" : "fresh") : "none"} />
-        <TelemetryCell icon={Cpu} label="Duration" value={lastRun?.durationMs !== undefined ? `${lastRun.durationMs}ms` : "n/a"} />
-        <TelemetryCell icon={Activity} label="Model" value={lastRun?.model ?? (agent.usesAI ? "mock-agent-v1" : "deterministic")} />
-      </div>
-    </article>
   );
 }
 
@@ -190,30 +161,23 @@ function Summary({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function TelemetryCell({
-  icon: Icon,
-  label,
-  value,
-  tone = "gold",
+function SupportModuleCard({
+  name,
+  role,
+  detail,
 }: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  tone?: "gold" | "emerald" | "orange";
+  name: string;
+  role: string;
+  detail: string;
 }) {
-  const color =
-    tone === "emerald"
-      ? "text-emerald-300"
-      : tone === "orange"
-      ? "text-orange-300"
-      : "text-gold";
   return (
-    <div className="bg-card px-5 py-4">
-      <div className="mb-2 flex items-center gap-2">
-        <Icon className={cn("h-3.5 w-3.5", color)} />
-        <p className="cmd-label text-muted-foreground/45">{label}</p>
+    <div className="rounded-lg border border-border/70 bg-white/[0.025] p-4">
+      <div className="flex items-center gap-2">
+        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
+        <p className="text-[12.5px] font-semibold text-foreground">{name}</p>
       </div>
-      <p className="truncate text-[12.5px] font-medium text-foreground/82">{value}</p>
+      <p className="mt-2 text-[11.5px] font-medium text-gold/85">{role}</p>
+      <p className="mt-2 text-[11.5px] leading-5 text-muted-foreground/68">{detail}</p>
     </div>
   );
 }
