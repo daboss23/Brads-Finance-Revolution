@@ -60,6 +60,12 @@ const advisorPulse = [
   { label: "SOA", value: 91, tone: "emerald" },
 ];
 
+const liquidTile =
+  "border border-white/[0.10] bg-[linear-gradient(135deg,rgba(255,255,255,0.13),rgba(34,211,238,0.10)_34%,rgba(217,70,239,0.08)_66%,rgba(5,10,20,0.42))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_32px_-20px_rgba(34,211,238,0.95),0_16px_36px_-26px_rgba(0,0,0,0.95)] backdrop-blur-xl";
+
+const liquidLink =
+  "border border-white/[0.10] bg-[linear-gradient(135deg,rgba(255,255,255,0.10),rgba(34,211,238,0.08)_46%,rgba(217,70,239,0.07))] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_0_24px_-18px_rgba(34,211,238,0.8)] transition hover:border-cyan-300/40 hover:bg-cyan-300/[0.08] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_0_30px_-14px_rgba(34,211,238,0.85)]";
+
 export default function DashboardPage() {
   const metrics = getMetrics();
   const soa = getPipelineMetrics();
@@ -78,10 +84,11 @@ export default function DashboardPage() {
 
   return (
     <main className="relative isolate min-h-[100dvh] overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,hsl(var(--gold)/0.18),transparent_26%),radial-gradient(circle_at_86%_8%,hsl(39_50%_64%/0.10),transparent_22%),linear-gradient(145deg,hsl(32_13%_16%),hsl(220_28%_4%)_54%,hsl(34_20%_8%))]" />
-      <div className="absolute inset-x-8 top-5 -z-10 h-28 rounded-full bg-gold/10 blur-3xl" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,hsl(184_88%_58%/0.15),transparent_26%),radial-gradient(circle_at_86%_8%,hsl(286_88%_64%/0.12),transparent_24%),radial-gradient(circle_at_50%_110%,hsl(var(--gold)/0.16),transparent_32%),linear-gradient(145deg,hsl(216_30%_12%),hsl(220_30%_4%)_54%,hsl(270_28%_8%))]" />
+      <div className="absolute inset-x-8 top-5 -z-10 h-28 rounded-full bg-cyan-300/10 blur-3xl" />
+      <div className="absolute bottom-0 right-10 -z-10 h-56 w-56 rounded-full bg-fuchsia-500/10 blur-3xl" />
 
-      <section className="mx-auto max-w-[1480px] overflow-hidden rounded-[24px] border border-white/[0.08] bg-[linear-gradient(135deg,hsl(220_18%_11%/0.98),hsl(220_24%_5%/0.99))] shadow-[0_26px_80px_-32px_rgba(0,0,0,0.92)]">
+      <section className="mx-auto max-w-[1480px] overflow-hidden rounded-[24px] border border-cyan-200/20 bg-[linear-gradient(135deg,hsl(220_18%_12%/0.82),hsl(220_24%_5%/0.90))] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_0_1px_rgba(217,70,239,0.10),0_32px_90px_-34px_rgba(0,0,0,0.95),0_0_70px_-42px_rgba(34,211,238,0.85)] backdrop-blur-2xl">
         <TopBar metrics={metrics} />
 
         <div className="grid gap-3 p-3 lg:grid-cols-[300px_minmax(0,1fr)_330px] xl:grid-cols-[320px_minmax(0,1fr)_360px]">
@@ -179,7 +186,7 @@ export default function DashboardPage() {
                       <DataPlate label="Approved" value={soa.approvedReady} />
                       <DataPlate label="Signed" value={soa.signedThisMonth} />
                     </div>
-                    <div className="mt-5 rounded-lg border border-gold/15 bg-gold/[0.04] p-4">
+                    <div className={cn("mt-5 rounded-lg p-4", liquidTile)}>
                       <div className="flex items-center gap-2 text-gold">
                         <Sparkles className="h-4 w-4" />
                         <p className="cmd-label">Sarah recommendation</p>
@@ -200,7 +207,7 @@ export default function DashboardPage() {
                     <LoadRow key={item.label} {...item} />
                   ))}
                 </div>
-                <div className="mt-6 rounded-lg border border-white/[0.07] bg-black/20 p-4">
+                <div className={cn("mt-6 rounded-lg p-4", liquidTile)}>
                   <p className="text-[12px] leading-5 text-muted-foreground/70">
                     Review pressure is concentrated in compliance and pre-SOA evidence.
                   </p>
@@ -250,7 +257,7 @@ export default function DashboardPage() {
                   <Link
                     key={client.id}
                     href={`/clients/${client.id}/compliance`}
-                    className="group flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.025] px-3 py-2.5 transition hover:border-gold/25 hover:bg-gold/[0.04]"
+                    className={cn("group flex items-center justify-between rounded-lg px-3 py-2.5", liquidLink)}
                   >
                     <span className="truncate text-[12px] text-foreground/80">
                       {client.name}
@@ -270,7 +277,7 @@ export default function DashboardPage() {
                     <li key={item.id}>
                       <Link
                         href={item.href}
-                        className="group flex items-start gap-3 rounded-lg border border-white/[0.06] bg-white/[0.025] px-3 py-3 transition hover:border-gold/25 hover:bg-gold/[0.04]"
+                        className={cn("group flex items-start gap-3 rounded-lg px-3 py-3", liquidLink)}
                       >
                         <span
                           className={cn(
@@ -305,7 +312,7 @@ export default function DashboardPage() {
 
 function TopBar({ metrics }: { metrics: ReturnType<typeof getMetrics> }) {
   return (
-    <header className="flex flex-col gap-4 border-b border-white/[0.07] bg-black/25 px-4 py-4 backdrop-blur md:flex-row md:items-center md:justify-between lg:px-5">
+    <header className="flex flex-col gap-4 border-b border-cyan-200/15 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(34,211,238,0.06)_38%,rgba(217,70,239,0.05))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_16px_44px_-36px_rgba(34,211,238,0.75)] backdrop-blur-2xl md:flex-row md:items-center md:justify-between lg:px-5">
       <div>
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="grid h-7 w-7 place-items-center rounded-full border border-gold/25 bg-gold/15 text-[11px] font-bold text-gold">
@@ -322,14 +329,14 @@ function TopBar({ metrics }: { metrics: ReturnType<typeof getMetrics> }) {
         </h1>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="hidden items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-muted-foreground/65 sm:flex">
+        <div className={cn("hidden items-center gap-2 rounded-full px-3 py-2 text-muted-foreground/65 sm:flex", liquidTile)}>
           <Search className="h-3.5 w-3.5" />
           <span className="text-[12px]">Search clients, SOAs, evidence</span>
         </div>
         <TopPill icon={Activity} label="Live" value={`${metrics.active} files`} />
         <Link
           href="/clients"
-          className="inline-flex h-9 items-center gap-2 rounded-full bg-gold px-4 text-[12px] font-semibold text-gold-foreground transition hover:bg-gold/90"
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-cyan-200/30 bg-[linear-gradient(135deg,hsl(180_86%_58%),hsl(220_90%_68%)_56%,hsl(286_88%_64%))] px-4 text-[12px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_0_30px_-12px_rgba(34,211,238,0.9),0_0_30px_-16px_rgba(217,70,239,0.9)] transition hover:scale-[1.02]"
         >
           New client <ArrowRight className="h-3.5 w-3.5" />
         </Link>
@@ -354,11 +361,14 @@ function CommandPanel({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-lg border border-white/[0.08] bg-[linear-gradient(150deg,hsl(222_18%_13%/0.92),hsl(222_24%_7%/0.96))] p-4 shadow-[0_18px_42px_-30px_rgba(0,0,0,0.95)]",
-        "before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[linear-gradient(135deg,rgba(255,255,255,0.10),transparent_34%,rgba(202,151,78,0.04))]",
+        "group relative overflow-hidden rounded-lg border border-cyan-200/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.11),rgba(34,211,238,0.07)_30%,rgba(217,70,239,0.06)_62%,rgba(5,10,20,0.78))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(34,211,238,0.12),0_22px_54px_-34px_rgba(0,0,0,0.95),0_0_42px_-28px_rgba(34,211,238,0.95),0_0_42px_-30px_rgba(217,70,239,0.8)] backdrop-blur-2xl",
+        "before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[linear-gradient(128deg,rgba(255,255,255,0.18),transparent_28%,rgba(34,211,238,0.11)_54%,rgba(217,70,239,0.12)_76%,transparent)]",
+        "after:pointer-events-none after:absolute after:inset-x-6 after:bottom-0 after:h-px after:bg-[linear-gradient(90deg,transparent,rgba(34,211,238,0.95),rgba(217,70,239,0.8),transparent)] after:shadow-[0_0_18px_3px_rgba(34,211,238,0.45)]",
         className,
       )}
     >
+      <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-cyan-300/10 blur-2xl transition group-hover:bg-cyan-300/16" />
+      <span className="pointer-events-none absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-fuchsia-500/10 blur-2xl transition group-hover:bg-fuchsia-500/16" />
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <p className="cmd-label text-gold/75">{eyebrow}</p>
@@ -383,7 +393,7 @@ function TopPill({
   value: string;
 }) {
   return (
-    <div className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] px-3">
+    <div className={cn("inline-flex h-9 items-center gap-2 rounded-full px-3", liquidTile)}>
       <Icon className="h-3.5 w-3.5 text-gold" />
       <span className="text-[10px] font-bold uppercase text-muted-foreground/55">
         {label}
@@ -418,7 +428,7 @@ function HeroMetric({
         <p className="max-w-[190px] text-[12px] leading-5 text-muted-foreground/70">
           {detail}
         </p>
-        <div className={cn("grid h-12 w-12 place-items-center rounded-lg border", toneClass)}>
+        <div className={cn("grid h-12 w-12 place-items-center rounded-lg border shadow-[inset_0_1px_0_rgba(255,255,255,0.20),0_0_24px_-14px_rgba(34,211,238,0.75)] backdrop-blur-xl", toneClass)}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -428,7 +438,7 @@ function HeroMetric({
 
 function RadarDial({ value }: { value: number }) {
   return (
-    <div className="relative grid h-48 w-48 place-items-center rounded-full border border-gold/25 bg-[radial-gradient(circle,hsl(43_62%_54%/0.20),transparent_58%)]">
+    <div className="relative grid h-48 w-48 place-items-center rounded-full border border-cyan-200/25 bg-[radial-gradient(circle_at_35%_30%,hsl(180_86%_58%/0.28),transparent_34%),radial-gradient(circle_at_68%_72%,hsl(286_88%_64%/0.22),transparent_38%),radial-gradient(circle,hsl(43_62%_54%/0.18),transparent_60%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_0_45px_-16px_rgba(34,211,238,0.85),0_0_42px_-20px_rgba(217,70,239,0.75)]">
       <div className="absolute inset-4 rounded-full border border-gold/20" />
       <div className="absolute inset-10 rounded-full border border-gold/20" />
       <div className="absolute left-1/2 top-5 h-[152px] w-px -translate-x-1/2 bg-gold/25" />
@@ -456,7 +466,7 @@ function TinyStat({
   danger?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-white/[0.07] bg-black/20 px-3 py-3">
+    <div className={cn("rounded-lg px-3 py-3", liquidTile)}>
       <p className={cn("text-[22px] font-semibold leading-none", danger ? "text-orange-300" : "text-foreground")}>
         {value}
       </p>
@@ -467,7 +477,7 @@ function TinyStat({
 
 function BriefLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.025] px-3.5 py-3">
+    <div className={cn("rounded-lg px-3.5 py-3", liquidTile)}>
       <p className="cmd-label text-muted-foreground/45">{label}</p>
       <p className="mt-1.5 text-[13px] leading-5 text-foreground/82">{value}</p>
     </div>
@@ -476,7 +486,7 @@ function BriefLine({ label, value }: { label: string; value: string }) {
 
 function MiniAreaChart() {
   return (
-    <div className="mt-5 h-32 rounded-lg border border-white/[0.06] bg-[linear-gradient(180deg,transparent,hsl(43_68%_52%/0.06))] p-3">
+    <div className={cn("mt-5 h-32 rounded-lg p-3", liquidTile)}>
       <svg viewBox="0 0 260 100" className="h-full w-full" aria-hidden="true">
         <path
           d="M0 82 L32 66 L64 72 L96 42 L128 52 L160 28 L192 38 L224 18 L260 26 L260 100 L0 100 Z"
@@ -499,7 +509,7 @@ function MiniAreaChart() {
 
 function DataPlate({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-white/[0.07] bg-black/25 px-4 py-3">
+    <div className={cn("rounded-lg px-4 py-3", liquidTile)}>
       <p className="cmd-label text-muted-foreground/45">{label}</p>
       <p className="mt-3 text-[28px] font-semibold leading-none tracking-normal text-foreground">
         {value}
@@ -510,7 +520,7 @@ function DataPlate({ label, value }: { label: string; value: number }) {
 
 function BarCluster() {
   return (
-    <div className="flex h-60 items-end gap-3 rounded-lg border border-white/[0.06] bg-[linear-gradient(180deg,hsl(220_18%_12%/0.8),hsl(220_22%_6%/0.88))] px-5 pb-5 pt-8">
+    <div className={cn("flex h-60 items-end gap-3 rounded-lg px-5 pb-5 pt-8", liquidTile)}>
       {graphBars.map((height, index) => (
         <div key={index} className="flex flex-1 flex-col items-center gap-2">
           <div
@@ -559,7 +569,7 @@ function LoadRow({
 
 function MapMatrix() {
   return (
-    <div className="mt-5 rounded-lg border border-white/[0.06] bg-[radial-gradient(circle_at_68%_36%,hsl(43_68%_52%/0.18),transparent_26%),linear-gradient(180deg,hsl(220_18%_12%),hsl(220_22%_6%))] p-4">
+    <div className="mt-5 rounded-lg border border-cyan-200/15 bg-[radial-gradient(circle_at_26%_18%,hsl(180_86%_58%/0.14),transparent_24%),radial-gradient(circle_at_68%_36%,hsl(286_88%_64%/0.14),transparent_28%),radial-gradient(circle_at_68%_36%,hsl(43_68%_52%/0.16),transparent_26%),linear-gradient(180deg,hsl(220_18%_12%/0.82),hsl(220_22%_6%/0.88))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_34px_-22px_rgba(34,211,238,0.8)] backdrop-blur-xl">
       <div className="grid gap-[3px]">
         {mapRows.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-[3px]">
@@ -591,8 +601,8 @@ function MapMatrix() {
 
 function ClientMatrix() {
   return (
-    <div className="mt-4 overflow-hidden rounded-lg border border-white/[0.06]">
-      <div className="grid grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] gap-3 border-b border-white/[0.06] bg-black/25 px-4 py-3 text-[10px] font-bold uppercase text-muted-foreground/45">
+    <div className={cn("mt-4 overflow-hidden rounded-lg", liquidTile)}>
+      <div className="grid grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] gap-3 border-b border-cyan-200/10 bg-white/[0.035] px-4 py-3 text-[10px] font-bold uppercase text-muted-foreground/45">
         <span>Client</span>
         <span>Progress</span>
         <span>Status</span>
@@ -604,7 +614,7 @@ function ClientMatrix() {
           <Link
             key={client.id}
             href={`/clients/${client.id}`}
-            className="grid grid-cols-1 gap-3 px-4 py-3 transition hover:bg-white/[0.025] md:grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] md:items-center"
+            className="grid grid-cols-1 gap-3 px-4 py-3 transition hover:bg-cyan-300/[0.04] md:grid-cols-[1.35fr_0.65fr_0.85fr_1fr_auto] md:items-center"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gold/20 bg-gold/10 text-[10px] font-bold text-gold">
