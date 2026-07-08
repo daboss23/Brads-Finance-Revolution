@@ -86,22 +86,32 @@ export type ScribeOutput = {
 };
 
 export type OrionOutput = {
-  strategyThemes: string[];
-  adviserConsiderations: string[];
-  relevantClientFacts: string[];
-  knowledgeReferences: string[];
-  uncertaintyLevel: "low" | "medium" | "high";
-  requiresBradDecision: true;
-  disclaimer: "Adviser consideration only. Requires Brad review.";
-};
-
-export type AtlasOutput = {
   soaReady: boolean;
-  soaInputPack: Record<string, unknown>;
+  evidencePacket: {
+    approvedFactsOnly: boolean;
+    factFindHighlights: string[];
+    complianceGuardrails: string[];
+    knowledgeChunks: string[];
+    projectionInputs: Array<{ label: string; value: string }>;
+  };
   recommendedSections: string[];
   missingBeforeDraft: string[];
   complianceNotes: string[];
+  nextDataPulls: string[];
   adviserApprovalRequired: true;
+};
+
+export type AtlasOutput = {
+  strategyThemes: string[];
+  tailoredRecommendations: string[];
+  relevantClientFacts: string[];
+  knowledgeReferences: string[];
+  reusableAdviceChunks: string[];
+  projectionAssumptions: string[];
+  personalizationNotes: string[];
+  uncertaintyLevel: "low" | "medium" | "high";
+  requiresBradDecision: true;
+  disclaimer: "Adviser consideration only. Requires Brad review.";
 };
 
 export type CipherOutput = {

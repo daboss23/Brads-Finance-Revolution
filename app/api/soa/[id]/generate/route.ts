@@ -6,9 +6,14 @@ import {
   getStageOrder,
   type GenerationStage,
 } from "@/lib/soa/soa-generator";
+import { buildClientAgentInput } from "@/lib/agents/client-input";
+import { runAgent } from "@/lib/agents/run-agent";
+import type { AgentId } from "@/lib/agents/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const SOA_AGENT_CHAIN: AgentId[] = ["beacon", "guardian", "scribe", "orion", "atlas"];
 
 export async function POST(
   _req: NextRequest,
@@ -33,6 +38,14 @@ export async function POST(
           });
           // Stagger to feel like genuine progress without being slow.
           await new Promise((r) => setTimeout(r, 220));
+        }
+
+        for (const agentId of SOA_AGENT_CHAIN) {
+          const input = buildClientAgentInput(params.id, agentId);
+          await runAgent(agentId, input, {
+            clientId: params.id,
+            force: false,
+          });
         }
 
         const doc = generateSoa(params.id, {

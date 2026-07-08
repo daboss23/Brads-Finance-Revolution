@@ -16,11 +16,13 @@ function summariseOutput(output: AgentOutput): string {
   if ("completionPercentage" in output) return `Beacon completion ${output.completionPercentage}%`;
   if ("complianceScore" in output) return `Guardian score ${output.complianceScore}`;
   if ("meetingBrief" in output) return "Meeting brief ready";
+  if ("soaReady" in output) {
+    return output.soaReady ? "SOA evidence packet ready" : "SOA evidence packet blocked";
+  }
   if ("strategyThemes" in output) {
     const themes = Array.isArray(output.strategyThemes) ? output.strategyThemes : [];
     return `${themes.length} strategy themes`;
   }
-  if ("soaReady" in output) return output.soaReady ? "SOA input pack ready" : "SOA input pack blocked";
   if ("todaysBrief" in output) {
     return typeof output.todaysBrief === "string" ? output.todaysBrief : "Cipher brief ready";
   }

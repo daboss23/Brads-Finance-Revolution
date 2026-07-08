@@ -43,17 +43,17 @@ const ACTIONS: Array<{
   },
   {
     agentId: "orion",
-    label: "Generate Orion View",
-    title: "Orion adviser considerations",
-    icon: AlertTriangle,
-    description: "Adviser consideration only. Requires Brad review.",
+    label: "Assemble Orion Packet",
+    title: "Orion SOA evidence packet",
+    icon: FileSignature,
+    description: "Pulls approved facts, compliance notes and projection drivers into one prep layer.",
   },
   {
     agentId: "atlas",
-    label: "Generate Atlas Pack",
-    title: "Atlas SOA input pack",
-    icon: FileSignature,
-    description: "Prepares SOA inputs only from Brad-approved facts.",
+    label: "Generate ATLAS Draft View",
+    title: "ATLAS strategy synthesis",
+    icon: AlertTriangle,
+    description: "Produces tailored strategy reasoning, reusable advice chunks and projection assumptions.",
   },
   {
     agentId: "cipher",
@@ -166,13 +166,16 @@ function summariseOutput(agentId: AgentId, output: AgentOutput): string {
     const questions = Array.isArray(output.questionsForBrad) ? output.questionsForBrad : [];
     return `${questions.length} meeting prep questions ready.`;
   }
-  if (agentId === "orion" && "strategyThemes" in output) {
-    const themes = Array.isArray(output.strategyThemes) ? output.strategyThemes : [];
-    return `${themes.length} adviser-only strategy themes. Requires Brad review.`;
-  }
-  if (agentId === "atlas" && "soaReady" in output) {
+  if (agentId === "orion" && "soaReady" in output) {
     const missing = Array.isArray(output.missingBeforeDraft) ? output.missingBeforeDraft : [];
-    return output.soaReady ? "SOA input pack ready." : `${missing.length} items missing before draft.`;
+    return output.soaReady ? "SOA evidence packet ready." : `${missing.length} items still blocking Atlas.`;
+  }
+  if (agentId === "atlas" && "strategyThemes" in output) {
+    const themes = Array.isArray(output.strategyThemes) ? output.strategyThemes : [];
+    const recommendations = Array.isArray(output.tailoredRecommendations)
+      ? output.tailoredRecommendations
+      : [];
+    return `${themes.length} tailored strategy themes and ${recommendations.length} recommendation lanes ready.`;
   }
   if (agentId === "cipher" && "todaysBrief" in output) {
     return typeof output.todaysBrief === "string" ? output.todaysBrief : "Cipher brief ready.";

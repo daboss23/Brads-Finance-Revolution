@@ -16,6 +16,8 @@ import { STRATEGY_LABELS, type StrategyKey } from "../forms";
 import { LANGUAGE_TEMPLATES } from "../compliance/knowledge-base";
 import { checkCompliance } from "../compliance/compliance-checker";
 import { logAudit } from "../compliance/audit-trail";
+import { getAgentOutput } from "../data/agent-output-repository";
+import type { AtlasOutput, OrionOutput } from "../agents/types";
 
 import {
   STRATEGY_PATTERNS,
@@ -134,11 +136,19 @@ export function generateSoa(
 
   stage("fetching-market");
   const market = snapshotsForStrategies(strategies);
+  const orionContext = readOrionContext(clientId);
+  const atlasContext = readAtlasContext(clientId);
 
   stage("generating-summary");
   const sections: SoaSectionContent[] = isShowpieceClient(clientId)
     ? buildSarahDemoSections()
-    : buildProceduralSections(factFind, strategies, client.name);
+    : buildProceduralSections(
+        factFind,
+        strategies,
+        client.name,
+        orionContext,
+        atlasContext,
+      );
 
   stage("generating-recommendations");
   // Already produced in sections above; this stage gate is for the UI
@@ -206,6 +216,8 @@ function buildProceduralSections(
   factFind: ReturnType<typeof getFactFindOrDemo>,
   strategies: StrategyKey[],
   clientName: string,
+  orionContext: OrionOutput | null,
+  atlasContext: AtlasOutput | null,
 ): SoaSectionContent[] {
   if (!factFind) throw new Error("Fact find required");
 
@@ -214,13 +226,19 @@ function buildProceduralSections(
   const incomeRaw = factFind.employmentAndIncome.annualGrossIncome || "your income";
   const superFund = factFind.superannuation.fundName || "your current super fund";
   const superBalance = factFind.superannuation.estimatedBalance || "your current balance";
+  const atlasRecommendations = atlasContext?.tailoredRecommendations ?? [];
+  const atlasThemes = atlasContext?.strategyThemes ?? [];
+  const atlasAssumptions = atlasContext?.projectionAssumptions ?? [];
+  const atlasPersonalisation = atlasContext?.personalizationNotes ?? [];
+  const orionHighlights = orionContext?.evidencePacket.factFindHighlights ?? [];
+  const orionProjectionInputs = orionContext?.evidencePacket.projectionInputs ?? [];
 
   const bodies: Partial<Record<SectionId, string>> = {
     cover: `This Statement of Advice has been prepared for ${clientName} by Brad Lonergan, Authorised Representative of Charter Financial Planning Limited AFSL 234665, trading as Newcastle Financial Services. It is confidential and prepared for ${firstName}'s personal use only.`,
 
     "executive-summary": `${firstName}, this plan covers ${strategies
       .map((s) => STRATEGY_LABELS[s].toLowerCase())
-      .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.`,
+      .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.${atlasPersonalisation.length > 0 ? ` Adviser context used for this draft includes ${atlasPersonalisation.join(" ")}` : ""}`,
 
     "about-you": `You are ${factFind.familyAndDependants.relationshipStatus.toLowerCase() || "currently single"} living at ${factFind.personalDetails.address || "your current address"}. ${
       factFind.familyAndDependants.numberOfDependants &&
@@ -229,14 +247,25 @@ function buildProceduralSections(
         : "You have no dependants. "
     }You work as ${factFind.employmentAndIncome.occupation || "your current role"} at ${factFind.employmentAndIncome.employerName || "your current employer"} earning ${incomeRaw}. Your superannuation is held with ${superFund} with a balance of ${superBalance}. You told us your priorities are ${factFind.goalsAndObjectives.primaryFinancialGoals || "the goals you described in your session"}.`,
 
-    "risk-profile": `Your recorded risk profile is ${factFind.goalsAndObjectives.investmentRiskPreference || "Moderate"}. That profile guides every investment recommendation in this plan. We have aligned the recommended asset allocation accordingly. Please confirm this still reflects your attitude to risk by signing the acknowledgement at the back of this document.`,
+    "risk-profile": `Your recorded risk profile is ${factFind.goalsAndObjectives.investmentRiskPreference || "Moderate"}. That profile guides every investment recommendation in this plan. We have aligned the recommended asset allocation accordingly. Please confirm this still reflects your attitude to risk by signing the acknowledgement at the back of this document.${atlasThemes.length > 0 ? ` The strategy themes highlighted for your file are ${atlasThemes.map((theme) => theme.toLowerCase()).join(", ")}.` : ""}`,
 
-    recommendations: strategies
-      .map((s, i) => {
-        const pattern = STRATEGY_PATTERNS[s];
-        return `Recommendation ${i + 1}: ${STRATEGY_LABELS[s]}. ${pattern.openingAngle} We recommend this strategy because it fits your circumstances based on what you shared with us. Key things this addresses for you: ${pattern.mustCover.slice(0, 2).join("; ")}. Alternatives considered and not chosen: standard product without active review, do nothing. Implementation steps are documented in the implementation plan below.`;
-      })
-      .join("\n\n"),
+    recommendations:
+      atlasRecommendations.length > 0
+        ? atlasRecommendations
+            .map((recommendation, i) => {
+              const context =
+                orionHighlights.length > 0
+                  ? ` This is supported by file evidence including ${orionHighlights.join(" ")}`
+                  : "";
+              return `Recommendation ${i + 1}: ${recommendation}${context} Implementation steps are documented in the implementation plan below.`;
+            })
+            .join("\n\n")
+        : strategies
+            .map((s, i) => {
+              const pattern = STRATEGY_PATTERNS[s];
+              return `Recommendation ${i + 1}: ${STRATEGY_LABELS[s]}. ${pattern.openingAngle} We recommend this strategy because it fits your circumstances based on what you shared with us. Key things this addresses for you: ${pattern.mustCover.slice(0, 2).join("; ")}. Alternatives considered and not chosen: standard product without active review, do nothing. Implementation steps are documented in the implementation plan below.`;
+            })
+            .join("\n\n"),
 
     superannuation: `Your super is currently with ${superFund} at ${superBalance}. We recommend reviewing your investment option and contribution rate at the next annual review. ${caseStudies.find((c) => c.strategy === "super-consolidation")?.learning ?? ""}`,
 
@@ -248,7 +277,7 @@ function buildProceduralSections(
       ? `We recommend an asset allocation matching your ${factFind.goalsAndObjectives.investmentRiskPreference || "moderate"} risk profile, implemented through a Charter approved platform. Fees and projected returns are detailed below.`
       : `An investment strategy outside super was not included in the scope of this advice.`,
 
-    "retirement-projections": `Your retirement projection is set out below using conservative assumptions. We will update this every year at your annual review.`,
+    "retirement-projections": `Your retirement projection is set out below using conservative assumptions. We will update this every year at your annual review.${atlasAssumptions.length > 0 ? ` The current modelling assumptions for this draft are ${atlasAssumptions.join(" ")}` : ""}${orionProjectionInputs.length > 0 ? ` Key inputs include ${orionProjectionInputs.map((item) => `${item.label}: ${item.value}`).join(". ")}.` : ""}`,
 
     implementation: `1. Sign and return this SOA. Responsible: ${firstName}. By: within 14 days.\n2. Brad and Colleen lodge all provider applications. Responsible: Brad. By: within 7 days of signed SOA.\n3. Annual review meeting. Responsible: Brad and ${firstName}. By: 12 months from sign date.`,
 
@@ -270,6 +299,18 @@ function buildProceduralSections(
     reviewed: false,
     approved: false,
   }));
+}
+
+function readOrionContext(clientId: string): OrionOutput | null {
+  const stored = getAgentOutput(clientId, "orion");
+  if (!stored || !("soaReady" in stored.output)) return null;
+  return stored.output as OrionOutput;
+}
+
+function readAtlasContext(clientId: string): AtlasOutput | null {
+  const stored = getAgentOutput(clientId, "atlas");
+  if (!stored || !("strategyThemes" in stored.output)) return null;
+  return stored.output as AtlasOutput;
 }
 
 // ── Diagnostics ─────────────────────────────────────────────────────────────

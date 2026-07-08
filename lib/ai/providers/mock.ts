@@ -147,37 +147,116 @@ function runScribe(input: AgentInput): ScribeOutput {
 
 function runOrion(input: AgentInput): OrionOutput {
   const client = getClient(input);
+  const guardian = runGuardian(input);
+  const answers = getAnswers(input);
+  const topSections = Object.entries(answers)
+    .filter(([, fields]) => Object.values(fields).some(Boolean))
+    .slice(0, 4)
+    .map(([section, fields]) => {
+      const preview = Object.values(fields).filter(Boolean).slice(0, 2).join("; ");
+      return `${section.replace(/-/g, " ")}: ${preview}`;
+    });
+  const growthGoal =
+    /first home|property/i.test(client.notes) ? "Property acquisition" : "Long-term wealth accumulation";
+  const projectionInputs = [
+    { label: "Current progress", value: `${client.progress}% fact-find complete` },
+    { label: "Meeting stage", value: client.meetingStage },
+    { label: "Primary goal lane", value: growthGoal },
+    { label: "Advice focus", value: /insurance/i.test(client.notes) ? "Insurance and cash-flow resilience" : "Retirement and wealth strategy" },
+  ];
+  const knowledgeChunks = [
+    "Use Brad voice rules to keep recommendations commercial, direct and plain-English.",
+    "Pull only compliant language templates that match the client's actual strategy scope.",
+    "Pair every recommendation with implementation sequencing and clear assumptions.",
+  ];
+  const missingBeforeDraft = guardian.blockedFromSOA
+    ? guardian.reasonsBlocked
+    : [];
   return {
-    strategyThemes: ["Superannuation review", "Insurance adequacy", "Cash-flow and goal funding"],
-    adviserConsiderations: [
-      "Adviser consideration only. Requires Brad review. Consider whether super consolidation or contribution strategy is relevant after product research.",
-      "Adviser consideration only. Requires Brad review. Review insurance needs against income, debt and dependant context before any recommendation.",
+    soaReady: Boolean(input.bradReviewed && !guardian.blockedFromSOA),
+    evidencePacket: {
+      approvedFactsOnly: input.bradReviewed === true,
+      factFindHighlights: topSections.length > 0 ? topSections : [client.notes],
+      complianceGuardrails: guardian.adviserReviewFlags,
+      knowledgeChunks,
+      projectionInputs,
+    },
+    recommendedSections: [
+      "Client position and goals",
+      "Strategy logic and trade-offs",
+      "Projection assumptions",
+      "Risks and implementation sequencing",
     ],
-    relevantClientFacts: [client.notes, `Current fact-find progress: ${client.progress}%`],
-    knowledgeReferences: ["BID seven-step checklist", "Safe harbour evidence checklist", "Brad voice rules"],
-    uncertaintyLevel: client.progress >= 85 ? "medium" : "high",
-    requiresBradDecision: true,
-    disclaimer: "Adviser consideration only. Requires Brad review.",
+    missingBeforeDraft,
+    complianceNotes: guardian.warningFlags,
+    nextDataPulls: guardian.blockedFromSOA
+      ? ["Resolve blocker list before final strategy synthesis"]
+      : ["Pull relevant advice chunk from knowledge base", "Confirm projection assumptions with Brad"],
+    adviserApprovalRequired: true,
   };
 }
 
 function runAtlas(input: AgentInput): AtlasOutput {
   const client = getClient(input);
   const guardian = runGuardian(input);
-  const soaReady = Boolean(input.approvedForSOA && !guardian.blockedFromSOA);
+  const orion = runOrion(input);
+  const propertyGoal = /first home|property/i.test(client.notes);
+  const insuranceNeed = /insurance|dependant|debt/i.test(client.notes);
+  const strategyThemes = [
+    propertyGoal ? "Goal-linked capital accumulation" : "Long-term wealth and retirement positioning",
+    insuranceNeed ? "Insurance protection alignment" : "Cash-flow and contribution efficiency",
+    "Superannuation and implementation sequencing",
+  ];
+  const recommendationPool = [
+    propertyGoal
+      ? "Use cash-flow surplus and tax-effective contribution settings to build a home deposit plan without derailing long-term retirement balances."
+      : "Sequence super contributions and portfolio settings around the client's long-term retirement timeline and liquidity needs.",
+    insuranceNeed
+      ? "Review life, TPD and income protection settings against earnings, debts and dependant reliance so the cover recommendation solves a real protection gap."
+      : "Use contribution and cash reserve settings to strengthen resilience before taking additional investment risk.",
+    "Stage implementation so urgent protection or structure changes happen first, followed by optimisation work once evidence is complete.",
+  ];
+  const personalizationNotes = [
+    client.notes,
+    `Current fact-find completion is ${client.progress}% and meeting stage is ${client.meetingStage}.`,
+    input.bradReviewed
+      ? "Brad review is complete, so Atlas can rely on approved facts and focus on advice tailoring."
+      : "Brad review is not complete, so Atlas should keep uncertainty visible and avoid final-sounding recommendations.",
+  ];
+  const projectionAssumptions = [
+    propertyGoal
+      ? "Model savings and contribution pathways against the client's stated property timing window."
+      : "Model long-term balances and contribution benefits over the client's likely accumulation horizon.",
+    insuranceNeed
+      ? "Reflect premium affordability and cash-flow impact before recommending protection changes."
+      : "Stress test contribution levels against day-to-day cash-flow stability.",
+    "Make every projection explicit about assumptions, data gaps and required adviser validation.",
+  ];
   return {
-    soaReady,
-    soaInputPack: {
-      clientId: client.id,
-      clientName: client.name,
-      approvedFactsOnly: input.bradReviewed === true,
-      progress: client.progress,
-      meetingStage: client.meetingStage,
-    },
-    recommendedSections: ["Client profile", "Goals", "Strategy rationale", "Risks", "Implementation"],
-    missingBeforeDraft: soaReady ? [] : guardian.reasonsBlocked,
-    complianceNotes: guardian.adviserReviewFlags,
-    adviserApprovalRequired: true,
+    strategyThemes,
+    tailoredRecommendations: recommendationPool,
+    relevantClientFacts: orion.evidencePacket.factFindHighlights,
+    knowledgeReferences: [
+      "Brad voice rules",
+      "BID seven-step checklist",
+      "Safe harbour evidence checklist",
+      "SOA knowledge base strategy patterns",
+    ],
+    reusableAdviceChunks: [
+      "Recommendation rationale should connect client goals, current position, benefits, risks and implementation timing in one flow.",
+      "Projection language should explain what the numbers depend on and what may change after product research or underwriting.",
+      "Risk disclosures should be specific to cash-flow, insurance affordability, market volatility or legislative assumptions as relevant.",
+    ],
+    projectionAssumptions,
+    personalizationNotes,
+    uncertaintyLevel:
+      guardian.blockedFromSOA || client.progress < 80
+        ? "high"
+        : client.progress < 95
+        ? "medium"
+        : "low",
+    requiresBradDecision: true,
+    disclaimer: "Adviser consideration only. Requires Brad review.",
   };
 }
 

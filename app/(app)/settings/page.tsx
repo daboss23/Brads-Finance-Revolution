@@ -103,8 +103,8 @@ export default function SettingsPage() {
           <div>
             <h2 className="text-[15px] font-semibold text-foreground">Agent Usage Mode</h2>
             <p className="mt-1 text-[12px] text-muted-foreground/70">
-              Default is Balanced: Beacon, Guardian and Scribe can auto-run after workflow events.
-              Orion and Atlas remain manual.
+              Default is Balanced: Beacon, Guardian, Scribe and Orion can auto-run after workflow events.
+              ATLAS stays manual so Brad reviews the final strategy synthesis deliberately.
             </p>
           </div>
         </div>

@@ -72,7 +72,7 @@ export function AgentCard({ agent, featured = false }: { agent: Agent; featured?
       {/* Accent top rail */}
       <div className={cn("h-[3px] bg-gradient-to-r to-transparent", tone.glow)} />
 
-      {/* Featured badge for ORION */}
+      {/* Featured badge for the final SOA synthesis agent */}
       {featured && (
         <div className="absolute right-5 top-5 z-10 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.08] px-2.5 py-1">
           <Crown className="h-3 w-3 text-gold" />

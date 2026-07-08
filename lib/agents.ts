@@ -1,6 +1,6 @@
 import { CLIENTS } from "@/lib/data";
 
-export type AgentId = "nova" | "vanta" | "orion" | "pulse";
+export type AgentId = "nova" | "vanta" | "atlas" | "pulse";
 
 export type AgentStatus = "active" | "monitoring" | "blocked" | "ready";
 
@@ -86,25 +86,25 @@ export const AGENTS: Agent[] = [
     confidence: 88,
   },
   {
-    id: "orion",
-    name: "ORION",
-    role: "Strategy and SOA Agent",
+    id: "atlas",
+    name: "ATLAS",
+    role: "Strategy and Final SOA Agent",
     tagline: "Strategy and Final Assembly",
     domain: "SOA drafting and strategy logic",
     tone: "gold",
-    callsign: "Brings every signal together into the final SOA draft",
+    callsign: "Pulls approved facts, projections and knowledge fragments into a tailored SOA draft",
     flowStep: 3,
     status: "ready",
-    workload: 54,
-    activeTask: "SOA draft assembled for Robert and Sue Tanner",
+    workload: 59,
+    activeTask: "Synthesising tailored SOA plan for Robert and Sue Tanner",
     blockedItem: null,
     linkedClientId: "robert-sue-tanner",
     priority: "high",
-    nextAction: "Hand SOA draft to Brad for review and approval",
+    nextAction: "Review projection assumptions and personalised recommendations with Brad",
     queueDepth: 2,
     completedToday: 1,
-    throughput: [1, 2, 1, 3, 2, 2, 3, 2],
-    confidence: 91,
+    throughput: [1, 2, 2, 3, 2, 3, 3, 2],
+    confidence: 93,
   },
   {
     id: "pulse",
@@ -222,8 +222,8 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-2",
-    agentId: "orion",
-    label: "Review SOA draft prepared for Robert and Sue Tanner",
+    agentId: "atlas",
+    label: "Review ATLAS SOA draft prepared for Robert and Sue Tanner",
     clientId: "robert-sue-tanner",
     priority: "high",
     href: "/clients/robert-sue-tanner/soa",

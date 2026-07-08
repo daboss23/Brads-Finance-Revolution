@@ -28,8 +28,8 @@ const ICONS: Record<AgentId, React.ElementType> = {
   beacon: RadioTower,
   guardian: ShieldCheck,
   scribe: Activity,
-  orion: Sparkles,
-  atlas: FileSignature,
+  orion: FileSignature,
+  atlas: Sparkles,
   cipher: Zap,
   nexus: Database,
 };
@@ -47,7 +47,7 @@ const FLOW_LABELS = [
   "Guardian",
   "Scribe",
   "Orion",
-  "Atlas",
+  "ATLAS",
   "Cipher",
   "Nexus",
 ];
@@ -69,8 +69,8 @@ export default function AgentsPage() {
           </h1>
           <p className="mt-4 max-w-[760px] text-[14px] leading-7 text-muted-foreground/80">
             The platform now has a lightweight agent layer for fact-find structuring,
-            compliance checks, meeting intelligence, adviser-only strategy support,
-            SOA input preparation, follow-ups and integration health.
+            compliance checks, meeting intelligence, SOA evidence assembly,
+            final strategy synthesis, follow-ups and integration health.
           </p>
         </div>
         <div className="rounded-xl border border-border/70 bg-card p-5">
