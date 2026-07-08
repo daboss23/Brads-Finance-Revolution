@@ -50,8 +50,8 @@ const ACTIONS: Array<{
   },
   {
     agentId: "atlas",
-    label: "Generate ATLAS Draft View",
-    title: "ATLAS strategy synthesis",
+    label: "Generate Atlas Draft View",
+    title: "Atlas strategy synthesis",
     icon: AlertTriangle,
     description: "Produces tailored strategy reasoning, reusable advice chunks and projection assumptions.",
   },

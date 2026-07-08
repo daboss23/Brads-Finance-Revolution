@@ -36,9 +36,10 @@ export default function AgentsPage() {
             BMK Agent Command Centre
           </h1>
           <p className="mt-4 max-w-[760px] text-[14px] leading-7 text-muted-foreground/80">
-            Four core agents now define the platform language everywhere. Sarah handles
-            discovery, then NOVA, VANTA, ATLAS and PULSE move the file through
-            research, compliance, strategy synthesis and follow-up.
+            The current agent language is now consistent across the platform. Sarah
+            handles discovery, then Beacon, Guardian, Scribe, Orion, Atlas, Cipher
+            and Nexus move the file through structuring, compliance, meeting prep,
+            evidence, SOA drafting, follow-up and integrations.
           </p>
         </div>
         <div className="rounded-xl border border-border/70 bg-card p-5">

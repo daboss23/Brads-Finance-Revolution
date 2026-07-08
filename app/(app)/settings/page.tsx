@@ -104,8 +104,9 @@ export default function SettingsPage() {
           <div>
             <h2 className="text-[15px] font-semibold text-foreground">Agent Usage Mode</h2>
             <p className="mt-1 text-[12px] text-muted-foreground/70">
-              Default is Balanced: NOVA and VANTA supporting modules can auto-run after
-              workflow events, while ATLAS remains a deliberate final review step for Brad.
+              Default is Balanced: Beacon and Guardian supporting modules can auto-run
+              after workflow events, while Atlas remains a deliberate final review step
+              for Brad.
             </p>
           </div>
         </div>

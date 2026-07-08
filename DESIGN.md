@@ -126,6 +126,24 @@ All spacing is based on a **4px** rhythm.
 - **States**: hover, focus-visible
 - **Accessibility**: readable on mobile as a stacked layout
 
+### Client Progress Engine
+
+- **Structure**: dominant central module with an orbital workflow, stage nodes, Sarah intelligence core, and compact operational metrics
+- **Variants**: onboarding engine only for the main dashboard
+- **Spacing**: `16px-20px` internal padding, with nodes stacking below the core on small screens
+- **States**: active nodes pulse softly, links and analytics action have hover and focus-visible states
+- **Accessibility**: stage labels, counts, and descriptions remain text-first so color and position are not the only cues
+- **Motion**: slow orbital glow using transform and opacity only, disabled for reduced motion
+
+### Dashboard Support Panels
+
+- **Structure**: Priority Queue, Sarah Brief, Pipeline Snapshot, Flow Reading, Next Best Actions, and Agent Activity Strip all use the Glass Panel material with tighter internals
+- **Variants**: action, insight, telemetry, status
+- **Spacing**: compact `12px-16px` rows inside `16px-20px` panels
+- **States**: default, hover, focus-visible for clickable rows and actions
+- **Accessibility**: badges use explicit text labels, agent status is written out, and rows keep visible forward affordances
+- **Motion**: hover elevation only, no layout animation
+
 ## 6. Motion & Interaction
 
 ### Timing

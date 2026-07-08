@@ -40,12 +40,12 @@ export const CORE_AGENT_ORDER: CommandAgentId[] = ["nova", "vanta", "atlas", "pu
 export const CORE_AGENT_BLUEPRINTS: Record<CommandAgentId, CoreAgentBlueprint> = {
   nova: {
     id: "nova",
-    name: "NOVA",
-    role: "Client Research Agent",
+    name: "Beacon",
+    role: "Fact Find Structuring Agent",
     tagline: "Client Intelligence",
     domain: "Research and pre meeting context",
     description:
-      "Summarises fact-find context, highlights missing evidence and prepares Brad with the most useful client intelligence before strategy work begins.",
+      "Normalises Sarah and manual fact-find data, highlights missing evidence and prepares Brad with the most useful client intelligence before strategy work begins.",
     tone: "blue",
     callsign: "Reads every file before Brad walks in the room",
     flowStep: 1,
@@ -53,7 +53,7 @@ export const CORE_AGENT_BLUEPRINTS: Record<CommandAgentId, CoreAgentBlueprint> =
   },
   vanta: {
     id: "vanta",
-    name: "VANTA",
+    name: "Guardian",
     role: "Risk and Compliance Agent",
     tagline: "Compliance Gate",
     domain: "Best interests duty and advice risk",
@@ -66,7 +66,7 @@ export const CORE_AGENT_BLUEPRINTS: Record<CommandAgentId, CoreAgentBlueprint> =
   },
   atlas: {
     id: "atlas",
-    name: "ATLAS",
+    name: "Atlas",
     role: "Strategy and Final SOA Agent",
     tagline: "Strategy and Final Assembly",
     domain: "SOA drafting and strategy logic",
@@ -79,7 +79,7 @@ export const CORE_AGENT_BLUEPRINTS: Record<CommandAgentId, CoreAgentBlueprint> =
   },
   pulse: {
     id: "pulse",
-    name: "PULSE",
+    name: "Cipher",
     role: "Client Follow Up Agent",
     tagline: "Pipeline Momentum",
     domain: "Follow ups and pipeline movement",
@@ -177,7 +177,7 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
   atlas: {
     id: "atlas",
     coreAgentId: "atlas",
-    name: "ATLAS",
+    name: "Atlas",
     role: "Strategy and Final SOA Agent",
     description:
       "Synthesises approved facts, compliance guardrails, meeting context, knowledge chunks and projection assumptions into Brad-ready SOA strategy output.",

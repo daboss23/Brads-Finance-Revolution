@@ -58,7 +58,7 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
   nova: {
     status: "active",
     workload: 68,
-    activeTask: "Preparing pre meeting brief for Sarah Mitchell",
+    activeTask: "Structuring Sarah Mitchell's discovery file for adviser review",
     blockedItem: null,
     linkedClientId: "sarah-mitchell",
     priority: "high",
@@ -215,7 +215,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-2",
     agentId: "atlas",
-    label: "Review ATLAS SOA draft prepared for Robert and Sue Tanner",
+    label: "Review Atlas SOA draft prepared for Robert and Sue Tanner",
     clientId: "robert-sue-tanner",
     priority: "high",
     href: "/clients/robert-sue-tanner/soa",
@@ -223,7 +223,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-3",
     agentId: "nova",
-    label: "Review NOVA client brief for Sarah Mitchell before the 28 May meeting",
+    label: "Review Scribe client brief for Sarah Mitchell before the 28 May meeting",
     clientId: "sarah-mitchell",
     priority: "high",
     href: "/clients/sarah-mitchell/fact-find-review",
@@ -239,7 +239,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-5",
     agentId: "pulse",
-    label: "Send PULSE follow up reminder to Michael and Kate Reynolds",
+    label: "Send Cipher follow up reminder to Michael and Kate Reynolds",
     clientId: "michael-kate-reynolds",
     priority: "medium",
     href: "/clients/michael-kate-reynolds",
