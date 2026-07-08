@@ -19,6 +19,7 @@ import { ExportButtons } from "@/components/fact-find-review/ExportButtons";
 import { EditableFactFindValue } from "@/components/fact-find-review/EditableFactFindValue";
 import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
 import { ClientTabs } from "@/components/clients/ClientTabs";
+import { AgentIntelligencePanel } from "@/components/agents/AgentIntelligencePanel";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -258,6 +259,7 @@ export default function FactFindReviewPage({
 
         {/* Right — interactive checklist, notes, actions */}
         <div className="sticky top-8">
+          <AgentIntelligencePanel clientId={client.id} />
           <ReviewInteractive
             clientId={client.id}
             clientName={client.name}
