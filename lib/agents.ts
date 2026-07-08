@@ -1,14 +1,13 @@
 import {
-  CORE_AGENT_BLUEPRINTS,
-  CORE_AGENT_ORDER,
-  type CommandAgentId,
+  ACTIVE_WORKFLOW_AGENT_ORDER,
+  RUNTIME_AGENT_BLUEPRINTS,
+  RUNTIME_AGENT_ORDER,
   type CommandAgentPriority,
   type CommandAgentStatus,
   type CommandAgentTone,
 } from "@/lib/agent-system";
+import type { AgentId } from "@/lib/agents/types";
 import { CLIENTS } from "@/lib/data";
-
-export type AgentId = CommandAgentId;
 
 export type AgentStatus = CommandAgentStatus;
 
@@ -20,13 +19,11 @@ export type Agent = {
   id: AgentId;
   name: string;
   role: string;
-  tagline: string;
-  domain: string;
   description: string;
+  trigger: string;
   tone: AgentTone;
   callsign: string;
-  flowStep: number;
-  runtimeAgents: string[];
+  flowStep: number | null;
   status: AgentStatus;
   workload: number;
   activeTask: string;
@@ -42,20 +39,24 @@ export type Agent = {
 
 type AgentState = Omit<
   Agent,
-  | "id"
-  | "name"
-  | "role"
-  | "tagline"
-  | "domain"
-  | "description"
-  | "tone"
-  | "callsign"
-  | "flowStep"
-  | "runtimeAgents"
+  "id" | "name" | "role" | "description" | "trigger" | "tone" | "callsign" | "flowStep"
 >;
 
 const AGENT_STATE: Record<AgentId, AgentState> = {
-  nova: {
+  sarah: {
+    status: "ready",
+    workload: 42,
+    activeTask: "Waiting for the next discovery session to begin",
+    blockedItem: null,
+    linkedClientId: "sarah-mitchell",
+    priority: "medium",
+    nextAction: "Collect the next client fact find cleanly and hand off to Beacon",
+    queueDepth: 1,
+    completedToday: 3,
+    throughput: [1, 2, 1, 3, 2, 2, 3, 3],
+    confidence: 96,
+  },
+  beacon: {
     status: "active",
     workload: 68,
     activeTask: "Structuring Sarah Mitchell's discovery file for adviser review",
@@ -68,7 +69,7 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
     throughput: [3, 4, 2, 5, 4, 6, 5, 7],
     confidence: 94,
   },
-  vanta: {
+  guardian: {
     status: "blocked",
     workload: 81,
     activeTask: "Reviewing best interests duty evidence for David Okafor",
@@ -80,6 +81,32 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
     completedToday: 2,
     throughput: [4, 3, 5, 2, 3, 2, 4, 3],
     confidence: 88,
+  },
+  scribe: {
+    status: "active",
+    workload: 54,
+    activeTask: "Preparing meeting brief for Sarah Mitchell",
+    blockedItem: null,
+    linkedClientId: "sarah-mitchell",
+    priority: "high",
+    nextAction: "Finish adviser briefing and surface meeting questions",
+    queueDepth: 2,
+    completedToday: 4,
+    throughput: [2, 3, 3, 4, 5, 4, 4, 4],
+    confidence: 92,
+  },
+  orion: {
+    status: "active",
+    workload: 57,
+    activeTask: "Assembling evidence packet for Robert and Sue Tanner",
+    blockedItem: null,
+    linkedClientId: "robert-sue-tanner",
+    priority: "medium",
+    nextAction: "Prepare approved fact highlights and projection inputs for Atlas",
+    queueDepth: 2,
+    completedToday: 3,
+    throughput: [2, 2, 3, 3, 3, 4, 3, 4],
+    confidence: 93,
   },
   atlas: {
     status: "ready",
@@ -94,7 +121,7 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
     throughput: [1, 2, 2, 3, 2, 3, 3, 2],
     confidence: 93,
   },
-  pulse: {
+  cipher: {
     status: "monitoring",
     workload: 47,
     activeTask: "Tracking stalled clients across the pipeline",
@@ -107,6 +134,41 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
     throughput: [6, 5, 7, 6, 8, 7, 9, 8],
     confidence: 96,
   },
+  nexus: {
+    status: "monitoring",
+    workload: 22,
+    activeTask: "Monitoring provider keys and integration readiness",
+    blockedItem: null,
+    linkedClientId: null,
+    priority: "low",
+    nextAction: "Report missing credentials before live integrations are enabled",
+    queueDepth: 1,
+    completedToday: 6,
+    throughput: [3, 3, 4, 5, 4, 5, 6, 6],
+    confidence: 98,
+  },
+};
+
+const AGENT_TONES: Record<AgentId, AgentTone> = {
+  sarah: "violet",
+  beacon: "blue",
+  guardian: "orange",
+  scribe: "gold",
+  orion: "emerald",
+  atlas: "gold",
+  cipher: "emerald",
+  nexus: "blue",
+};
+
+const AGENT_CALLSIGNS: Record<AgentId, string> = {
+  sarah: "Opens the conversation and gathers the story cleanly",
+  beacon: "Turns raw discovery into a file Brad can actually work with",
+  guardian: "Nothing reaches advice without clearing the gate",
+  scribe: "Packages the meeting so Brad walks in prepared",
+  orion: "Builds the evidence packet before final advice takes shape",
+  atlas: "Pulls approved facts and reasoning into the final SOA draft",
+  cipher: "Keeps every client moving and never lets a file go quiet",
+  nexus: "Watches the wiring behind the command centre",
 };
 
 function clientName(id: string | null): string | null {
@@ -114,13 +176,19 @@ function clientName(id: string | null): string | null {
   return CLIENTS.find((c) => c.id === id)?.name ?? null;
 }
 
-export const AGENTS: Agent[] = CORE_AGENT_ORDER.map((id) => {
-  const blueprint = CORE_AGENT_BLUEPRINTS[id];
+export const AGENTS: Agent[] = RUNTIME_AGENT_ORDER.map((id) => {
+  const blueprint = RUNTIME_AGENT_BLUEPRINTS[id];
   return {
     ...blueprint,
     ...AGENT_STATE[id],
+    tone: AGENT_TONES[id],
+    callsign: AGENT_CALLSIGNS[id],
   };
 });
+
+export const ACTIVE_WORKFLOW_AGENTS: Agent[] = ACTIVE_WORKFLOW_AGENT_ORDER.map((id) =>
+  AGENTS.find((agent) => agent.id === id)!,
+);
 
 export function getAgent(id: AgentId): Agent | undefined {
   return AGENTS.find((agent) => agent.id === id);
@@ -206,7 +274,7 @@ export type ActionQueueItem = {
 export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-1",
-    agentId: "vanta",
+    agentId: "guardian",
     label: "Resolve compliance blocker on David Okafor before SOA can proceed",
     clientId: "david-okafor",
     priority: "critical",
@@ -222,7 +290,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-3",
-    agentId: "nova",
+    agentId: "scribe",
     label: "Review Scribe client brief for Sarah Mitchell before the 28 May meeting",
     clientId: "sarah-mitchell",
     priority: "high",
@@ -230,7 +298,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-4",
-    agentId: "vanta",
+    agentId: "guardian",
     label: "Confirm best interests evidence for Angela Forsyth",
     clientId: "angela-forsyth",
     priority: "medium",
@@ -238,7 +306,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-5",
-    agentId: "pulse",
+    agentId: "cipher",
     label: "Send Cipher follow up reminder to Michael and Kate Reynolds",
     clientId: "michael-kate-reynolds",
     priority: "medium",

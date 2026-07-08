@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { AGENTS } from "@/lib/agents";
-import { getRuntimeBlueprintsForCore, listRuntimeBlueprints } from "@/lib/agent-system";
+import { listRuntimeBlueprints } from "@/lib/agent-system";
 import { cn } from "@/lib/utils";
 
 const usageMode = "balanced";
@@ -55,6 +55,7 @@ const providerRows = [
 
 export default function SettingsPage() {
   const runtimeAgents = listRuntimeBlueprints();
+  const runtimeById = new Map(runtimeAgents.map((agent) => [agent.id, agent]));
 
   return (
     <div className="max-w-[1180px] px-8 py-12 lg:px-10">
@@ -132,7 +133,7 @@ export default function SettingsPage() {
           <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
             <ShieldCheck className="h-4 w-4" />
           </div>
-          <h2 className="text-[15px] font-semibold text-foreground">Core Agents</h2>
+          <h2 className="text-[15px] font-semibold text-foreground">Agent Registry</h2>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           {AGENTS.map((agent) => (
@@ -141,7 +142,7 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-[13px] font-semibold text-foreground">{agent.name}</p>
                   <p className="mt-1 text-[11.5px] text-muted-foreground/65">
-                    {agent.role}. Modules: {getRuntimeBlueprintsForCore(agent.id).map((runtime) => runtime.name).join(", ")}.
+                    {agent.role}. Trigger: {runtimeById.get(agent.id)?.trigger ?? "Manual orchestration"}.
                   </p>
                 </div>
                 <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-300">
@@ -171,7 +172,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <span className="rounded-full border border-border/70 bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
-                  {agent.coreAgentId ? agent.coreAgentId.toUpperCase() : "Platform"}
+                  {agent.autoRunModes.length > 0 ? "Auto-run ready" : "Manual"}
                 </span>
               </div>
             </div>

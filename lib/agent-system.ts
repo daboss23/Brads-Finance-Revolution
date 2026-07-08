@@ -1,29 +1,20 @@
 import type { AgentId, CostLevel, UsageMode } from "@/lib/agents/types";
 
-export type CommandAgentId = "nova" | "vanta" | "atlas" | "pulse";
-
 export type CommandAgentStatus = "active" | "monitoring" | "blocked" | "ready";
 
 export type CommandAgentPriority = "low" | "medium" | "high" | "critical";
 
 export type CommandAgentTone = "blue" | "orange" | "gold" | "emerald" | "violet";
 
-export type CoreAgentBlueprint = {
-  id: CommandAgentId;
-  name: string;
-  role: string;
-  tagline: string;
-  domain: string;
-  description: string;
-  tone: CommandAgentTone;
-  callsign: string;
-  flowStep: number;
-  runtimeAgents: AgentId[];
-};
+export type AgentCategory =
+  | "discovery"
+  | "workflow"
+  | "strategy"
+  | "operations"
+  | "platform";
 
 export type RuntimeAgentBlueprint = {
   id: AgentId;
-  coreAgentId: CommandAgentId | null;
   name: string;
   role: string;
   description: string;
@@ -33,63 +24,8 @@ export type RuntimeAgentBlueprint = {
   costLevel: CostLevel;
   autoRunModes: UsageMode[];
   manualRefresh: boolean;
-};
-
-export const CORE_AGENT_ORDER: CommandAgentId[] = ["nova", "vanta", "atlas", "pulse"];
-
-export const CORE_AGENT_BLUEPRINTS: Record<CommandAgentId, CoreAgentBlueprint> = {
-  nova: {
-    id: "nova",
-    name: "Beacon",
-    role: "Fact Find Structuring Agent",
-    tagline: "Client Intelligence",
-    domain: "Research and pre meeting context",
-    description:
-      "Normalises Sarah and manual fact-find data, highlights missing evidence and prepares Brad with the most useful client intelligence before strategy work begins.",
-    tone: "blue",
-    callsign: "Reads every file before Brad walks in the room",
-    flowStep: 1,
-    runtimeAgents: ["beacon", "scribe"],
-  },
-  vanta: {
-    id: "vanta",
-    name: "Guardian",
-    role: "Risk and Compliance Agent",
-    tagline: "Compliance Gate",
-    domain: "Best interests duty and advice risk",
-    description:
-      "Owns compliance readiness, consent checks, evidence gaps and the gate that determines whether a client file can move toward advice drafting.",
-    tone: "orange",
-    callsign: "Nothing reaches advice without clearing the gate",
-    flowStep: 2,
-    runtimeAgents: ["guardian"],
-  },
-  atlas: {
-    id: "atlas",
-    name: "Atlas",
-    role: "Strategy and Final SOA Agent",
-    tagline: "Strategy and Final Assembly",
-    domain: "SOA drafting and strategy logic",
-    description:
-      "Pulls approved facts, projections, compliance guardrails and reusable knowledge into a tailored SOA plan Brad can review and refine.",
-    tone: "gold",
-    callsign: "Pulls approved facts, projections and knowledge fragments into a tailored SOA draft",
-    flowStep: 3,
-    runtimeAgents: ["orion", "atlas"],
-  },
-  pulse: {
-    id: "pulse",
-    name: "Cipher",
-    role: "Client Follow Up Agent",
-    tagline: "Pipeline Momentum",
-    domain: "Follow ups and pipeline movement",
-    description:
-      "Tracks stalled clients, follow-up priorities and pipeline momentum so good files do not go cold before they reach Brad.",
-    tone: "emerald",
-    callsign: "Keeps every client moving, never lets one go quiet",
-    flowStep: 4,
-    runtimeAgents: ["cipher"],
-  },
+  category: AgentCategory;
+  flowStep: number | null;
 };
 
 export const RUNTIME_AGENT_ORDER: AgentId[] = [
@@ -103,10 +39,18 @@ export const RUNTIME_AGENT_ORDER: AgentId[] = [
   "nexus",
 ];
 
+export const ACTIVE_WORKFLOW_AGENT_ORDER: AgentId[] = [
+  "beacon",
+  "guardian",
+  "scribe",
+  "orion",
+  "atlas",
+  "cipher",
+];
+
 export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = {
   sarah: {
     id: "sarah",
-    coreAgentId: null,
     name: "Sarah",
     role: "Client Discovery Agent",
     description:
@@ -117,10 +61,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "medium",
     autoRunModes: [],
     manualRefresh: false,
+    category: "discovery",
+    flowStep: 0,
   },
   beacon: {
     id: "beacon",
-    coreAgentId: "nova",
     name: "Beacon",
     role: "Fact Find Structuring Agent",
     description:
@@ -131,10 +76,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "low",
     autoRunModes: ["balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "workflow",
+    flowStep: 1,
   },
   guardian: {
     id: "guardian",
-    coreAgentId: "vanta",
     name: "Guardian",
     role: "Compliance and Risk Agent",
     description:
@@ -145,10 +91,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "low",
     autoRunModes: ["balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "workflow",
+    flowStep: 2,
   },
   scribe: {
     id: "scribe",
-    coreAgentId: "nova",
     name: "Scribe",
     role: "Meeting Intelligence Agent",
     description:
@@ -159,10 +106,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "medium",
     autoRunModes: ["balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "workflow",
+    flowStep: 3,
   },
   orion: {
     id: "orion",
-    coreAgentId: "atlas",
     name: "Orion",
     role: "SOA Evidence Assembly Agent",
     description:
@@ -173,10 +121,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "low",
     autoRunModes: ["balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "strategy",
+    flowStep: 4,
   },
   atlas: {
     id: "atlas",
-    coreAgentId: "atlas",
     name: "Atlas",
     role: "Strategy and Final SOA Agent",
     description:
@@ -187,10 +136,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "medium",
     autoRunModes: ["high-intelligence"],
     manualRefresh: true,
+    category: "strategy",
+    flowStep: 5,
   },
   cipher: {
     id: "cipher",
-    coreAgentId: "pulse",
     name: "Cipher",
     role: "Follow Up and Client Status Agent",
     description:
@@ -201,10 +151,11 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "none",
     autoRunModes: ["conservative", "balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "operations",
+    flowStep: 6,
   },
   nexus: {
     id: "nexus",
-    coreAgentId: null,
     name: "Nexus",
     role: "Integration Agent",
     description:
@@ -215,6 +166,8 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     costLevel: "none",
     autoRunModes: ["conservative", "balanced", "high-intelligence"],
     manualRefresh: true,
+    category: "platform",
+    flowStep: null,
   },
 };
 
@@ -226,16 +179,6 @@ export function getRuntimeBlueprint(agentId: AgentId) {
   return RUNTIME_AGENT_BLUEPRINTS[agentId];
 }
 
-export function listCoreBlueprints() {
-  return CORE_AGENT_ORDER.map((id) => CORE_AGENT_BLUEPRINTS[id]);
-}
-
-export function getCoreBlueprint(coreAgentId: CommandAgentId) {
-  return CORE_AGENT_BLUEPRINTS[coreAgentId];
-}
-
-export function getRuntimeBlueprintsForCore(coreAgentId: CommandAgentId) {
-  return CORE_AGENT_BLUEPRINTS[coreAgentId].runtimeAgents.map(
-    (agentId) => RUNTIME_AGENT_BLUEPRINTS[agentId],
-  );
+export function listActiveWorkflowBlueprints() {
+  return ACTIVE_WORKFLOW_AGENT_ORDER.map((id) => RUNTIME_AGENT_BLUEPRINTS[id]);
 }

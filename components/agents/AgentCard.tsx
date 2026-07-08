@@ -100,7 +100,7 @@ export function AgentCard({ agent, featured = false }: { agent: Agent; featured?
                 {agent.name}
               </h3>
               <span className="cmd-label text-muted-foreground/45">
-                0{agent.flowStep}
+                {agent.flowStep === null ? "PL" : String(agent.flowStep).padStart(2, "0")}
               </span>
             </div>
             <p className="mt-1.5 text-[12px] text-muted-foreground/75 tracking-tight">

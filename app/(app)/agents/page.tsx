@@ -1,17 +1,12 @@
 import {
-  Activity,
   ArrowRight,
   Bot,
   CheckCircle2,
   Mic,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  CORE_AGENT_ORDER,
-  getRuntimeBlueprintsForCore,
-  listRuntimeBlueprints,
-} from "@/lib/agent-system";
-import { AGENTS } from "@/lib/agents";
+import { listRuntimeBlueprints } from "@/lib/agent-system";
+import { ACTIVE_WORKFLOW_AGENTS, AGENTS } from "@/lib/agents";
 import { AgentCard } from "@/components/agents/AgentCard";
 import { getAgentTelemetry } from "@/lib/agents/events";
 import { cn } from "@/lib/utils";
@@ -25,7 +20,7 @@ export default function AgentsPage() {
   const runtimeBlueprints = listRuntimeBlueprints();
   const latestByAgent = new Map(telemetry.map((event) => [event.agentId, event]));
   const autoRunnable = runtimeBlueprints.filter((agent) => agent.autoRunModes.length > 0).length;
-  const coreFlow = ["Sarah", ...AGENTS.map((agent) => agent.name)];
+  const agentFlow = AGENTS.map((agent) => agent.name);
 
   return (
     <div className="px-6 py-8 sm:px-8 lg:px-10 xl:px-14 xl:py-12">
@@ -45,10 +40,10 @@ export default function AgentsPage() {
         <div className="rounded-xl border border-border/70 bg-card p-5">
           <p className="cmd-label text-gold/85">System intelligence</p>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <Summary label="Core agents" value={AGENTS.length} />
+            <Summary label="Agents in registry" value={AGENTS.length} />
+            <Summary label="Workflow agents" value={ACTIVE_WORKFLOW_AGENTS.length} />
             <Summary label="Runtime modules" value={runtimeBlueprints.length} />
             <Summary label="Auto-runnable" value={autoRunnable} />
-            <Summary label="Runs logged" value={telemetry.length} />
           </div>
         </div>
       </header>
@@ -69,12 +64,12 @@ export default function AgentsPage() {
           </Link>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2 text-[12.5px]">
-          {coreFlow.map((step, index) => (
+          {agentFlow.map((step, index) => (
             <div key={step} className="flex items-center gap-2">
               <span className="rounded-md border border-border/70 bg-white/[0.03] px-3 py-1.5 font-medium text-foreground/80">
                 {step}
               </span>
-              {index < coreFlow.length - 1 && (
+              {index < agentFlow.length - 1 && (
                 <span className="text-muted-foreground/40">-&gt;</span>
               )}
             </div>
@@ -89,37 +84,44 @@ export default function AgentsPage() {
             <div className="rounded-xl border border-border/70 bg-card p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Bot className="h-4 w-4 text-gold" />
-                <p className="cmd-label text-gold/85">Supporting modules</p>
+                <p className="cmd-label text-gold/85">Execution profile</p>
               </div>
               <div className="space-y-2.5">
-                {getRuntimeBlueprintsForCore(agent.id).map((runtime) => {
-                  const latest = latestByAgent.get(runtime.id);
-                  return (
-                    <div
-                      key={runtime.id}
-                      className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-white/[0.025] px-3 py-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-[12.5px] font-semibold text-foreground">
-                          {runtime.name}
-                        </p>
-                        <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground/68">
-                          {runtime.role}
-                        </p>
-                      </div>
-                      <span
-                        className={cn(
-                          "rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase",
-                          latest?.status === "success"
-                            ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
-                            : "border-border/70 bg-white/[0.03] text-muted-foreground",
-                        )}
-                      >
-                        {latest?.status ?? "idle"}
-                      </span>
-                    </div>
-                  );
-                })}
+                <div className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-white/[0.025] px-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[12.5px] font-semibold text-foreground">Trigger</p>
+                    <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground/68">
+                      {agent.trigger}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase",
+                      latestByAgent.get(agent.id)?.status === "success"
+                        ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
+                        : "border-border/70 bg-white/[0.03] text-muted-foreground",
+                    )}
+                  >
+                    {latestByAgent.get(agent.id)?.status ?? "idle"}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-3 rounded-lg border border-border/70 bg-white/[0.025] px-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[12.5px] font-semibold text-foreground">
+                      Execution mode
+                    </p>
+                    <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground/68">
+                      {agent.description}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-border/70 bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
+                    {agent.id === "sarah"
+                      ? "Session"
+                      : agent.id === "nexus" || agent.id === "cipher"
+                        ? "Deterministic"
+                        : "AI"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
