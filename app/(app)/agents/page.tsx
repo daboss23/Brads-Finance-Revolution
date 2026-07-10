@@ -126,7 +126,7 @@ export default function AgentsPage() {
                 <p className="cmd-label text-gold/85">Execution profile</p>
               </div>
               <div className="space-y-2.5">
-                <div className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.07] bg-white/[0.025] px-3 py-3">
+                <div className="flex items-start justify-between gap-3 rounded-lg glass-chip px-3 py-3">
                   <div className="min-w-0">
                     <p className="text-[12.5px] font-semibold text-foreground">Trigger</p>
                     <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground/68">
@@ -144,7 +144,7 @@ export default function AgentsPage() {
                     {latestByAgent.get(agent.id)?.status ?? "idle"}
                   </span>
                 </div>
-                <div className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.07] bg-white/[0.025] px-3 py-3">
+                <div className="flex items-start justify-between gap-3 rounded-lg glass-chip px-3 py-3">
                   <div className="min-w-0">
                     <p className="text-[12.5px] font-semibold text-foreground">
                       Execution mode
@@ -196,7 +196,7 @@ export default function AgentsPage() {
 
 function Summary({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
+    <div className="rounded-lg glass-chip p-3">
       <p className="text-[22px] font-semibold leading-none text-foreground tabular-nums">{value}</p>
       <p className="mt-2 cmd-label text-muted-foreground/55">{label}</p>
     </div>
@@ -213,7 +213,7 @@ function SupportModuleCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-4">
+    <div className="rounded-lg glass-chip p-4">
       <div className="flex items-center gap-2">
         <CheckCircle2 className="h-3.5 w-3.5 text-success" />
         <p className="text-[12.5px] font-semibold text-foreground">{name}</p>

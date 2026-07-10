@@ -116,7 +116,7 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="inline-flex items-center gap-1.5 rounded border border-border bg-card px-2 py-1 text-[11px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors"
+              className="inline-flex items-center gap-1.5 btn-glass rounded px-2 py-1 text-[11px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors"
             >
               <Pencil className="h-3 w-3" />
               Edit
@@ -155,7 +155,7 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
               </button>
               <button
                 onClick={cancel}
-                className="inline-flex items-center gap-1.5 rounded border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors"
+                className="inline-flex items-center gap-1.5 btn-glass rounded px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors"
               >
                 <X className="h-3 w-3" />
                 Cancel

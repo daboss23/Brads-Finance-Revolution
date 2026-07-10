@@ -82,7 +82,7 @@ export default function SettingsPage() {
           return (
             <div key={section.group} className="glass-panel p-5">
               <div className="mb-5 flex items-center gap-3">
-                <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
+                <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
                   <Icon className="h-4 w-4" />
                 </div>
                 <h2 className="text-[15px] font-semibold text-foreground">{section.group}</h2>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
       <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
             <SlidersHorizontal className="h-4 w-4" />
           </div>
           <div>
@@ -116,10 +116,10 @@ export default function SettingsPage() {
             <div
               key={mode}
               className={cn(
-                "rounded-lg border px-4 py-3",
+                "glass-chip rounded-lg px-4 py-3",
                 mode === usageMode
-                  ? "border-gold/35 bg-gold/10 text-gold"
-                  : "border-border/70 bg-white/[0.025] text-muted-foreground/75",
+                  ? "glass-active text-gold"
+                  : "text-muted-foreground/75",
               )}
             >
               <p className="text-[13px] font-semibold capitalize">{mode}</p>
@@ -130,14 +130,14 @@ export default function SettingsPage() {
 
       <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
             <ShieldCheck className="h-4 w-4" />
           </div>
           <h2 className="text-[15px] font-semibold text-foreground">Agent Registry</h2>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           {AGENTS.filter((agent) => agent.id !== "cipher").map((agent) => (
-            <div key={agent.id} className="rounded-lg border border-border/70 bg-white/[0.025] px-4 py-3">
+            <div key={agent.id} className="rounded-lg glass-chip px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[13px] font-semibold text-foreground">{agent.name}</p>
@@ -156,14 +156,14 @@ export default function SettingsPage() {
 
       <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
             <Bot className="h-4 w-4" />
           </div>
           <h2 className="text-[15px] font-semibold text-foreground">Runtime Modules</h2>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           {runtimeAgents.filter((agent) => agent.id !== "cipher").map((agent) => (
-            <div key={agent.id} className="rounded-lg border border-border/70 bg-white/[0.025] px-4 py-3">
+            <div key={agent.id} className="rounded-lg glass-chip px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[13px] font-semibold text-foreground">{agent.name}</p>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
         className="group block glass-panel p-6 transition-colors hover:border-gold/40"
       >
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
+          <div className="glass-orb flex h-10 w-10 shrink-0 items-center justify-center border-gold/35">
             <Database className="h-4 w-4 text-gold" />
           </div>
           <div className="flex-1">
@@ -213,19 +213,27 @@ function StatusRow({
   connected: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-white/[0.025] px-4 py-3">
+    <div className="flex items-start justify-between gap-4 rounded-lg glass-chip px-4 py-3">
       <div>
         <p className="text-[13px] font-semibold text-foreground">{label}</p>
         <p className="mt-1 text-[11.5px] text-muted-foreground/65">{detail}</p>
       </div>
       <span
         className={cn(
-          "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase",
+          "glass-chip inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase",
           connected
-            ? "border-success/25 bg-success/10 text-success"
-            : "border-warning/25 bg-warning/10 text-warning",
+            ? "border-success/30 text-success"
+            : "border-warning/30 text-warning",
         )}
       >
+        <span
+          className={cn(
+            "size-1.5 rounded-full",
+            connected
+              ? "bg-success shadow-[0_0_6px_0_hsl(var(--success)/0.8)]"
+              : "bg-warning shadow-[0_0_6px_0_hsl(var(--warning)/0.8)]",
+          )}
+        />
         {connected ? "Connected" : "Mock mode"}
       </span>
     </div>

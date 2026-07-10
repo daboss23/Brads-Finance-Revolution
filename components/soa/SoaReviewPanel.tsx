@@ -60,7 +60,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
     <div className="space-y-5">
 
       {/* Score and certificate */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60 bg-black/25 flex items-center gap-2.5">
           <ShieldCheck className="h-4 w-4 text-gold" />
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -82,7 +82,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Flagged items */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Flagged for Brad
@@ -124,7 +124,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Approval progress */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Approval Progress
@@ -147,7 +147,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Actions
@@ -156,7 +156,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
         <div className="px-5 py-5 space-y-2.5">
           <button
             onClick={downloadPdf}
-            className="w-full inline-flex items-center justify-center gap-2 rounded border border-border bg-card px-3 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 btn-glass rounded px-3 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
             Download as PDF

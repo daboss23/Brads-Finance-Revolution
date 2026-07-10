@@ -10,7 +10,7 @@ interface Props {
 
 export function ThresholdsCard({ thresholds, financialYear, lastUpdated }: Props) {
   return (
-    <section className="rounded-lg border border-border bg-card overflow-hidden">
+    <section className="rounded-lg glass-card overflow-hidden">
       <div className="px-6 py-5 border-b border-border/60 bg-black/25 flex items-end justify-between">
         <div>
           <h2 className="text-[14px] font-semibold text-foreground tracking-tight">

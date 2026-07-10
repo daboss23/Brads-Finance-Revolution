@@ -87,7 +87,7 @@ export function PipelineTable() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden">
+    <div className="rounded-xl glass-card overflow-hidden">
       <table className="w-full">
         <thead>
           <tr className="border-b border-border/60 bg-[hsl(222_24%_6%)]">

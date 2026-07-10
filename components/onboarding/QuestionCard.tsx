@@ -59,13 +59,13 @@ export function QuestionCard({
   }
 
   const baseInput =
-    "w-full rounded-lg border border-border bg-card px-4 py-3.5 text-[14.5px] text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all";
+    "w-full rounded-lg glass-card px-4 py-3.5 text-[14.5px] text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all";
 
   return (
     <div className="onboarding-fade-in space-y-6">
       {/* Section intro — BMK Sarah card pattern */}
       {sectionIntro && (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
             <div className="flex-1 px-5 py-4">

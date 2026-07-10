@@ -123,7 +123,7 @@ export default function SarahPage() {
           { label: "Not Started", value: metrics.notStarted, icon: Users, color: "text-zinc-400", bg: "bg-zinc-400/15", accent: "from-zinc-400/20" },
           { label: "Avg Completion", value: `${metrics.avg}%`, icon: TrendingDown, color: "text-gold", bg: "bg-gold/15", accent: "from-gold/50" },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
-          <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
+          <div key={label} className="rounded-lg glass-card overflow-hidden">
             <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
             <div className="px-5 pt-5 pb-5">
               <div className="flex items-start justify-between mb-5">
@@ -146,7 +146,7 @@ export default function SarahPage() {
       <div className="grid grid-cols-[1fr_320px] gap-6 mb-12">
 
         {/* Sarah intelligence panel */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
             <div className="flex-1 px-7 py-6">
@@ -206,7 +206,7 @@ export default function SarahPage() {
         </div>
 
         {/* Drop-off analysis */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
             <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Common Drop-off Points

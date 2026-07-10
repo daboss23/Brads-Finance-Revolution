@@ -64,7 +64,7 @@ export function SectionComplete({
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-md onboarding-rise">
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           {/* BMK accent strip */}
           <div className="h-px bg-gradient-to-r from-gold/50 to-transparent" />
 

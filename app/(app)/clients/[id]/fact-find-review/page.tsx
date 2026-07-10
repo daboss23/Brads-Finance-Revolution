@@ -132,7 +132,7 @@ export default function FactFindReviewPage({
 
       {/* Gaps summary — only when there are missing sections */}
       {missingSections.length > 0 && (
-        <div className="mb-8 rounded-lg border border-warning/30 bg-warning/[0.06] overflow-hidden">
+        <div className="glass-panel glass-rim-amber mb-8 overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-warning/70 to-warning/20" />
             <div className="px-6 py-4">
@@ -146,7 +146,7 @@ export default function FactFindReviewPage({
                 {missingSections.map((s) => (
                   <span
                     key={s.id}
-                    className="rounded px-2.5 py-1 text-[11px] font-medium text-warning bg-warning/10 border border-warning/25"
+                    className="glass-chip rounded-md px-2.5 py-1 text-[11px] font-medium text-warning border-warning/30"
                   >
                     {s.title}
                   </span>
@@ -179,10 +179,10 @@ export default function FactFindReviewPage({
                 className={cn(
                   "glass-panel overflow-hidden",
                   status === "missing"
-                    ? "border-warning/30"
+                    ? "glass-rim-amber"
                     : status === "in-progress"
-                    ? "border-gold/25"
-                    : "border-border"
+                    ? "glass-rim-gold"
+                    : "glass-rim-emerald"
                 )}
               >
                 {/* Section header */}
@@ -282,18 +282,18 @@ function SectionIcon({ status }: { status: SectionStatus }) {
 function SectionStatusPill({ status }: { status: SectionStatus }) {
   if (status === "complete")
     return (
-      <span className="text-[11px] font-medium text-success bg-success/10 border border-success/25 rounded px-2.5 py-0.5">
+      <span className="glass-chip text-[11px] font-medium text-success border-success/30 rounded-md px-2.5 py-0.5">
         Complete
       </span>
     );
   if (status === "in-progress")
     return (
-      <span className="text-[11px] font-medium text-gold bg-gold/10 border border-gold/25 rounded px-2.5 py-0.5">
+      <span className="glass-chip text-[11px] font-medium text-gold border-gold/30 rounded-md px-2.5 py-0.5">
         In Progress
       </span>
     );
   return (
-    <span className="text-[11px] font-medium text-warning bg-warning/10 border border-warning/25 rounded px-2.5 py-0.5">
+    <span className="glass-chip text-[11px] font-medium text-warning border-warning/30 rounded-md px-2.5 py-0.5">
       Missing
     </span>
   );

@@ -124,7 +124,7 @@ export function KnowledgeBaseManager() {
       </div>
 
       {/* Author tag selector */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Tag uploads as
@@ -194,7 +194,7 @@ export function KnowledgeBaseManager() {
       </div>
 
       {/* Document list */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Training Corpus

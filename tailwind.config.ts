@@ -62,6 +62,12 @@ const config: Config = {
         "teal-accent": {
           DEFAULT: "hsl(var(--teal-accent))",
         },
+        "cyan-accent": {
+          DEFAULT: "hsl(var(--cyan-accent))",
+        },
+        "purple-accent": {
+          DEFAULT: "hsl(var(--purple-accent))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
         },

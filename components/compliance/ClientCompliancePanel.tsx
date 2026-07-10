@@ -108,7 +108,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
     <div className="space-y-6">
 
       {/* Summary */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="grid grid-cols-[1fr_auto] gap-6 px-7 py-6">
           <div>
             <div className="flex items-center gap-2.5 mb-2.5">
@@ -162,7 +162,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
           </button>
           <button
             onClick={downloadCertificate}
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
+            className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
           >
             <Download className="h-3 w-3" />
             Download Compliance Certificate
@@ -170,7 +170,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
           <button
             onClick={signOff}
             disabled={result.blockers.length > 0 || signedOff}
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             title={
               result.blockers.length > 0
                 ? "Resolve blockers before signing off"
@@ -212,7 +212,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       )}
 
       {/* Best Interests Duty */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Best Interests Duty
@@ -255,7 +255,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       </div>
 
       {/* Safe Harbour */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Safe Harbour · s961B(2)
@@ -297,7 +297,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       </div>
 
       {/* AFSL obligations */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             AFSL Obligations · Charter 234665

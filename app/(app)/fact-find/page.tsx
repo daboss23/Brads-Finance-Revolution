@@ -88,7 +88,7 @@ export default function FactFindPage() {
             accent: "from-blue-accent/50",
           },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
-          <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
+          <div key={label} className="rounded-lg glass-card overflow-hidden">
             <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
             <div className="px-6 pt-6 pb-6">
               <div className="flex items-start justify-between mb-5">
@@ -259,7 +259,7 @@ function SectionCard({
   total: number;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg glass-card overflow-hidden">
       <div
         className={cn(
           "h-px bg-gradient-to-r to-transparent",

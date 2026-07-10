@@ -39,7 +39,7 @@ export function CompletionCertificate({ clientFullName, xpEarned, completedDate 
         </div>
 
         {/* Certificate card */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="h-px bg-gradient-to-r from-gold/50 to-transparent" />
 
           <div className="px-8 py-10 text-center">
@@ -101,7 +101,7 @@ export function CompletionCertificate({ clientFullName, xpEarned, completedDate 
         </div>
 
         {/* What's next */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-blue-accent/60 via-blue-accent/25 to-transparent" />
             <div className="flex-1 px-6 py-5">

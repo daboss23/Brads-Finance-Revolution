@@ -369,8 +369,8 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_80%,hsl(var(--gold-shadow)/0.22),transparent_60%)]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,hsl(var(--teal-accent)/0.04),transparent_70%)] onboarding-glow-a" />
 
-        {/* Card */}
-        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] border border-gold/[0.14] bg-[linear-gradient(165deg,hsl(219_16%_9%/0.96),hsl(220_20%_4%/0.98))] shadow-[0_40px_120px_hsl(0_0%_0%/0.85),0_0_0_1px_hsl(0_0%_0%/0.4),inset_0_1px_0_hsl(44_75%_85%/0.1),inset_0_0_80px_hsl(var(--gold)/0.04)] px-8 pt-4 pb-8 flex flex-col items-center text-center sm:px-10">
+        {/* Card — large soft translucent glass panel */}
+        <div className="glass-panel glass-panel-elevated glass-grain relative z-10 w-full max-w-[640px] rounded-[32px] px-8 pt-4 pb-8 flex flex-col items-center text-center sm:px-10">
           <div className="mb-2">
             <NewcastleLogoFull size={220} />
           </div>
@@ -436,7 +436,10 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
       {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
       <main className="relative shrink-0 flex flex-col items-center px-6 mt-8">
-        <div className="rounded-[28px] border border-gold/[0.12] bg-[linear-gradient(168deg,hsl(219_15%_11%/0.97),hsl(220_18%_6%/0.98))] p-8 sm:p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_hsl(0_0%_0%/0.9),0_0_0_1px_hsl(0_0%_0%/0.35),inset_0_1px_0_hsl(44_75%_85%/0.09),inset_0_0_60px_hsl(var(--gold)/0.035)]">
+        <div className="glass-panel glass-panel-elevated relative rounded-[28px] p-8 sm:p-12 w-full max-w-[720px] flex flex-col items-center overflow-hidden">
+          {/* glass chamber sheen over the orb */}
+          <span className="pointer-events-none absolute inset-x-14 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.35),transparent)]" aria-hidden />
+          <span className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(55%_28%_at_50%_0%,hsl(46_85%_93%/0.045),transparent_75%)]" aria-hidden />
           <OrbCanvas
             state={orbState}
             className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
@@ -495,7 +498,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
                 placeholder="Type your answer here..."
                 disabled={inputDisabled}
                 rows={1}
-                className="w-full bg-white/[0.04] border border-white/[0.18] rounded-2xl px-5 py-4 text-[15px] text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px] shadow-[inset_0_1px_0_hsl(44_75%_85%/0.05)]"
+                className="glass-input w-full rounded-2xl px-5 py-4 text-[15px] text-foreground placeholder:text-foreground/40 resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
               />
             </div>
 
@@ -541,15 +544,18 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       )}
 
       {isComplete && (
-        <div className="relative shrink-0 flex flex-col items-center gap-3 py-8 px-6 onboarding-rise">
-          <div className="flex items-center gap-2 text-[13px] text-success bg-success/10 border border-success/25 rounded-full px-5 py-2.5 shadow-[0_0_28px_-12px_hsl(var(--success)/0.6)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Financial Discovery complete
+        <div className="relative shrink-0 flex flex-col items-center py-8 px-6 onboarding-rise">
+          <div className="glass-panel glass-rim-emerald glass-grain flex w-full max-w-[520px] flex-col items-center gap-3 rounded-[24px] px-8 py-8 text-center">
+            <span className="pointer-events-none absolute inset-x-12 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(158_60%_75%/0.35),transparent)]" aria-hidden />
+            <div className="glass-chip flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] text-success border-success/30 shadow-[0_0_28px_-12px_hsl(var(--success)/0.6)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_6px_0_hsl(var(--success)/0.8)]" />
+              Financial Discovery complete
+            </div>
+            <p className="max-w-[440px] text-center text-[13px] leading-relaxed text-foreground/70">
+              Thank you. Brad will personally review everything you have shared
+              and be fully prepared for your meeting.
+            </p>
           </div>
-          <p className="max-w-[440px] text-center text-[13px] leading-relaxed text-foreground/60">
-            Thank you. Brad will personally review everything you have shared
-            and be fully prepared for your meeting.
-          </p>
         </div>
       )}
     </div>

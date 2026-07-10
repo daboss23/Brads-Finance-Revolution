@@ -73,7 +73,9 @@ export default function SoaDashboardPage() {
       </section>
 
       {/* ATLAS synthesis chain */}
-      <section className="glass-panel edge-gold mb-8 overflow-hidden">
+      <section className="glass-panel glass-panel-elevated glass-rim-gold glass-shine mb-8 overflow-hidden">
+        <span className="shine-layer" aria-hidden />
+        <span className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" aria-hidden />
         <div className="border-b border-white/[0.06] bg-black/25 px-6 py-4">
           <p className="cmd-label text-gold/85">ATLAS Synthesis Line</p>
           <p className="mt-1.5 text-[12.5px] leading-5 text-muted-foreground/75 max-w-[680px]">
@@ -90,21 +92,20 @@ export default function SoaDashboardPage() {
               <div key={agent.name} className="flex min-w-0 flex-1 basis-[210px] items-center gap-2">
                 <div
                   className={cn(
-                    "flex min-w-0 flex-1 items-center gap-3 rounded-xl border px-3.5 py-3",
-                    isAtlas
-                      ? "border-gold/35 bg-gold/[0.08] shadow-[inset_0_1px_0_hsl(44_75%_85%/0.1),0_0_30px_-16px_hsl(var(--gold)/0.7)]"
-                      : "border-white/[0.08] bg-black/25",
+                    "glass-chip flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3.5 py-3",
+                    isAtlas &&
+                      "border-gold/40 shadow-[inset_0_1px_0_hsl(48_85%_88%/0.2),inset_0_-8px_18px_-10px_hsl(39_55%_28%/0.5),0_6px_16px_-6px_hsl(0_0%_0%/0.7),0_0_34px_-12px_hsl(var(--gold-glow)/0.55)]",
                   )}
                 >
                   <div
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-lg border",
+                      "glass-orb grid size-9 shrink-0 place-items-center rounded-lg",
                       isAtlas
-                        ? "border-gold/40 bg-gold/15 text-gold"
-                        : "border-white/[0.1] bg-white/[0.04] text-teal-accent",
+                        ? "border-gold/45 text-gold shadow-[0_1px_0_0_hsl(46_85%_92%/0.22)_inset,0_0_18px_-4px_hsl(var(--gold-glow)/0.6),0_8px_22px_-8px_hsl(0_0%_0%/0.75)]"
+                        : "text-teal-accent",
                     )}
                   >
-                    <Icon className="size-4" />
+                    <Icon className={cn("size-4", isAtlas && "drop-shadow-[0_0_6px_currentColor]")} />
                   </div>
                   <div className="min-w-0">
                     <p className={cn("text-[12.5px] font-semibold", isAtlas ? "text-gold" : "text-foreground")}>
@@ -119,8 +120,8 @@ export default function SoaDashboardPage() {
               </div>
             );
           })}
-          <div className="flex min-w-0 flex-1 basis-[190px] items-center gap-3 rounded-xl border border-success/30 bg-success/[0.07] px-3.5 py-3">
-            <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-success/35 bg-success/10 text-success">
+          <div className="glass-chip flex min-w-0 flex-1 basis-[190px] items-center gap-3 rounded-xl border-success/35 px-3.5 py-3 shadow-[inset_0_1px_0_hsl(158_70%_88%/0.14),0_3px_10px_-4px_hsl(0_0%_0%/0.6),0_0_26px_-12px_hsl(var(--success-glow)/0.4)]">
+            <div className="glass-orb grid size-9 shrink-0 place-items-center rounded-lg border-success/40 text-success">
               <FileSignature className="size-4" />
             </div>
             <div className="min-w-0">
@@ -287,16 +288,11 @@ function KpiCard({
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70 leading-snug max-w-[140px]">
             {label}
           </p>
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full shrink-0 border border-white/[0.08]",
-              t.iconBg,
-            )}
-          >
-            <Icon className={cn("h-[15px] w-[15px]", t.iconColor)} />
+          <div className="glass-orb flex h-9 w-9 items-center justify-center shrink-0">
+            <Icon className={cn("h-[15px] w-[15px] drop-shadow-[0_0_6px_currentColor]", t.iconColor)} />
           </div>
         </div>
-        <p className="text-[44px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
+        <p className="text-[44px] font-semibold tracking-tight text-foreground leading-none tabular-nums drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.7)]">
           {value}
         </p>
       </div>

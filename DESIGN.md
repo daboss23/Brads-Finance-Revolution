@@ -21,7 +21,11 @@ The platform is a black and gold luxury financial command system: private bankin
 | Border | `--border` | `219 14% 18%` | Dividers and panel outlines |
 | Gold ramp | `--gold-bright` → `--gold` → `--gold-dim` → `--gold-shadow` | #F0D28A → #C9A84C → dim → #6E5220 | CTAs, readiness, focus, rim light |
 | Teal accent | `--teal-accent` | `175 65% 53%` (#36D6C8) | Telemetry, Sarah energy |
+| Cyan accent | `--cyan-accent` | `187 75% 56%` (#3EC9DE) | Glass edge light, focus glow |
+| Amethyst | `--purple-accent` | `258 45% 62%` (#8A74C9) | Scribe rim light, decorative glass edges only |
 | Soft blue | `--blue-accent` | `212 100% 65%` (#4EA3FF) | Progress and system activity |
+| Glass material | `--glass-bg` `--glass-bg-strong` `--glass-border` `--glass-border-bright` `--glass-highlight` `--glass-shadow` `--glass-inner-shadow` | see globals.css | Liquid glass slab layer stack |
+| Glow ramp | `--gold-glow` `--cyan-glow` `--purple-glow` `--danger-glow` `--success-glow` | see globals.css | Rim glow and focus bloom colours |
 | Success | `--success` | `158 57% 50%` (#38C98B) | Completed / healthy |
 | Warning | `--warning` | `36 66% 54%` (#D89A3D) | Attention and review pressure |
 | Destructive | `--destructive` | `6 63% 55%` (#D65345) | Critical alerts only |
@@ -58,9 +62,14 @@ The platform is a black and gold luxury financial command system: private bankin
 
 ## 5. Components
 
-### Instrument Panel (`.glass-panel` + `.glass-hover`)
-- Machined dark gradient surface, thin warm border, inner gold-tinted rim light (`::before`), deep drop shadow. Hover: gold border bloom + soft gold glow.
-- Variants via edge glows: `.edge-gold` `.edge-teal` `.edge-blue` `.edge-emerald` `.edge-orange`.
+### Liquid Glass Slab (`.glass-panel` + `.glass-hover` / `<GlassPanel>`)
+- Core surface. Layer stack: specular top catch → diagonal reflection streak → interior gold pooling → smoked translucent base; masked gradient rim (`::before`, bright top edge / gold ember base), breathing ambient glow (`::after`), lit inner top edge, pooled inner base shadow, hairline containment ring, near contact + far ambient drop shadows.
+- `.glass-panel-elevated` — hero slabs (engine, ATLAS, Sarah intro): stronger body, corner refraction, wider bloom. Pair with `.glass-grain` frost noise on hero slabs only.
+- Rim variants: `.glass-rim-gold` `-cyan` `-purple` `-danger` `-emerald` `-amber`; `.glass-active` is the strongest resting state.
+- `.glass-card` — lighter-blur nested slab for dense grids; `.glass-chip` — tiny glass pill for rows, badges, agent tiles; `.glass-orb` — circular glass bubble for icons/mic; `.glass-input` — recessed glass field with gold (or `-cyan`) focus bloom.
+- Motion: `.glass-hover-lift` (2px rise + glow), `.glass-shine` + `<span class="shine-layer"/>` (hover light sweep).
+- React: `GlassPanel` / `GlassRow` / `GlassOrb` in `components/ui/glass-panel.tsx`, variants default/elevated/active/critical/gold/cyan/purple/emerald/amber, paddings none/compact/default/spacious.
+- Legacy edge glows remain: `.edge-gold` `.edge-teal` `.edge-blue` `.edge-emerald` `.edge-orange`.
 
 ### Gold Button (`.btn-gold`) / Ghost Button (`.btn-glass`)
 - Gold: brushed champagne vertical gradient, lit top edge, antique shadow base, dark text. Hover deepens glow.
@@ -101,6 +110,8 @@ The platform is a black and gold luxury financial command system: private bankin
 
 ## 7. Depth & Surface
 
-- Luxury metal/glass instrumentation, not glassmorphism: restrained blur, layered gradients, machined rim light, deep shadows.
-- Gold rim lighting is the signature material — panel `::before` rims, `.gold-rule` dividers, active nav inset.
-- Strong glow reserved for the central engine, top-level metrics, and primary actions. Decoration never competes with status and metric values.
+- Liquid glass over a dark luxury surface: every major panel is a translucent slab with a lit top edge, refracted rim, pooled inner shadow, and a two-stage drop shadow (near contact + far ambient) so it reads as floating.
+- Gold rim lighting is the signature material — panel `::before` rims, `.gold-rule` dividers, active nav inset. Cyan and amethyst appear only as glass-edge light, never as semantics.
+- Depth hierarchy: `.glass-chip` (nested strip) → `.glass-card` (grid slab) → `.glass-panel` (module) → `.glass-panel-elevated` (hero). The engine chamber adds `.depth-grid` and a glass-dome sheen so the core reads as machinery under glass.
+- Strong glow reserved for the central engine, ATLAS synthesis, top-level metrics, and primary actions. Decoration never competes with status and metric values; text contrast always beats glow.
+- Performance: backdrop-filter only on module-level slabs (panels/cards), never on hundreds of chips at once (`.glass-chip` uses no blur); animation is transform/opacity/filter only.

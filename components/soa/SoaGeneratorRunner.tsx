@@ -119,7 +119,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
         className={cn(
           "inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-[13px] font-semibold transition-colors",
           disabled || running
-            ? "bg-card border border-border text-muted-foreground/55 cursor-not-allowed"
+            ? "glass-card text-muted-foreground/55 cursor-not-allowed"
             : "bg-gold text-gold-foreground hover:bg-gold/90 shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_4px_14px_-4px_rgba(212,175,55,0.45)]",
         )}
       >
@@ -137,7 +137,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
       </button>
 
       {(running || states["done"] === "done" || error) && (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="px-6 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Generation Progress

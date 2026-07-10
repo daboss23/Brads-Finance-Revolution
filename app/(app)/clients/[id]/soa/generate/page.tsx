@@ -185,7 +185,7 @@ export default function GenerateSoaPage({
         </div>
 
         {/* Right summary */}
-        <aside className="sticky top-8 rounded-lg border border-border bg-card overflow-hidden">
+        <aside className="sticky top-8 rounded-lg glass-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Client Summary
@@ -258,7 +258,7 @@ function ReadinessCard({
   sublist?: string[];
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg glass-card overflow-hidden">
       <div className="px-5 py-4 flex items-start gap-3.5">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${

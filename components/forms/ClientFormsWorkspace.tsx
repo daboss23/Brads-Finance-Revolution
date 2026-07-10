@@ -309,7 +309,7 @@ function ManualStrategyCard({
     <button
       type="button"
       onClick={onApprove}
-      className="text-left rounded-lg border border-border/70 bg-card hover:border-gold/40 hover:bg-gold/[0.04] transition-colors p-5"
+      className="text-left rounded-lg glass-card hover:border-gold/40 hover:bg-gold/[0.04] transition-colors p-5"
     >
       <p className="text-[14.5px] font-semibold text-foreground tracking-tight">
         {STRATEGY_LABELS[strategyKey]}
@@ -341,7 +341,7 @@ function ApprovedStrategyBlock({
   onRemove: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-card/60 overflow-hidden">
+    <div className="rounded-xl glass-card overflow-hidden">
       <div className="px-6 py-4 border-b border-border/60 flex items-center justify-between bg-card">
         <div>
           <p className="text-[10.5px] font-bold tracking-[0.18em] uppercase text-success/90 mb-1">

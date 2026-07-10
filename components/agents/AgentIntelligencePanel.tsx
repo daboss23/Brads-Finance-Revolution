@@ -58,6 +58,15 @@ const ACTIONS: Array<{
 
 type OutputState = Partial<Record<AgentId, { output: AgentOutput; cached: boolean }>>;
 
+/* Distinct glass rim + icon tone per agent */
+const AGENT_GLASS: Partial<Record<AgentId, { row: string; icon: string }>> = {
+  beacon: { row: "border-teal-accent/25", icon: "border-teal-accent/35 text-teal-accent" },
+  guardian: { row: "border-success/25", icon: "border-success/35 text-success" },
+  scribe: { row: "border-purple-accent/25", icon: "border-purple-accent/35 text-purple-accent" },
+  orion: { row: "border-blue-accent/25", icon: "border-blue-accent/35 text-blue-accent" },
+  atlas: { row: "border-gold/30", icon: "border-gold/40 text-gold" },
+};
+
 export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
   const [outputs, setOutputs] = useState<OutputState>({});
   const [running, setRunning] = useState<AgentId | null>(null);
@@ -105,9 +114,20 @@ export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
           const Icon = action.icon;
           const result = outputs[action.agentId];
           return (
-            <div key={action.agentId} className="rounded-lg border border-border/70 bg-white/[0.025] p-3">
+            <div
+              key={action.agentId}
+              className={cn(
+                "glass-chip rounded-xl p-3",
+                AGENT_GLASS[action.agentId]?.row,
+              )}
+            >
               <div className="flex items-start gap-3">
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
+                <div
+                  className={cn(
+                    "glass-orb grid h-8 w-8 shrink-0 place-items-center rounded-lg",
+                    AGENT_GLASS[action.agentId]?.icon ?? "border-gold/30 text-gold",
+                  )}
+                >
                   <Icon className="h-3.5 w-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">

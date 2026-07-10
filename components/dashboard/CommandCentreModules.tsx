@@ -168,7 +168,7 @@ export function DashboardHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 md:justify-end">
-        <label className="hidden h-10 min-w-[260px] items-center gap-2 rounded-full border border-white/[0.10] bg-black/25 px-3 text-muted-foreground/70 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.06)] backdrop-blur-xl sm:flex xl:min-w-[330px]">
+        <label className="glass-input hidden h-10 min-w-[260px] items-center gap-2 rounded-full px-3 text-muted-foreground/70 sm:flex xl:min-w-[330px]">
           <Search className="size-4 shrink-0" />
           <span className="sr-only">Search clients, SOAs and evidence</span>
           <input
@@ -210,15 +210,14 @@ export function GlowPanel({
   return (
     <section
       className={cn(
-        "liquid-glow group relative overflow-hidden rounded-2xl border border-white/[0.09] bg-[linear-gradient(160deg,hsl(46_80%_92%/0.07),hsl(46_80%_92%/0.015)_15%,transparent_30%),linear-gradient(150deg,hsl(219_16%_11%/0.94),hsl(220_19%_5%/0.9)_58%,hsl(220_20%_4%/0.94))] p-4 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),inset_0_-1px_0_hsl(43_53%_54%/0.05),inset_0_-14px_30px_-20px_hsl(39_55%_28%/0.3),0_22px_54px_-34px_hsl(0_0%_0%/0.95)] backdrop-blur-2xl",
-        variant === "emphasis" &&
-          "border-gold/[0.18] shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),inset_0_-1px_0_hsl(43_53%_54%/0.08),0_28px_70px_-34px_hsl(0_0%_0%/0.95),0_0_54px_-26px_hsl(43_53%_54%/0.5)]",
-        variant === "alert" &&
-          "border-warning/25 shadow-[0_0_44px_-30px_hsl(36_66%_54%/0.85)]",
+        "glass-panel glass-shine liquid-glow group relative overflow-hidden rounded-2xl p-4",
+        variant === "emphasis" && "glass-panel-elevated glass-rim-gold",
+        variant === "alert" && "glass-rim-amber",
         className,
       )}
     >
-      <span className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.35),transparent)]" />
+      <span className="shine-layer" aria-hidden />
+      <span className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" />
       <span className="dashboard-signal pointer-events-none absolute -right-12 top-8 size-28 rounded-full bg-gold/[0.07] blur-3xl" />
       <span className="pointer-events-none absolute -bottom-14 left-8 size-28 rounded-full bg-teal-accent/[0.05] blur-3xl transition group-hover:bg-teal-accent/[0.08]" />
       {(eyebrow || title || action) && (
@@ -271,39 +270,46 @@ export function MetricCard({ metric }: { metric: DashboardMetric }) {
   return (
     <GlowPanel
       className={cn(
-        "dashboard-breathe-soft min-h-[154px] p-4 transition duration-200 hover:-translate-y-0.5 hover:border-gold/[0.24]",
+        "dashboard-breathe-soft glass-hover-lift min-h-[154px] p-4",
         metric.id === "needs-attention" && "border-warning/[0.22]",
       )}
       variant={metric.id === "needs-attention" ? "alert" : "default"}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className={cn("cmd-label", metric.tone === "orange" ? "text-warning" : "text-gold/82")}>
+        <div className="relative min-w-0">
+          <span
+            className={cn(
+              "pointer-events-none absolute -left-4 -top-2 size-20 rounded-full opacity-60 blur-2xl",
+              toneBg[metric.tone],
+            )}
+            aria-hidden
+          />
+          <p className={cn("cmd-label relative", metric.tone === "orange" ? "text-warning" : "text-gold/82")}>
             {metric.label}
           </p>
-          <p className="mt-3 text-[32px] font-semibold leading-none text-foreground tabular-nums">
+          <p className="relative mt-3 text-[32px] font-semibold leading-none text-foreground tabular-nums drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.7)]">
             {metric.value}
           </p>
         </div>
         <div
           className={cn(
-            "grid size-11 shrink-0 place-items-center rounded-xl border shadow-[inset_0_1px_0_hsl(44_70%_88%/0.16)] backdrop-blur-xl",
+            "glass-orb grid size-11 shrink-0 place-items-center rounded-xl",
             toneBorder[metric.tone],
-            toneBg[metric.tone],
             toneText[metric.tone],
           )}
         >
-          <Icon className="size-4" />
+          <Icon className="size-4 drop-shadow-[0_0_6px_currentColor]" />
         </div>
       </div>
       <p className="mt-3 min-h-[38px] text-[12px] leading-5 text-muted-foreground/72">
         {metric.description}
       </p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/40 shadow-[inset_0_1px_2px_hsl(220_25%_2%/0.8),0_1px_0_hsl(44_60%_90%/0.05)]">
         <div
           className={cn(
-            "dashboard-activity-rail h-full rounded-full",
+            "dashboard-activity-rail h-full rounded-full shadow-[0_0_8px_0_currentColor]",
             toneRail[metric.tone],
+            toneText[metric.tone],
             getProgressWidthClass(metric.progress),
           )}
         />
@@ -352,8 +358,12 @@ export function ClientProgressEngine({
         carry each file through to signed advice.
       </p>
 
-      <div className="relative mt-5 min-h-[500px] overflow-hidden rounded-2xl border border-gold/[0.08] bg-black/20 px-3 py-4 md:min-h-[560px]">
+      <div className="depth-grid relative mt-5 min-h-[500px] overflow-hidden rounded-2xl border border-gold/[0.12] bg-black/30 px-3 py-4 shadow-[inset_0_2px_18px_hsl(220_25%_2%/0.75),inset_0_1px_0_hsl(44_70%_88%/0.07)] md:min-h-[560px]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--gold)/0.1),transparent_36%),radial-gradient(circle_at_54%_42%,hsl(var(--teal-accent)/0.07),transparent_32%)]" />
+        {/* glass dome over the chamber — top sheen + corner refraction */}
+        <div className="glass-grain pointer-events-none absolute inset-0 z-30 rounded-2xl" />
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-[linear-gradient(168deg,hsl(46_85%_93%/0.05),transparent_22%),radial-gradient(60%_30%_at_50%_0%,hsl(46_85%_93%/0.045),transparent_70%)]" />
+        <span className="pointer-events-none absolute inset-x-10 top-0 z-30 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" />
         <div className="engine-energy-haze pointer-events-none absolute left-1/2 top-1/2 hidden size-[410px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14] md:block" />
         <div className="engine-energy pointer-events-none absolute left-1/2 top-1/2 hidden size-[324px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
@@ -414,13 +424,13 @@ export function ClientProgressEngine({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.08] bg-black/[0.18] p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-center">
+      <div className="mt-4 grid gap-3 rounded-2xl glass-chip p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-center">
         <EngineStat label="Average time in flow" value={averageTimeInFlow} tone="cyan" />
         <EngineStat label="Flow velocity" value={flowVelocity} tone="emerald" />
         <EngineStat label="Conversion to meeting" value={conversionToMeeting} tone="gold" />
         <Link
           href="/sarah"
-          className="inline-flex min-h-10 items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 text-[12px] font-medium text-muted-foreground/78 transition hover:border-gold/30 hover:text-gold"
+          className="inline-flex min-h-10 items-center justify-between gap-3 rounded-xl glass-chip px-3 text-[12px] font-medium text-muted-foreground/78 transition hover:border-gold/30 hover:text-gold"
         >
           View engine analytics
           <ArrowRight className="size-3.5" />
@@ -444,7 +454,7 @@ function EngineStageNode({
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-[linear-gradient(165deg,hsl(46_80%_92%/0.06),transparent_30%),linear-gradient(180deg,hsl(220_16%_9%/0.55),hsl(220_20%_4%/0.6))] p-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.14),0_16px_34px_-28px_hsl(0_0%_0%/0.95)] backdrop-blur-xl md:absolute md:z-20 md:w-40",
+        "glass-card rounded-2xl p-3 transition-shadow duration-300 md:absolute md:z-20 md:w-40",
         toneBorder[stage.tone],
         stage.state === "active" && "dashboard-stage-active",
         className,
@@ -453,9 +463,8 @@ function EngineStageNode({
       <div className="flex items-start gap-2.5">
         <div
           className={cn(
-            "relative grid size-9 shrink-0 place-items-center rounded-xl border",
+            "glass-orb relative grid size-9 shrink-0 place-items-center rounded-xl",
             toneBorder[stage.tone],
-            toneBg[stage.tone],
             toneText[stage.tone],
           )}
         >
@@ -516,12 +525,12 @@ export function PriorityQueue({ items }: { items: PriorityQueueItem[] }) {
           <Link
             key={item.id}
             href={item.href}
-            className="dashboard-event-glow group rounded-xl border border-white/[0.09] bg-white/[0.035] px-3.5 py-3.5 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.07)] transition hover:border-gold/[0.24] hover:bg-gold/[0.05]"
+            className="dashboard-event-glow glass-chip group rounded-xl px-3.5 py-3.5 transition hover:border-gold/[0.28] hover:shadow-[0_1px_0_0_hsl(44_70%_90%/0.12)_inset,0_-1px_0_0_hsl(220_25%_3%/0.5)_inset,0_6px_16px_-6px_hsl(0_0%_0%/0.7),0_0_26px_-10px_hsl(var(--gold-glow)/0.3)]"
           >
             <div className="flex items-start gap-3">
               <Badge
                 className={cn(
-                  "mt-0.5 shrink-0 rounded-md border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em]",
+                  "mt-0.5 shrink-0 rounded-md border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),0_2px_6px_-2px_hsl(0_0%_0%/0.6)]",
                   priorityClasses[item.priority],
                 )}
               >
@@ -566,7 +575,7 @@ export function SarahBriefPanel({
         {insights.map((item) => (
           <div
             key={item.id}
-            className="rounded-xl border border-white/[0.08] bg-black/[0.18] px-3.5 py-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.07)]"
+            className="rounded-xl glass-chip px-3.5 py-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.07)]"
           >
             <div className="flex items-center gap-2">
               <span className={cn("size-2 rounded-full", toneRail[item.tone])} />
@@ -581,7 +590,7 @@ export function SarahBriefPanel({
       </div>
       <Link
         href="/sarah"
-        className="mt-4 inline-flex h-11 w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 text-[12px] font-medium text-foreground/82 transition hover:border-gold/30 hover:text-gold"
+        className="mt-4 inline-flex h-11 w-full items-center justify-between rounded-xl glass-chip px-3 text-[12px] font-medium text-foreground/82 transition hover:border-gold/30 hover:text-gold"
       >
         Open full Sarah Brief
         <ArrowRight className="size-3.5" />
@@ -603,7 +612,7 @@ export function PipelineSnapshot({
         {items.map((item) => (
           <div
             key={item.id}
-            className="rounded-xl border border-white/[0.08] bg-black/20 px-3 py-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.06)]"
+            className="rounded-xl glass-chip px-3 py-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.06)]"
           >
             <p className={cn("text-[24px] font-semibold leading-none tabular-nums", toneText[item.tone])}>
               {item.value}
@@ -667,7 +676,7 @@ export function NextBestActions({ items }: { items: NextBestActionItem[] }) {
           <Link
             key={item.id}
             href={item.href}
-            className="group flex min-h-10 items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-black/[0.16] px-3 text-[12.5px] text-foreground/82 transition hover:border-gold/[0.24] hover:bg-gold/[0.05]"
+            className="group flex min-h-10 items-center justify-between gap-3 rounded-xl glass-chip px-3 text-[12.5px] text-foreground/82 transition hover:border-gold/[0.24] hover:bg-gold/[0.05]"
           >
             <span>{item.label}</span>
             <span className="flex items-center gap-2 text-muted-foreground/58">
@@ -700,7 +709,7 @@ export function AgentActivityStrip({
   return (
     <GlowPanel className="p-3">
       <div className="grid gap-3 xl:grid-cols-[220px_1fr] xl:items-center">
-        <div className="rounded-xl border border-white/[0.08] bg-black/[0.18] px-4 py-3">
+        <div className="rounded-xl glass-chip px-4 py-3">
           <p className="text-[15px] font-semibold text-foreground">System & Agent Activity</p>
           <div
             className={cn(
@@ -724,18 +733,25 @@ export function AgentActivityStrip({
               <Link
                 key={agent.name}
                 href="/agents"
-                className="group rounded-xl border border-white/[0.08] bg-black/[0.18] px-3 py-3 transition hover:border-gold/[0.24] hover:bg-gold/[0.05]"
+                className={cn(
+                  "glass-chip group relative overflow-hidden rounded-xl px-3 py-3 transition hover:border-gold/[0.28]",
+                  agent.status === "Active" && "agent-pulse",
+                )}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-xl border",
+                      "glass-orb grid size-9 shrink-0 place-items-center",
                       toneBorder[agent.tone],
-                      toneBg[agent.tone],
                       toneText[agent.tone],
                     )}
                   >
-                    <Icon className="size-4" />
+                    <Icon
+                      className={cn(
+                        "size-4",
+                        agent.status === "Active" && "drop-shadow-[0_0_6px_currentColor]",
+                      )}
+                    />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-[12.5px] font-semibold text-foreground">
@@ -749,6 +765,13 @@ export function AgentActivityStrip({
                 <p className="mt-2 truncate text-[10.5px] text-muted-foreground/55">
                   {agent.detail}
                 </p>
+                <span
+                  className={cn(
+                    "absolute inset-x-3 bottom-0 h-[2px] rounded-t-full",
+                    agent.status === "Active" ? toneRail[agent.tone] : "bg-white/[0.06]",
+                  )}
+                  aria-hidden
+                />
               </Link>
             );
           })}

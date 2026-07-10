@@ -50,14 +50,14 @@ function NavLinks({
             href={href}
             onClick={onNavigate}
             className={cn(
-              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-medium transition-all duration-150",
+              "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-medium transition-all duration-200",
               active
-                ? "border border-gold/25 bg-gradient-to-r from-gold/[0.13] to-gold/[0.02] text-gold shadow-[inset_0_1px_0_hsl(43_77%_74%/0.12),0_0_20px_-8px_hsl(43_53%_54%/0.5)]"
-                : "border border-transparent text-muted-foreground/85 hover:bg-white/[0.04] hover:text-foreground"
+                ? "border border-gold/30 bg-gradient-to-r from-gold/[0.14] via-gold/[0.05] to-transparent text-gold shadow-[inset_0_1px_0_hsl(43_77%_74%/0.18),inset_0_-6px_14px_-8px_hsl(39_55%_28%/0.5),0_4px_14px_-6px_hsl(0_0%_0%/0.7),0_0_26px_-8px_hsl(43_53%_54%/0.55)]"
+                : "border border-transparent text-muted-foreground/85 hover:border-white/[0.06] hover:bg-white/[0.04] hover:text-foreground hover:shadow-[inset_0_1px_0_hsl(44_70%_90%/0.07),0_4px_12px_-6px_hsl(0_0%_0%/0.6)]"
             )}
           >
             {active && (
-              <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-gold shadow-[0_0_8px_0_hsl(43_53%_54%/0.8)]" />
+              <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-gold-bright shadow-[0_0_10px_1px_hsl(43_53%_54%/0.9)]" />
             )}
             <Icon
               className={cn(
@@ -77,10 +77,10 @@ function NavLinks({
 
 function BradProfile() {
   return (
-    <div className="flex items-center gap-3 px-2.5">
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gradient-to-b from-gold/20 to-gold/5">
+    <div className="glass-chip flex items-center gap-3 rounded-2xl px-3 py-2.5">
+      <div className="glass-orb relative flex h-9 w-9 shrink-0 items-center justify-center border-gold/35 shadow-[0_1px_0_0_hsl(46_85%_92%/0.2)_inset,0_-4px_10px_-4px_hsl(220_25%_2%/0.7)_inset,0_0_18px_-6px_hsl(43_53%_54%/0.45),0_8px_22px_-8px_hsl(0_0%_0%/0.75)]">
         <span className="text-[12px] font-bold text-gold tracking-tight">BL</span>
-        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[hsl(220_20%_4%)] bg-success" />
+        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[hsl(220_20%_4%)] bg-success shadow-[0_0_6px_0_hsl(158_57%_50%/0.7)]" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
@@ -101,7 +101,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="relative z-20 hidden h-screen w-[260px] shrink-0 flex-col border-r border-gold/[0.08] bg-[hsl(220_20%_4%_/_0.82)] backdrop-blur-xl lg:flex">
+      <aside className="relative z-20 hidden h-screen w-[260px] shrink-0 flex-col border-r border-gold/[0.1] bg-[hsl(220_20%_4%_/_0.78)] shadow-[inset_-1px_0_0_hsl(44_70%_88%/0.05),8px_0_32px_-16px_hsl(0_0%_0%/0.8)] backdrop-blur-2xl lg:flex">
         {/* Brand */}
         <div className="px-5 pt-3 pb-4">
           <div className="flex items-center justify-center">

@@ -110,7 +110,7 @@ export function QuestionStep({
             onChange={(e) => onChange(e.target.value)}
             placeholder={question.placeholder}
             onKeyDown={(e) => e.key === "Enter" && canContinue && onContinue()}
-            className="w-full bg-card border border-border/60 rounded-lg px-5 py-3.5 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all pr-14"
+            className="w-full glass-card/60 rounded-lg px-5 py-3.5 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all pr-14"
           />
           <MicButton
             isListening={isListening}
@@ -130,7 +130,7 @@ export function QuestionStep({
             onChange={(e) => onChange(e.target.value)}
             placeholder={question.placeholder}
             rows={3}
-            className="w-full bg-card border border-border/60 rounded-lg px-5 py-3.5 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none pr-14"
+            className="w-full glass-card/60 rounded-lg px-5 py-3.5 text-[14px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all resize-none pr-14"
           />
           <MicButton
             isListening={isListening}

@@ -160,7 +160,7 @@ export function FormsPanel({
         return (
           <div
             key={form.id}
-            className="rounded-lg border border-border/70 bg-card overflow-hidden"
+            className="rounded-lg glass-card overflow-hidden"
           >
             <div className="px-5 py-4 flex items-center justify-between gap-5">
               {/* Left: icon + info */}

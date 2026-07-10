@@ -37,7 +37,7 @@ export function RegulatoryUpdatesCard({ updates, lastChecked }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card overflow-hidden">
+    <section className="rounded-lg glass-card overflow-hidden">
       <div className="px-6 py-5 border-b border-border/60 bg-black/25 flex items-center justify-between">
         <div>
           <h2 className="text-[14px] font-semibold text-foreground tracking-tight">
@@ -50,7 +50,7 @@ export function RegulatoryUpdatesCard({ updates, lastChecked }: Props) {
         <button
           onClick={refresh}
           disabled={refreshing}
-          className="inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 btn-glass rounded px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-50"
         >
           <RefreshCw className={cn("h-3 w-3", refreshing && "animate-spin")} />
           {refreshing ? "Checking…" : "Refresh"}

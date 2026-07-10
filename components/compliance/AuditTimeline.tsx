@@ -72,7 +72,7 @@ export function AuditTimeline({ clientId }: Props) {
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg glass-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Audit Trail
@@ -86,7 +86,7 @@ export function AuditTimeline({ clientId }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg glass-card overflow-hidden">
       <div className="px-6 py-4 border-b border-border/60 bg-black/25">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           Audit Trail

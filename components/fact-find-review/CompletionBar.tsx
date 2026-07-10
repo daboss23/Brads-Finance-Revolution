@@ -9,7 +9,7 @@ interface Props {
 export function CompletionBar({ percentage, missingSections, source }: Props) {
   const pct = Math.max(0, Math.min(100, Math.round(percentage)));
   return (
-    <div className="mb-8 rounded-lg border border-border bg-card px-6 py-5">
+    <div className="mb-8 rounded-lg glass-card px-6 py-5">
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">

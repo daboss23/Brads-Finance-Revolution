@@ -38,7 +38,7 @@ export function IntroScreen({ firstName, onBegin }: Props) {
         </div>
 
         {/* Sarah intro card — BMK pattern */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
             <div className="px-7 py-6 space-y-3.5">
@@ -59,7 +59,7 @@ export function IntroScreen({ firstName, onBegin }: Props) {
             { label: "Est. time", value: `${ESTIMATED_MINUTES} min` },
             { label: "Adviser", value: "Brad Lonergan" },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
+            <div key={label} className="rounded-lg glass-card overflow-hidden">
               <div className="h-px bg-gradient-to-r from-gold/40 to-transparent" />
               <div className="px-5 py-5 text-center">
                 <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60 mb-2.5">
