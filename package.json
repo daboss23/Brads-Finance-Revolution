@@ -24,6 +24,7 @@
     "motion": "^12.42.2",
     "next": "14.2.35",
     "pdf-lib": "^1.17.1",
+    "postgres": "^3.4.9",
     "postprocessing": "^6.39.1",
     "react": "^18",
     "react-dom": "^18",

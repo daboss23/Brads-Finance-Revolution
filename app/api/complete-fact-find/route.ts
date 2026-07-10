@@ -1,4 +1,5 @@
 import { saveFactFind, getFactFind } from "@/lib/sarah-fact-find-store";
+import { persistFactFind } from "@/lib/db/fact-find-persistence";
 import { validateOnboardingToken } from "@/lib/security/onboarding-access";
 import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
 
@@ -39,12 +40,14 @@ export async function POST(req: Request) {
       return Response.json({ error: "A valid session link is required." }, { status: 401 });
     }
 
-    saveFactFind({
+    const entry = {
       clientId,
       token,
       receivedAt: new Date().toISOString(),
       data,
-    });
+    };
+    saveFactFind(entry);
+    await persistFactFind(entry);
 
     log("Sarah fact find received for", clientId, "via token", token);
     // Stub notification — wire to email/Slack when integrations come online.

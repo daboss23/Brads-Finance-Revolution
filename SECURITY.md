@@ -88,20 +88,44 @@ farmed through the public endpoints.
 - **nosniff, Referrer-Policy, Permissions-Policy** — microphone stays
   available to Sarah (`self`) while camera and geolocation are blocked.
 
-## 7. Audit trail
+## 7. Encrypted persistence
+
+All persisted client data flows through `lib/db/persistence.ts` and is
+encrypted with AES-256-GCM (`lib/db/crypto.ts`) **before** it reaches any
+storage backend — a stolen database dump or file yields only authenticated
+ciphertext.
+
+- **Postgres backend**: set `DATABASE_URL` (Neon, Supabase or Vercel
+  Postgres) and run `db/schema.sql` once against it. Fact finds and
+  security events persist there automatically from then on.
+- **Sandbox backend**: without `DATABASE_URL`, encrypted blobs are written
+  to `.data/` (gitignored) so local development persists across restarts.
+- **Key**: set `DATA_ENCRYPTION_KEY` (32 bytes base64):
+  `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
+  Production **fails closed** without it — client data is never written in
+  plaintext. Sandbox auto-generates a local key in `.data/dev.key`.
+- The in-memory read cache is hydrated from persistence at every server
+  boot (`instrumentation.ts`), and security events get a durable copy in
+  the same backend.
+
+## 8. Audit trail
 
 Compliance actions are recorded per client with the checker version that
 produced them (`lib/compliance/audit-trail.ts`) so a Charter or ASIC review
 can reconstruct what rules applied at the time.
 
-## 8. Go-live checklist (before real client data enters production)
+## 9. Go-live checklist (before real client data enters production)
 
 The current build stores fact find data in browser localStorage and static
 demo files. That is fine for the sandbox, but before onboarding real
 clients:
 
-- [ ] Move client records to a real database with encryption at rest and
-      per-request access control.
+- [x] Encrypted persistence for fact finds and security events
+      (AES-256-GCM app-layer encryption over Postgres or local file).
+- [ ] Provision the production Postgres (Neon/Supabase/Vercel Postgres),
+      run db/schema.sql, set DATABASE_URL and DATA_ENCRYPTION_KEY.
+- [ ] Move the remaining browser-localStorage stores (compliance audit
+      trail, review store) into the same persistence layer.
 - [ ] Issue new links with `generateOnboardingToken()` (128-bit random)
       and retire the short demo tokens; reduce `LINK_VALIDITY_DAYS` to 30.
 - [ ] Move login throttling to a shared store (e.g. Upstash) so limits
@@ -117,7 +141,7 @@ clients:
 - [ ] Review Anthropic and ElevenLabs data processing terms for handling of
       voice and transcript data.
 
-## 9. Reporting a concern
+## 10. Reporting a concern
 
 Suspected data exposure or a vulnerability: contact Brad Lonergan
 immediately, rotate affected keys in Vercel, and record the event in the

@@ -14,6 +14,10 @@ const securityHeaders = [
 
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Boot hook that hydrates the encrypted fact find store (instrumentation.ts).
+    instrumentationHook: true,
+  },
   typescript: {
     // The dashboard page has a pre-existing type quirk against the locked lucide-react version.
     // The runtime is fine; don't gate deployment on it.

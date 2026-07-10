@@ -1,6 +1,10 @@
 // In-memory store of completed Sarah fact finds, keyed by clientId.
-// Phase 1 mock: ephemeral per server instance. Real persistence will move
-// to a database when integrations come online.
+//
+// This module stays dependency-free so client components can import the
+// read helpers. Durability lives in lib/db/fact-find-persistence.ts
+// (server-only): the API route write-throughs to it, and instrumentation.ts
+// seeds this map from it at every server boot, so completed fact finds
+// survive restarts and deploys.
 
 import type { SarahFactFind } from "./sarah-fact-find-schema";
 import { getDemoFactFind } from "./sarah-fact-find-demo";
@@ -32,6 +36,14 @@ export function saveFactFind(entry: StoredFactFind): void {
     "missing:",
     entry.data.missingSections,
   );
+}
+
+// Boot-time seeding from persistence; never overwrites live entries.
+export function seedFactFinds(entries: StoredFactFind[]): void {
+  const store = getStore();
+  for (const entry of entries) {
+    if (!store.map.has(entry.clientId)) store.map.set(entry.clientId, entry);
+  }
 }
 
 export function getFactFind(clientId: string): StoredFactFind | undefined {

@@ -18,14 +18,19 @@ export function logSecurityEvent(
   event: SecurityEvent,
   meta: Record<string, string | number | boolean | null> = {},
 ): void {
-  console.log(
-    JSON.stringify({
-      type: "security",
-      event,
-      at: new Date().toISOString(),
-      ...meta,
-    }),
-  );
+  const at = new Date().toISOString();
+  console.log(JSON.stringify({ type: "security", event, at, ...meta }));
+
+  // Durable copy via the encrypted persistence layer (Postgres when
+  // DATABASE_URL is set, local file otherwise). Fire-and-forget: an audit
+  // write must never block or fail a login response. Node runtime only.
+  if (process.env.NEXT_RUNTIME === "nodejs" || typeof window === "undefined") {
+    import("@/lib/db/persistence")
+      .then(({ getPersistence }) =>
+        getPersistence().recordSecurityEvent({ event, at, meta }),
+      )
+      .catch((e) => console.error("[access-log] durable write failed", e));
+  }
 }
 
 export function clientIpFrom(headers: Headers): string {
