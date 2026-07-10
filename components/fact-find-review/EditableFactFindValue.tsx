@@ -110,7 +110,7 @@ export function EditableFactFindValue({
           type="button"
           onClick={commit}
           aria-label="Save"
-          className="shrink-0 p-1 rounded text-emerald-400 hover:bg-emerald-500/10"
+          className="shrink-0 p-1 rounded text-success hover:bg-success/10"
         >
           <Check className="h-3.5 w-3.5" />
         </button>
@@ -135,7 +135,7 @@ export function EditableFactFindValue({
       className={cn(
         "group inline-flex items-start gap-1.5 text-left text-[14px] leading-snug",
         empty
-          ? "text-amber-400/85 italic"
+          ? "text-warning/85 italic"
           : "text-foreground/90 hover:text-gold transition-colors",
       )}
     >

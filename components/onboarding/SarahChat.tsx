@@ -363,55 +363,80 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
   if (!hasStarted) {
     return (
-      <div className="relative flex flex-col items-center justify-start min-h-screen bg-black text-white px-6 pt-10 overflow-hidden">
-        {/* Ambient depth — soft layered radial glows */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(50,100,255,0.10),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_75%,rgba(201,168,76,0.08),transparent_60%)]" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,rgba(80,140,255,0.06),transparent_70%)] onboarding-glow-a" />
+      <div className="relative flex flex-col items-center justify-start min-h-[100dvh] bg-background text-foreground px-6 py-10 overflow-hidden">
+        {/* Ambient depth — warm gold horizon over near black */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,hsl(var(--gold)/0.09),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_80%,hsl(var(--gold-shadow)/0.22),transparent_60%)]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,hsl(var(--teal-accent)/0.04),transparent_70%)] onboarding-glow-a" />
 
         {/* Card */}
-        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] bg-[#0f0f12] border border-white/[0.05] shadow-[0_40px_120px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_80px_rgba(50,100,255,0.05)] px-10 pt-4 pb-8 flex flex-col items-center text-center">
+        <div className="relative z-10 w-full max-w-[640px] rounded-[32px] border border-gold/[0.14] bg-[linear-gradient(165deg,hsl(219_16%_9%/0.96),hsl(220_20%_4%/0.98))] shadow-[0_40px_120px_hsl(0_0%_0%/0.85),0_0_0_1px_hsl(0_0%_0%/0.4),inset_0_1px_0_hsl(44_75%_85%/0.1),inset_0_0_80px_hsl(var(--gold)/0.04)] px-8 pt-4 pb-8 flex flex-col items-center text-center sm:px-10">
           <div className="mb-2">
             <NewcastleLogoFull size={220} />
           </div>
-          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-3">
+          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-foreground mb-3">
             Financial Discovery Session
           </h1>
-          <p className="text-lg text-white/70 max-w-[520px] mb-7 leading-relaxed">
-            Sarah will guide you through your discovery session so Brad can
-            prepare for your meeting.
+          <p className="text-lg text-foreground/70 max-w-[520px] leading-relaxed">
+            A relaxed conversation with Sarah, your discovery assistant, so
+            Brad can prepare properly for your meeting.
           </p>
+
+          <div className="gold-rule my-6 w-full max-w-[420px]" />
+
+          <ul className="mb-7 grid w-full max-w-[460px] gap-2.5 text-left">
+            {[
+              "You can type your answers or simply speak them.",
+              "Rough answers are perfectly fine. Brad will refine the detail with you.",
+              "No advice is given in this session. It is discovery only.",
+              "Your information is handled securely and reviewed personally by Brad.",
+            ].map((line) => (
+              <li key={line} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-foreground/65">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-gold/70" />
+                {line}
+              </li>
+            ))}
+          </ul>
+
           <button
             type="button"
             onClick={() => setHasStarted(true)}
-            className="onboarding-cta-shine relative overflow-hidden rounded-xl px-12 py-5 text-[17px] font-bold tracking-[0.05em] uppercase text-background bg-[linear-gradient(120deg,#c9a84c_0%,#e0c266_28%,#a8d4ff_72%,#6fb7f5_100%)] hover:brightness-105 transition-[filter] shadow-[0_14px_40px_-10px_rgba(201,168,76,0.55),0_8px_30px_-12px_rgba(120,180,255,0.45),inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(0,0,0,0.18)]"
+            className="onboarding-cta-shine btn-gold relative overflow-hidden rounded-xl px-12 py-5 text-[16px] font-bold tracking-[0.05em] uppercase transition-[filter] hover:brightness-105"
           >
             Begin My Financial Discovery
           </button>
+
+          <p className="mt-5 text-[12px] text-muted-foreground/60 max-w-[440px] leading-relaxed">
+            Shared only with your Newcastle Financial Services adviser. You can
+            pause at any time and pick up where you left off.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white">
+    <div className="flex flex-col min-h-[100dvh] bg-background text-foreground">
+      {/* Ambient depth — warm gold horizon over near black */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_18%,hsl(var(--gold)/0.06),transparent_50%),radial-gradient(circle_at_50%_95%,hsl(var(--gold-shadow)/0.18),transparent_55%)]" />
+
       {/* Header: logo lockup + headline + status — tight stack */}
-      <header className="shrink-0 flex flex-col items-center pt-4 px-6">
+      <header className="relative shrink-0 flex flex-col items-center pt-4 px-6">
         <NewcastleLogoFull size={180} />
-        <h1 className="-mt-2 text-3xl md:text-5xl font-light tracking-wide text-white text-center">
+        <h1 className="-mt-2 text-3xl md:text-5xl font-light tracking-wide text-foreground text-center">
           Financial Discovery Session
         </h1>
         <div className="mt-2 flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-          <span className="text-[13px] text-white/55 tracking-wide">
+          <span className="status-live h-2.5 w-2.5 rounded-full bg-success text-success shadow-[0_0_8px_hsl(var(--success)/0.7)]" />
+          <span className="text-[13px] text-foreground/55 tracking-wide">
             Sarah is online
           </span>
         </div>
       </header>
 
       {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
-      <main className="shrink-0 flex flex-col items-center px-6 mt-8">
-        <div className="bg-[#1c1c1e] rounded-[28px] p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.08),inset_0_0_60px_rgba(50,100,255,0.06)]">
+      <main className="relative shrink-0 flex flex-col items-center px-6 mt-8">
+        <div className="rounded-[28px] border border-gold/[0.12] bg-[linear-gradient(168deg,hsl(219_15%_11%/0.97),hsl(220_18%_6%/0.98))] p-8 sm:p-12 w-full max-w-[720px] flex flex-col items-center shadow-[0_30px_80px_hsl(0_0%_0%/0.9),0_0_0_1px_hsl(0_0%_0%/0.35),inset_0_1px_0_hsl(44_75%_85%/0.09),inset_0_0_60px_hsl(var(--gold)/0.035)]">
           <OrbCanvas
             state={orbState}
             className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
@@ -419,14 +444,15 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
           <div className="mt-6 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
             {errorMsg ? (
-              <p className="text-[14px] text-red-400/85 max-w-[680px] text-center">
-                {errorMsg}
+              <p className="text-[14px] text-destructive/85 max-w-[680px] text-center">
+                Sarah had a moment of trouble connecting. Please try again in a
+                few seconds.
               </p>
             ) : (
-              <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-white/75 text-center">
+              <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-foreground/78 text-center">
                 {visibleSubtitle}
                 {(isStreaming || isLoadingVoice) && (
-                  <span className="inline-block w-1 h-4 bg-white/50 ml-1 align-middle animate-pulse" />
+                  <span className="inline-block w-1 h-4 bg-gold/60 ml-1 align-middle animate-pulse" />
                 )}
               </p>
             )}
@@ -437,8 +463,8 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
           <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
             {recentAnswers.map(({ m, i }) => (
               <div key={i} className="flex flex-col items-end max-w-full">
-                <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
-                  <p className="text-[14px] text-white/85 leading-relaxed whitespace-pre-wrap">
+                <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-[inset_0_1px_0_hsl(44_75%_85%/0.08)]">
+                  <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
                     {m.content}
                   </p>
                 </div>
@@ -469,7 +495,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
                 placeholder="Type your answer here..."
                 disabled={inputDisabled}
                 rows={1}
-                className="w-full bg-white/5 border border-white/40 rounded-2xl px-5 py-4 text-[15px] text-white placeholder:text-white/40 focus:outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px]"
+                className="w-full bg-white/[0.04] border border-white/[0.18] rounded-2xl px-5 py-4 text-[15px] text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all resize-none disabled:opacity-40 leading-relaxed min-h-[56px] max-h-[140px] shadow-[inset_0_1px_0_hsl(44_75%_85%/0.05)]"
               />
             </div>
 
@@ -478,8 +504,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
               onClick={toggle}
               disabled={inputDisabled || isTranscribing}
               aria-label={isRecording ? "Stop recording" : "Start recording"}
-              style={{ width: 56, height: 56 }}
-              className="relative shrink-0 inline-flex items-center justify-center rounded-full bg-gold text-background transition-colors hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-gold relative h-14 w-14 shrink-0 inline-flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isRecording && (
                 <>
@@ -498,8 +523,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
               onClick={handleSubmit}
               disabled={!input.trim() || inputDisabled}
               aria-label="Send"
-              style={{ width: 56, height: 56 }}
-              className="shrink-0 inline-flex items-center justify-center rounded-full bg-white text-black transition-colors hover:bg-white/90 disabled:opacity-25 disabled:cursor-not-allowed"
+              className="btn-glass h-14 w-14 shrink-0 inline-flex items-center justify-center rounded-full text-foreground transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             >
               <ArrowRight className="h-5 w-5" />
             </button>
@@ -508,7 +532,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
           {/* Reserved slot so recorder errors don't push the layout */}
           <div className="h-5 mt-2 flex items-center justify-center">
             {recorderError && (
-              <p className="text-[11px] text-red-400/80 max-w-[500px] text-center leading-tight">
+              <p className="text-[11px] text-destructive/80 max-w-[500px] text-center leading-tight">
                 {recorderError}
               </p>
             )}
@@ -517,11 +541,15 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       )}
 
       {isComplete && (
-        <div className="shrink-0 flex justify-center py-8">
-          <div className="flex items-center gap-2 text-[13px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-5 py-2.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <div className="relative shrink-0 flex flex-col items-center gap-3 py-8 px-6 onboarding-rise">
+          <div className="flex items-center gap-2 text-[13px] text-success bg-success/10 border border-success/25 rounded-full px-5 py-2.5 shadow-[0_0_28px_-12px_hsl(var(--success)/0.6)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
             Financial Discovery complete
           </div>
+          <p className="max-w-[440px] text-center text-[13px] leading-relaxed text-foreground/60">
+            Thank you. Brad will personally review everything you have shared
+            and be fully prepared for your meeting.
+          </p>
         </div>
       )}
     </div>

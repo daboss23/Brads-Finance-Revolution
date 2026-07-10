@@ -30,9 +30,9 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
           className={cn(
             "h-full rounded-full transition-all",
             pct >= 80
-              ? "bg-emerald-500/80"
+              ? "bg-success/80"
               : pct >= 40
-                ? "bg-amber-500/80"
+                ? "bg-warning/80"
                 : "bg-red-500/80",
           )}
           style={{ width: `${pct}%` }}
@@ -46,7 +46,7 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
           {missingSections.map((s) => (
             <span
               key={s}
-              className="text-[12px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded px-2 py-0.5"
+              className="text-[12px] text-warning bg-warning/10 border border-warning/30 rounded px-2 py-0.5"
             >
               {s}
             </span>

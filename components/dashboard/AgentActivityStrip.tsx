@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 
 const TONE_FILL: Record<AgentTone, string> = {
   blue: "bg-blue-accent/70",
-  orange: "bg-orange-500/70",
+  orange: "bg-warning/70",
   gold: "bg-gold/70",
-  emerald: "bg-emerald-500/70",
-  violet: "bg-[hsl(268_70%_66%)]/70",
+  emerald: "bg-success/70",
+  violet: "bg-teal-accent/70",
 };
 
 export function AgentActivityStrip() {

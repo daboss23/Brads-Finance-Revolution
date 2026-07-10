@@ -44,7 +44,7 @@ export function PipelineVitals() {
         />
         <div className="min-w-0">
           <div className="mb-2 flex items-center gap-2">
-            <Gauge className="h-3.5 w-3.5 text-emerald-300" />
+            <Gauge className="h-3.5 w-3.5 text-success" />
             <p className="cmd-label text-muted-foreground/65">Client Readiness</p>
           </div>
           <p className="text-[13px] leading-snug tracking-tight text-foreground/80">
@@ -57,7 +57,7 @@ export function PipelineVitals() {
       <div className="glass-panel edge-orange px-7 py-6">
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertOctagon className="h-3.5 w-3.5 text-orange-300" />
+            <AlertOctagon className="h-3.5 w-3.5 text-warning" />
             <p className="cmd-label text-muted-foreground/65">Bottlenecks</p>
           </div>
           <p className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-orange-200">
@@ -73,7 +73,7 @@ export function PipelineVitals() {
               <span
                 className={cn(
                   "shrink-0 cmd-label",
-                  c.status === "review-required" ? "text-orange-300" : "text-muted-foreground/55"
+                  c.status === "review-required" ? "text-warning" : "text-muted-foreground/55"
                 )}
               >
                 {c.status === "review-required" ? "Review" : "Not started"}

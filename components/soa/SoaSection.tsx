@@ -67,9 +67,9 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
       className={cn(
         "rounded-lg border bg-card overflow-hidden",
         flagged
-          ? "border-amber-500/35"
+          ? "border-warning/35"
           : section.approved
-          ? "border-emerald-500/30"
+          ? "border-success/30"
           : "border-border",
       )}
     >
@@ -77,10 +77,10 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
         className={cn(
           "px-6 py-4 border-b flex items-center justify-between gap-4",
           flagged
-            ? "border-amber-500/25 bg-amber-500/[0.04]"
+            ? "border-warning/25 bg-warning/[0.05]"
             : section.approved
-            ? "border-emerald-500/20 bg-emerald-500/[0.03]"
-            : "border-border/60 bg-[hsl(224,20%,7%)]",
+            ? "border-success/20 bg-success/[0.03]"
+            : "border-border/60 bg-black/25",
         )}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -88,9 +88,9 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
             className={cn(
               "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold tabular-nums",
               flagged
-                ? "bg-amber-500/15 text-amber-300"
+                ? "bg-warning/[0.15] text-warning"
                 : section.approved
-                ? "bg-emerald-500/15 text-emerald-300"
+                ? "bg-success/15 text-success"
                 : "bg-muted text-muted-foreground/85",
             )}
           >
@@ -102,13 +102,13 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {flagged && (
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/30">
+            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-warning bg-warning/10 border border-warning/30">
               <AlertTriangle className="h-2.5 w-2.5" />
               Review needed
             </span>
           )}
           {section.reviewed && !flagged && (
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/25">
+            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-success bg-success/10 border border-success/25">
               <CheckCircle2 className="h-2.5 w-2.5" />
               Reviewed
             </span>
@@ -127,7 +127,7 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
 
       <div className="px-7 py-6">
         {section.needsReview && section.reviewReason && !section.reviewed && (
-          <p className="text-[12px] text-amber-300/90 mb-4 leading-relaxed">
+          <p className="text-[12px] text-warning/90 mb-4 leading-relaxed">
             Why this is flagged: {section.reviewReason}
           </p>
         )}

@@ -81,7 +81,7 @@ export function PipelineStages({
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="px-6 py-4 border-b border-border/60 bg-black/25">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           Pipeline Status
         </h2>
@@ -97,15 +97,15 @@ export function PipelineStages({
                 : Lock;
             const tone =
               stage.state === "complete"
-                ? "text-emerald-400"
+                ? "text-success"
                 : stage.state === "active"
-                ? "text-amber-400"
+                ? "text-warning"
                 : "text-muted-foreground/40";
             const pillTone =
               stage.state === "complete"
-                ? "text-emerald-400/85 bg-emerald-500/10 border-emerald-500/25"
+                ? "text-success/85 bg-success/10 border-success/25"
                 : stage.state === "active"
-                ? "text-amber-300/85 bg-amber-500/10 border-amber-500/25"
+                ? "text-warning/85 bg-warning/10 border-warning/25"
                 : "text-muted-foreground/55 bg-white/[0.03] border-border/55";
 
             const inner = (
@@ -171,13 +171,13 @@ export function SoaGate({ clientId, result, signedOff }: SoaGateProps) {
 
   if (cleared) {
     return (
-      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/[0.04] overflow-hidden">
+      <div className="rounded-lg border border-success/30 bg-success/[0.04] overflow-hidden">
         <div className="flex">
           <div className="w-[3px] shrink-0 bg-gradient-to-b from-emerald-500/70 to-emerald-500/20" />
           <div className="px-6 py-5">
             <div className="flex items-center gap-2.5 mb-2.5">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-emerald-300">
+              <ShieldCheck className="h-4 w-4 text-success" />
+              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-success">
                 SOA Ready · Compliance Cleared
               </p>
             </div>
@@ -194,7 +194,7 @@ export function SoaGate({ clientId, result, signedOff }: SoaGateProps) {
               </Link>
               <Link
                 href={`/clients/${clientId}/compliance`}
-                className="inline-flex items-center gap-2 rounded border border-emerald-500/35 bg-emerald-500/5 px-3 py-1.5 text-[12px] font-medium text-emerald-300 hover:text-emerald-200 hover:border-emerald-500/55 transition-colors"
+                className="inline-flex items-center gap-2 rounded border border-success/35 bg-success/5 px-3 py-1.5 text-[12px] font-medium text-success hover:text-success hover:border-emerald-500/55 transition-colors"
               >
                 View certificate
               </Link>
@@ -223,15 +223,15 @@ export function SoaGate({ clientId, result, signedOff }: SoaGateProps) {
   const tone =
     result.overallStatus === "failed"
       ? "border-red-500/30 bg-red-500/[0.04]"
-      : "border-amber-500/30 bg-amber-500/[0.04]";
+      : "border-warning/30 bg-warning/[0.05]";
   const accent =
     result.overallStatus === "failed"
       ? "from-red-500/70 to-red-500/20"
-      : "from-amber-500/70 to-amber-500/20";
+      : "from-warning/70 to-warning/20";
   const head =
-    result.overallStatus === "failed" ? "text-red-300" : "text-amber-300";
+    result.overallStatus === "failed" ? "text-red-300" : "text-warning";
   const iconTone =
-    result.overallStatus === "failed" ? "text-red-400" : "text-amber-400";
+    result.overallStatus === "failed" ? "text-red-400" : "text-warning";
 
   return (
     <div className={cn("rounded-lg border overflow-hidden", tone)}>
@@ -273,7 +273,7 @@ export function SoaGate({ clientId, result, signedOff }: SoaGateProps) {
               "inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[12px] font-medium transition-colors",
               result.overallStatus === "failed"
                 ? "border-red-500/35 bg-red-500/5 text-red-300 hover:text-red-200 hover:border-red-500/55"
-                : "border-amber-500/35 bg-amber-500/5 text-amber-300 hover:text-amber-200 hover:border-amber-500/55"
+                : "border-warning/35 bg-amber-500/5 text-warning hover:text-warning hover:border-amber-500/55"
             )}
           >
             Open compliance review

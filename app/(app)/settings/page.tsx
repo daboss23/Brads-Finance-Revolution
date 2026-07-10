@@ -58,12 +58,12 @@ export default function SettingsPage() {
   const runtimeById = new Map(runtimeAgents.map((agent) => [agent.id, agent]));
 
   return (
-    <div className="max-w-[1180px] px-8 py-12 lg:px-10">
-      <div className="mb-10 border-b border-border/60 pb-7">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
+      <div className="mb-10 border-b border-gold/[0.1] pb-7">
         <div className="mb-3 flex items-center gap-3">
           <SettingsIcon className="h-3.5 w-3.5 text-muted-foreground/85" />
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground/85">
-            Settings
+          <p className="cmd-label text-gold/80">
+            Settings · Configuration Console
           </p>
         </div>
         <h1 className="text-[26px] font-semibold tracking-tight text-foreground">
@@ -80,7 +80,7 @@ export default function SettingsPage() {
         {providerRows.map((section) => {
           const Icon = section.icon;
           return (
-            <div key={section.group} className="rounded-lg border border-border bg-card p-5">
+            <div key={section.group} className="glass-panel p-5">
               <div className="mb-5 flex items-center gap-3">
                 <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
                   <Icon className="h-4 w-4" />
@@ -97,7 +97,7 @@ export default function SettingsPage() {
         })}
       </section>
 
-      <section className="mb-8 rounded-lg border border-border bg-card p-5">
+      <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
             <SlidersHorizontal className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default function SettingsPage() {
             <h2 className="text-[15px] font-semibold text-foreground">Agent Usage Mode</h2>
             <p className="mt-1 text-[12px] text-muted-foreground/70">
               Default is Balanced: Beacon and Guardian supporting modules can auto-run
-              after workflow events, while Atlas remains a deliberate final review step
+              after workflow events, while ATLAS remains a deliberate final review step
               for Brad.
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="mb-8 rounded-lg border border-border bg-card p-5">
+      <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
             <ShieldCheck className="h-4 w-4" />
@@ -136,7 +136,7 @@ export default function SettingsPage() {
           <h2 className="text-[15px] font-semibold text-foreground">Agent Registry</h2>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          {AGENTS.map((agent) => (
+          {AGENTS.filter((agent) => agent.id !== "cipher").map((agent) => (
             <div key={agent.id} className="rounded-lg border border-border/70 bg-white/[0.025] px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                     {agent.role}. Trigger: {runtimeById.get(agent.id)?.trigger ?? "Manual orchestration"}.
                   </p>
                 </div>
-                <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-300">
+                <span className="rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[10px] font-bold uppercase text-success">
                   Enabled
                 </span>
               </div>
@@ -154,7 +154,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="mb-8 rounded-lg border border-border bg-card p-5">
+      <section className="mb-8 glass-panel p-5">
         <div className="mb-5 flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/25 bg-gold/10 text-gold">
             <Bot className="h-4 w-4" />
@@ -162,7 +162,7 @@ export default function SettingsPage() {
           <h2 className="text-[15px] font-semibold text-foreground">Runtime Modules</h2>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          {runtimeAgents.map((agent) => (
+          {runtimeAgents.filter((agent) => agent.id !== "cipher").map((agent) => (
             <div key={agent.id} className="rounded-lg border border-border/70 bg-white/[0.025] px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
 
       <Link
         href="/settings/knowledge-base"
-        className="group block rounded-lg border border-border bg-card p-6 transition-colors hover:border-gold/40"
+        className="group block glass-panel p-6 transition-colors hover:border-gold/40"
       >
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
@@ -222,11 +222,11 @@ function StatusRow({
         className={cn(
           "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase",
           connected
-            ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
-            : "border-amber-400/25 bg-amber-500/10 text-amber-300",
+            ? "border-success/25 bg-success/10 text-success"
+            : "border-warning/25 bg-warning/10 text-warning",
         )}
       >
-        {connected ? "Ready" : "Mock"}
+        {connected ? "Connected" : "Mock mode"}
       </span>
     </div>
   );

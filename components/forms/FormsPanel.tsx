@@ -41,10 +41,10 @@ interface Props {
 const PROVIDER_STYLES: Record<string, string> = {
   MLC: "text-blue-300 bg-blue-500/10 border-blue-500/30",
   AIA: "text-red-300 bg-red-500/10 border-red-500/30",
-  AMP: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  AMP: "text-success bg-success/10 border-success/30",
   CFS: "text-purple-300 bg-purple-500/10 border-purple-500/30",
   BT: "text-sky-300 bg-sky-500/10 border-sky-500/30",
-  Centrelink: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+  Centrelink: "text-warning bg-warning/10 border-warning/30",
   BMK: "text-gold/90 bg-gold/10 border-gold/30",
 };
 
@@ -59,11 +59,11 @@ const STATUS_CONFIG: Record<FormStatus, { label: string; className: string }> = 
   },
   sent: {
     label: "Sent",
-    className: "text-amber-300/90 bg-amber-500/10 border-amber-500/30",
+    className: "text-warning/90 bg-warning/10 border-warning/30",
   },
   completed: {
     label: "Completed",
-    className: "text-emerald-300/90 bg-emerald-500/10 border-emerald-500/30",
+    className: "text-success/90 bg-success/10 border-success/30",
   },
 };
 
@@ -189,7 +189,7 @@ export function FormsPanel({
                     Send to: {provider.team} · {provider.email}
                   </p>
                   {missing.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1.5 text-amber-300 text-[12px]">
+                    <div className="mt-2 flex items-center gap-1.5 text-warning text-[12px]">
                       <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">
                         {missing.length} field{missing.length === 1 ? "" : "s"} missing, fill manually
@@ -243,7 +243,7 @@ export function FormsPanel({
                     <a
                       href={mailto}
                       onClick={() => updateStatus(form.id, "sent")}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/35 bg-amber-500/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-amber-300/85 hover:text-amber-200 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-warning/35 bg-warning/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-warning/85 hover:text-warning transition-colors"
                     >
                       <Mail className="h-3.5 w-3.5" />
                       Email
@@ -262,7 +262,7 @@ export function FormsPanel({
                     </button>
                     <button
                       onClick={() => updateStatus(form.id, "completed")}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/35 bg-emerald-500/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-emerald-300/90 hover:text-emerald-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-success/35 bg-success/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-success/90 hover:text-success transition-colors"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Mark Complete
@@ -272,7 +272,7 @@ export function FormsPanel({
 
                 {entry.status === "completed" && (
                   <>
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                     <button
                       onClick={() => handleDownload(form.id)}
                       className="inline-flex items-center gap-1.5 rounded-md border border-border/70 px-3 py-1.5 text-[12.5px] font-medium text-foreground/75 hover:text-foreground transition-colors"

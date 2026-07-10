@@ -220,8 +220,8 @@ function runAtlas(input: AgentInput): AtlasOutput {
     client.notes,
     `Current fact-find completion is ${client.progress}% and meeting stage is ${client.meetingStage}.`,
     input.bradReviewed
-      ? "Brad review is complete, so Atlas can rely on approved facts and focus on advice tailoring."
-      : "Brad review is not complete, so Atlas should keep uncertainty visible and avoid final-sounding recommendations.",
+      ? "Brad review is complete, so ATLAS can rely on approved facts and focus on advice tailoring."
+      : "Brad review is not complete, so ATLAS should keep uncertainty visible and avoid final-sounding recommendations.",
   ];
   const projectionAssumptions = [
     propertyGoal

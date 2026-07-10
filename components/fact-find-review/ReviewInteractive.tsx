@@ -75,7 +75,7 @@ export function ReviewInteractive({ clientId, clientName, missingSectionCount }:
 
       {/* Checklist */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
             Adviser Checklist
           </h3>
@@ -105,7 +105,7 @@ export function ReviewInteractive({ clientId, clientName, missingSectionCount }:
 
       {/* Notes */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
             Adviser Notes
           </h3>
@@ -132,7 +132,7 @@ export function ReviewInteractive({ clientId, clientName, missingSectionCount }:
         onClick={handleMarkReviewed}
         className={
           reviewed
-            ? "w-full bg-emerald-600/90 hover:bg-emerald-600 text-white"
+            ? "w-full bg-success/90 hover:bg-success text-white"
             : "w-full bg-gold hover:bg-gold/90 text-background font-semibold"
         }
         disabled={!allChecked && !reviewed}
@@ -151,7 +151,7 @@ export function ReviewInteractive({ clientId, clientName, missingSectionCount }:
       </Button>
 
       {reviewed && (
-        <p className="text-[11px] text-emerald-400/70 text-center">
+        <p className="text-[11px] text-success/70 text-center">
           Pipeline updated — {clientName.split(" ")[0]}'s card shows Brad Reviewed
         </p>
       )}

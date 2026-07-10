@@ -45,7 +45,6 @@ export const ACTIVE_WORKFLOW_AGENT_ORDER: AgentId[] = [
   "scribe",
   "orion",
   "atlas",
-  "cipher",
 ];
 
 export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = {
@@ -114,7 +113,7 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     name: "Orion",
     role: "SOA Evidence Assembly Agent",
     description:
-      "Builds the approved evidence packet Atlas uses for tailored SOA drafting, including fact highlights, compliance notes and projection inputs.",
+      "Builds the approved evidence packet ATLAS uses for tailored SOA drafting, including fact highlights, compliance notes and projection inputs.",
     trigger: "After Guardian clears core blockers and Brad review is underway",
     usesAI: true,
     cacheTTL: null,
@@ -126,7 +125,7 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
   },
   atlas: {
     id: "atlas",
-    name: "Atlas",
+    name: "ATLAS",
     role: "Strategy and Final SOA Agent",
     description:
       "Synthesises approved facts, compliance guardrails, meeting context, knowledge chunks and projection assumptions into Brad-ready SOA strategy output.",

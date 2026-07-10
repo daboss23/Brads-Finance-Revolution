@@ -157,13 +157,13 @@ export default function GenerateSoaPage({
           )}
 
           {readiness.warnings.length > 0 && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.04] overflow-hidden">
+            <div className="rounded-lg border border-warning/30 bg-warning/[0.05] overflow-hidden">
               <div className="flex">
-                <div className="w-[3px] shrink-0 bg-gradient-to-b from-amber-500/70 to-amber-500/20" />
+                <div className="w-[3px] shrink-0 bg-gradient-to-b from-warning/70 to-warning/20" />
                 <div className="px-6 py-5">
                   <div className="flex items-center gap-2.5 mb-2.5">
-                    <AlertTriangle className="h-4 w-4 text-amber-400" />
-                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-amber-300">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-warning">
                       Brad will see these flagged
                     </p>
                   </div>
@@ -173,7 +173,7 @@ export default function GenerateSoaPage({
                         key={i}
                         className="flex items-start gap-2 text-[13px] text-foreground/85"
                       >
-                        <span className="mt-[7px] h-[3px] w-[3px] shrink-0 rounded-full bg-amber-400/70" />
+                        <span className="mt-[7px] h-[3px] w-[3px] shrink-0 rounded-full bg-warning/70" />
                         {w}
                       </li>
                     ))}
@@ -186,7 +186,7 @@ export default function GenerateSoaPage({
 
         {/* Right summary */}
         <aside className="sticky top-8 rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="px-5 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Client Summary
             </h3>
@@ -263,7 +263,7 @@ function ReadinessCard({
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
             ok
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+              ? "bg-success/10 border-success/30 text-success"
               : "bg-red-500/10 border-red-500/30 text-red-400"
           }`}
         >
@@ -274,7 +274,7 @@ function ReadinessCard({
             <p className="text-[13px] font-semibold text-foreground">{label}</p>
             <span
               className={`text-[10px] font-medium tracking-[0.15em] uppercase ${
-                ok ? "text-emerald-400/85" : "text-red-400/85"
+                ok ? "text-success/85" : "text-red-400/85"
               }`}
             >
               {ok ? "Ready" : "Blocked"}

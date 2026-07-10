@@ -118,8 +118,8 @@ export default function SarahPage() {
         {[
           { label: "Links Sent", value: metrics.sent, icon: LinkIcon, color: "text-blue-accent", bg: "bg-blue-accent/15", accent: "from-blue-accent/50" },
           { label: "Opened", value: metrics.opened, icon: ExternalLink, color: "text-sky-400", bg: "bg-sky-400/15", accent: "from-sky-400/50" },
-          { label: "In Progress", value: metrics.inProgress, icon: Clock, color: "text-amber-400", bg: "bg-amber-400/15", accent: "from-amber-400/50" },
-          { label: "Completed", value: metrics.completed, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/15", accent: "from-emerald-400/50" },
+          { label: "In Progress", value: metrics.inProgress, icon: Clock, color: "text-warning", bg: "bg-warning/[0.15]", accent: "from-warning/50" },
+          { label: "Completed", value: metrics.completed, icon: CheckCircle2, color: "text-success", bg: "bg-success/15", accent: "from-success/50" },
           { label: "Not Started", value: metrics.notStarted, icon: Users, color: "text-zinc-400", bg: "bg-zinc-400/15", accent: "from-zinc-400/20" },
           { label: "Avg Completion", value: `${metrics.avg}%`, icon: TrendingDown, color: "text-gold", bg: "bg-gold/15", accent: "from-gold/50" },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
@@ -187,11 +187,11 @@ export default function SarahPage() {
                       className={cn(
                         "mt-[7px] h-[4px] w-[4px] shrink-0 rounded-full",
                         item.priority === "high"
-                          ? "bg-orange-400"
+                          ? "bg-warning"
                           : item.priority === "action"
-                          ? "bg-emerald-400"
+                          ? "bg-success"
                           : item.priority === "medium"
-                          ? "bg-amber-400"
+                          ? "bg-warning"
                           : "bg-gold/50"
                       )}
                     />
@@ -230,7 +230,7 @@ export default function SarahPage() {
                     <div
                       className={cn(
                         "h-full rounded-full",
-                        i === 0 ? "bg-orange-400/70" : i === 1 ? "bg-amber-400/60" : "bg-gold/40"
+                        i === 0 ? "bg-warning/70" : i === 1 ? "bg-warning/60" : "bg-gold/40"
                       )}
                       style={{ width: `${pct}%` }}
                     />
@@ -329,7 +329,7 @@ export default function SarahPage() {
                         className={cn(
                           "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-all duration-150",
                           copied === link.token
-                            ? "border-emerald-800/50 bg-emerald-950/40 text-emerald-400"
+                            ? "border-success/30 bg-success/[0.08] text-success"
                             : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
                         )}
                       >

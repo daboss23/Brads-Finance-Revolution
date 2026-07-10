@@ -14,16 +14,16 @@ import { ComplianceSettingsCard } from "@/components/compliance/ComplianceSettin
 
 export default function CompliancePage() {
   return (
-    <div className="px-12 py-12 max-w-[1280px]">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Header */}
-      <header className="mb-12 pb-8 border-b border-border/60">
+      <header className="mb-10 pb-8 border-b border-gold/[0.1]">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
             <Shield className="h-4 w-4 text-gold" />
           </div>
-          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
-            Compliance
+          <p className="cmd-label text-gold/90">
+            Compliance · Regulatory Control Room
           </p>
         </div>
         <h1 className="text-[28px] font-semibold tracking-tight text-foreground">

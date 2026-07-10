@@ -62,7 +62,7 @@ export function LanguageLibraryCard({ templates }: Props) {
 
   return (
     <section className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-6 py-5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="px-6 py-5 border-b border-border/60 bg-black/25">
         <h2 className="text-[14px] font-semibold text-foreground tracking-tight">
           Approved Language Library
         </h2>
@@ -117,7 +117,7 @@ export function LanguageLibraryCard({ templates }: Props) {
                       {LANGUAGE_TYPE_LABELS[template.type]}
                     </span>
                     {approaching && (
-                      <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/30">
+                      <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-warning bg-warning/10 border border-warning/30">
                         <AlertTriangle className="h-2.5 w-2.5" />
                         Review due
                       </span>
@@ -133,7 +133,7 @@ export function LanguageLibraryCard({ templates }: Props) {
                 >
                   {copied ? (
                     <>
-                      <Check className="h-3 w-3 text-emerald-400" />
+                      <Check className="h-3 w-3 text-success" />
                       Copied
                     </>
                   ) : (

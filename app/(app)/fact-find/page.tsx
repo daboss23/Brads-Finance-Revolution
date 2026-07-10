@@ -67,9 +67,9 @@ export default function FactFindPage() {
             label: "Clients Fully Complete",
             value: `${fullyComplete} / ${CLIENTS.length}`,
             icon: Users,
-            color: "text-emerald-400",
-            bg: "bg-emerald-400/15",
-            accent: "from-emerald-400/50",
+            color: "text-success",
+            bg: "bg-success/15",
+            accent: "from-success/50",
           },
           {
             label: "Avg Completion",
@@ -264,7 +264,7 @@ function SectionCard({
         className={cn(
           "h-px bg-gradient-to-r to-transparent",
           pct === 100
-            ? "from-emerald-500/60"
+            ? "from-success/60"
             : pct >= 50
             ? "from-gold/55"
             : inProgress > 0
@@ -281,7 +281,7 @@ function SectionCard({
             className={cn(
               "text-[28px] font-semibold leading-none tabular-nums shrink-0",
               pct === 100
-                ? "text-emerald-400"
+                ? "text-success"
                 : pct >= 60
                 ? "text-gold"
                 : "text-foreground/85"
@@ -315,7 +315,7 @@ function SectionCard({
 
 function MatrixDot({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
+    return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (status === "in-progress")
     return <Clock className="h-4 w-4 text-blue-accent/80" />;
   return <Circle className="h-4 w-4 text-muted-foreground/20" />;

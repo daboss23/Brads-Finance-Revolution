@@ -8,7 +8,6 @@ import {
   RadioTower,
   ShieldCheck,
   Sparkles,
-  Zap,
 } from "lucide-react";
 import type { AgentId, AgentOutput } from "@/lib/agents/types";
 import { cn } from "@/lib/utils";
@@ -50,17 +49,10 @@ const ACTIONS: Array<{
   },
   {
     agentId: "atlas",
-    label: "Generate Atlas Draft View",
-    title: "Atlas strategy synthesis",
+    label: "Generate ATLAS Draft View",
+    title: "ATLAS strategy synthesis",
     icon: AlertTriangle,
     description: "Produces tailored strategy reasoning, reusable advice chunks and projection assumptions.",
-  },
-  {
-    agentId: "cipher",
-    label: "Refresh Cipher",
-    title: "Cipher follow-up recommendation",
-    icon: Zap,
-    description: "Finds stale clients, missing info and follow-up priorities.",
   },
 ];
 
@@ -80,7 +72,7 @@ export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             agentId,
-            clientId: agentId === "cipher" ? undefined : clientId,
+            clientId,
             force: true,
           }),
         });
@@ -98,8 +90,8 @@ export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
   }
 
   return (
-    <section className="mb-5 overflow-hidden rounded-lg border border-gold/20 bg-card">
-      <div className="border-b border-border/60 bg-[hsl(224,20%,7%)] px-5 py-4">
+    <section className="glass-panel edge-gold mb-5 overflow-hidden">
+      <div className="border-b border-white/[0.06] bg-black/25 px-5 py-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold/85">
           Agent Intelligence
         </p>
@@ -129,7 +121,7 @@ export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
                       </p>
                     </div>
                     {result && (
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
                     )}
                   </div>
                   <button
@@ -138,7 +130,7 @@ export function AgentIntelligencePanel({ clientId }: { clientId: string }) {
                     onClick={() => run(action.agentId)}
                     className={cn(
                       "mt-3 inline-flex h-8 items-center rounded-md border border-gold/25 bg-gold/10 px-3 text-[11px] font-semibold text-gold transition hover:border-gold/45 hover:bg-gold/15 disabled:cursor-wait disabled:opacity-60",
-                      result && "border-emerald-400/25 bg-emerald-500/10 text-emerald-300",
+                      result && "border-success/25 bg-success/10 text-success",
                     )}
                   >
                     {isPending && running === action.agentId ? "Running" : result ? "Refresh again" : action.label}
@@ -168,7 +160,7 @@ function summariseOutput(agentId: AgentId, output: AgentOutput): string {
   }
   if (agentId === "orion" && "soaReady" in output) {
     const missing = Array.isArray(output.missingBeforeDraft) ? output.missingBeforeDraft : [];
-    return output.soaReady ? "SOA evidence packet ready." : `${missing.length} items still blocking Atlas.`;
+    return output.soaReady ? "SOA evidence packet ready." : `${missing.length} items still blocking ATLAS.`;
   }
   if (agentId === "atlas" && "strategyThemes" in output) {
     const themes = Array.isArray(output.strategyThemes) ? output.strategyThemes : [];
@@ -176,9 +168,6 @@ function summariseOutput(agentId: AgentId, output: AgentOutput): string {
       ? output.tailoredRecommendations
       : [];
     return `${themes.length} tailored strategy themes and ${recommendations.length} recommendation lanes ready.`;
-  }
-  if (agentId === "cipher" && "todaysBrief" in output) {
-    return typeof output.todaysBrief === "string" ? output.todaysBrief : "Cipher brief ready.";
   }
   return "Agent output ready.";
 }

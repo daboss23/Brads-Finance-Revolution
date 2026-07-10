@@ -23,12 +23,12 @@ const TONE: Record<
     glow: "from-blue-accent/60",
   },
   orange: {
-    text: "text-orange-300",
-    soft: "bg-orange-500/12",
-    ring: "border-orange-500/30",
-    fill: "bg-orange-500/70",
+    text: "text-warning",
+    soft: "bg-warning/[0.12]",
+    ring: "border-warning/30",
+    fill: "bg-warning/70",
     edge: "edge-orange",
-    glow: "from-orange-400/60",
+    glow: "from-warning/60",
   },
   gold: {
     text: "text-gold",
@@ -39,20 +39,20 @@ const TONE: Record<
     glow: "from-gold/60",
   },
   emerald: {
-    text: "text-emerald-300",
-    soft: "bg-emerald-500/12",
-    ring: "border-emerald-500/30",
-    fill: "bg-emerald-500/70",
+    text: "text-success",
+    soft: "bg-success/[0.12]",
+    ring: "border-success/30",
+    fill: "bg-success/70",
     edge: "edge-emerald",
-    glow: "from-emerald-400/60",
+    glow: "from-success/60",
   },
   violet: {
-    text: "text-[hsl(268_78%_74%)]",
-    soft: "bg-[hsl(268_70%_60%)]/12",
-    ring: "border-[hsl(268_70%_60%)]/30",
-    fill: "bg-[hsl(268_70%_66%)]/70",
-    edge: "edge-violet",
-    glow: "from-[hsl(268_70%_66%)]/60",
+    text: "text-teal-accent",
+    soft: "bg-teal-accent/[0.12]",
+    ring: "border-teal-accent/30",
+    fill: "bg-teal-accent/70",
+    edge: "edge-teal",
+    glow: "from-teal-accent/60",
   },
 };
 
@@ -137,8 +137,7 @@ export function AgentCard({ agent, featured = false }: { agent: Agent; featured?
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
               <div
-                className={cn("h-full rounded-full", tone.fill)}
-                style={{ width: `${agent.workload}%` }}
+                className={cn("h-full rounded-full", tone.fill, workloadWidth(agent.workload))}
               />
             </div>
             <div className="mt-4 flex items-center gap-4">
@@ -160,9 +159,9 @@ export function AgentCard({ agent, featured = false }: { agent: Agent; featured?
 
         {/* Blocked */}
         {agent.blockedItem && (
-          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-orange-500/25 bg-orange-500/[0.06] px-3.5 py-2.5">
-            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0 text-orange-300" />
-            <p className="text-[12.5px] leading-relaxed tracking-tight text-orange-200/90">
+          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-warning/25 bg-warning/[0.06] px-3.5 py-2.5">
+            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0 text-warning" />
+            <p className="text-[12.5px] leading-relaxed tracking-tight text-warning/90">
               {agent.blockedItem}
             </p>
           </div>
@@ -209,6 +208,18 @@ export function AgentCard({ agent, featured = false }: { agent: Agent; featured?
       </div>
     </div>
   );
+}
+
+function workloadWidth(value: number) {
+  if (value >= 95) return "w-full";
+  if (value >= 85) return "w-11/12";
+  if (value >= 75) return "w-4/5";
+  if (value >= 65) return "w-2/3";
+  if (value >= 55) return "w-3/5";
+  if (value >= 45) return "w-1/2";
+  if (value >= 35) return "w-2/5";
+  if (value >= 20) return "w-1/4";
+  return "w-1/6";
 }
 
 function Stat({

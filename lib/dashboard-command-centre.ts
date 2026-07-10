@@ -22,8 +22,7 @@ export type RuntimeAgentName =
   | "Guardian"
   | "Scribe"
   | "Orion"
-  | "Atlas"
-  | "Cipher"
+  | "ATLAS"
   | "Nexus";
 
 export type AgentActivityStatus = "Active" | "Idle" | "Needs Key" | "Mock";
@@ -152,7 +151,7 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
       {
         id: "discovery",
         label: "Discovery In Progress",
-        description: "Completing Financial Discovery",
+        description: "Client completing Financial Discovery",
         count: state.factFindsInProgress,
         tone: "cyan",
         state: state.factFindsInProgress > 0 ? "active" : "waiting",
@@ -160,42 +159,53 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
       {
         id: "sarah-complete",
         label: "Sarah Complete",
-        description: "Ready for adviser review",
+        description: "Discovery captured, handing to Beacon",
         count: sarahComplete,
         tone: "emerald",
         state: sarahComplete > 0 ? "complete" : "waiting",
       },
       {
-        id: "brad-review",
-        label: "Brad Review",
-        description: "Adviser reviewing client information",
+        id: "beacon-structured",
+        label: "Beacon Structured",
+        description: "Fact find structured for adviser review",
         count: state.reviewRequiredClients.length,
-        tone: "violet",
+        tone: "cyan",
         state: state.reviewRequiredClients.length > 0 ? "active" : "waiting",
       },
       {
-        id: "ready-meeting",
-        label: "Ready For Meeting",
-        description: "Prepared for adviser meeting",
+        id: "guardian-check",
+        label: "Guardian Compliance Check",
+        description: "Risk and best interests screening",
+        count: state.complianceRows.length,
+        tone: "orange",
+        state: state.complianceRows.length > 0 ? "active" : "waiting",
+      },
+      {
+        id: "scribe-prep",
+        label: "Scribe Meeting Prep",
+        description: "Meeting briefs ready for Brad",
         count: state.readyForMeeting,
         tone: "gold",
         state: state.readyForMeeting > 0 ? "active" : "waiting",
       },
       {
-        id: "ready-soa",
-        label: "Ready For SOA",
-        description: "Files ready for SOA production",
+        id: "orion-evidence",
+        label: "Orion Evidence Assembly",
+        description: "Evidence packs assembled for SOA",
         count: state.readyForSoA,
-        tone: "cyan",
+        tone: "blue",
         state: state.readyForSoA > 0 ? "active" : "waiting",
       },
       {
-        id: "signed",
-        label: "Signed",
-        description: "Advice signed and delivered",
-        count: state.completedOrSignedCount,
-        tone: "blue",
-        state: state.completedOrSignedCount > 0 ? "complete" : "waiting",
+        id: "atlas-soa",
+        label: "ATLAS Strategy & SOA",
+        description: "Final strategy synthesis and drafting",
+        count: state.reviewRows.length + state.stageCounts["soa-approved"],
+        tone: "gold",
+        state:
+          state.reviewRows.length + state.stageCounts["soa-approved"] > 0
+            ? "active"
+            : "waiting",
       },
     ],
     totalFilesInFlow: state.activeClients,
@@ -365,7 +375,7 @@ function buildPriorityQueue(): PriorityQueueItem[] {
     {
       id: "atlas-tanner-soa",
       priority: "high",
-      agent: "Atlas",
+      agent: "ATLAS",
       title: "Review SOA draft prepared for Robert and Sue Tanner",
       clientName: clientName("robert-sue-tanner"),
       href: "/clients/robert-sue-tanner/soa",
@@ -387,10 +397,10 @@ function buildPriorityQueue(): PriorityQueueItem[] {
       href: "/clients/angela-forsyth/compliance",
     },
     {
-      id: "cipher-reynolds-id",
+      id: "sarah-reynolds-info",
       priority: "low",
-      agent: "Cipher",
-      title: "Follow up ID verification for Michael and Kate Reynolds",
+      agent: "Sarah",
+      title: "Follow up missing client information for Michael and Kate Reynolds",
       clientName: clientName("michael-kate-reynolds"),
       href: "/clients/michael-kate-reynolds",
     },
@@ -412,7 +422,7 @@ function buildSarahBrief(state: DashboardBaseState): SarahBriefInsight[] {
       section: "Where clients are stuck",
       insight: `${state.linkSentClients.length} clients have not started cleanly after link sent, and ${state.reviewRequiredClients.length} files need adviser review.`,
       timestamp: "5m ago",
-      tone: "violet",
+      tone: "blue",
     },
     {
       id: "follow-up",
@@ -457,7 +467,7 @@ function buildPipelineSnapshot(
       id: "ready-soa",
       label: "Ready For SOA",
       value: state.readyForSoA,
-      tone: "violet",
+      tone: "blue",
     },
     {
       id: "signed",
@@ -515,16 +525,10 @@ function buildAgentActivity(mockModeActive: boolean): AgentActivityItem[] {
       detail: "evidence sync",
     },
     {
-      name: "Atlas",
+      name: "ATLAS",
       status: "Active",
-      tone: "cyan",
-      detail: "SOA draft ready",
-    },
-    {
-      name: "Cipher",
-      status: "Active",
-      tone: "emerald",
-      detail: "follow-up sweep",
+      tone: "gold",
+      detail: "SOA synthesis ready",
     },
     {
       name: "Nexus",

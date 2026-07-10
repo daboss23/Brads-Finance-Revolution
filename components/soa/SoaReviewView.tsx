@@ -16,8 +16,8 @@ interface Props {
 }
 
 const STATUS_TONE: Record<string, string> = {
-  green: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
-  amber: "bg-amber-500/15 text-amber-300 border-amber-500/35",
+  green: "bg-success/15 text-success border-success/35",
+  amber: "bg-warning/[0.15] text-warning border-warning/35",
   blue: "bg-blue-accent/15 text-blue-accent border-blue-accent/35",
   neutral: "bg-zinc-700/30 text-zinc-300 border-zinc-600/50",
 };

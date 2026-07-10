@@ -63,7 +63,7 @@ export function CompletionCertificate({ clientFullName, xpEarned, completedDate 
             <div className="grid grid-cols-2 gap-2.5 mb-8 text-left">
               {FACT_FIND_SECTIONS.map((s) => (
                 <div key={s.id} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400/80" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-success/80" />
                   <span className="text-[12.5px] text-foreground/75">{s.title}</span>
                 </div>
               ))}
@@ -90,7 +90,7 @@ export function CompletionCertificate({ clientFullName, xpEarned, completedDate 
             </div>
           </div>
 
-          <div className="border-t border-border bg-[hsl(224,20%,7%)] px-8 py-4 text-center">
+          <div className="border-t border-border bg-black/25 px-8 py-4 text-center">
             <p className="text-[11.5px] text-muted-foreground/60">
               Prepared in partnership with{" "}
               <span className="text-foreground/80 font-medium">Brad Lonergan</span>

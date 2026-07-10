@@ -138,7 +138,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
 
       {(running || states["done"] === "done" || error) && (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="px-6 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Generation Progress
             </h3>
@@ -154,8 +154,8 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
                   <StageIcon state={state} />
                   <span
                     className={cn(
-                      state === "done" && "text-emerald-400/90",
-                      state === "running" && "text-amber-300/95",
+                      state === "done" && "text-success/90",
+                      state === "running" && "text-warning/95",
                       state === "error" && "text-red-400/95",
                       state === "pending" && "text-muted-foreground/65",
                     )}
@@ -221,9 +221,9 @@ function parseEvent(raw: string): { name: string; data: Record<string, unknown> 
 
 function StageIcon({ state }: { state: StageState }) {
   if (state === "done")
-    return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
+    return <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />;
   if (state === "running")
-    return <Loader2 className="h-3.5 w-3.5 text-amber-300 shrink-0 animate-spin" />;
+    return <Loader2 className="h-3.5 w-3.5 text-warning shrink-0 animate-spin" />;
   if (state === "error")
     return <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />;
   return <Circle className="h-3.5 w-3.5 text-muted-foreground/35 shrink-0" />;

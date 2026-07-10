@@ -43,8 +43,8 @@ const ALL_STRATEGIES: StrategyKey[] = [
 ];
 
 const CONFIDENCE_STYLE: Record<string, string> = {
-  high: "text-emerald-300/90 bg-emerald-500/10 border-emerald-500/30",
-  medium: "text-amber-300/90 bg-amber-500/10 border-amber-500/30",
+  high: "text-success/90 bg-success/10 border-success/30",
+  medium: "text-warning/90 bg-warning/10 border-warning/30",
   low: "text-muted-foreground/70 bg-white/[0.04] border-border/60",
 };
 
@@ -159,7 +159,7 @@ export function ClientFormsWorkspace({
       {/* Section 2 — Approved Strategies */}
       <section>
         <SectionHeader
-          icon={<ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />}
+          icon={<ShieldCheck className="h-3.5 w-3.5 text-success" />}
           title="Approved Strategies"
           subtitle={
             approved.length === 0
@@ -238,7 +238,7 @@ function RecommendationCard({
     <div
       className={cn(
         "rounded-xl border bg-card overflow-hidden transition-colors",
-        approved ? "border-emerald-500/35" : "border-border/70 hover:border-border",
+        approved ? "border-success/35" : "border-border/70 hover:border-border",
       )}
     >
       <div className="p-6">
@@ -277,7 +277,7 @@ function RecommendationCard({
           <button
             type="button"
             onClick={onUndo}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2.5 text-[13px] font-medium text-emerald-300"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2.5 text-[13px] font-medium text-success"
           >
             <CheckCircle2 className="h-4 w-4" />
             Approved
@@ -344,7 +344,7 @@ function ApprovedStrategyBlock({
     <div className="rounded-xl border border-border/70 bg-card/60 overflow-hidden">
       <div className="px-6 py-4 border-b border-border/60 flex items-center justify-between bg-card">
         <div>
-          <p className="text-[10.5px] font-bold tracking-[0.18em] uppercase text-emerald-400/90 mb-1">
+          <p className="text-[10.5px] font-bold tracking-[0.18em] uppercase text-success/90 mb-1">
             Approved
           </p>
           <p className="text-[16px] font-semibold text-foreground tracking-tight">

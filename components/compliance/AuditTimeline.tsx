@@ -31,8 +31,8 @@ const ICONS: Record<AuditActionType, React.ElementType> = {
 
 const ICON_TONE: Record<AuditActionType, string> = {
   "check-run": "text-blue-accent bg-blue-accent/10 border-blue-accent/30",
-  "blocker-resolved": "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  "warning-acknowledged": "text-amber-400 bg-amber-500/10 border-amber-500/30",
+  "blocker-resolved": "text-success bg-success/10 border-success/30",
+  "warning-acknowledged": "text-warning bg-warning/10 border-warning/30",
   "certificate-generated": "text-gold bg-gold/10 border-gold/30",
   "sign-off-given": "text-gold bg-gold/10 border-gold/35",
 };
@@ -73,7 +73,7 @@ export function AuditTimeline({ clientId }: Props) {
   if (entries.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Audit Trail
           </h2>
@@ -87,7 +87,7 @@ export function AuditTimeline({ clientId }: Props) {
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="px-6 py-4 border-b border-border/60 bg-black/25">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           Audit Trail
         </h2>

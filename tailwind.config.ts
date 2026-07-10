@@ -50,11 +50,26 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         gold: {
           DEFAULT: "hsl(var(--gold))",
+          bright: "hsl(var(--gold-bright))",
+          soft: "hsl(var(--gold-soft))",
           dim: "hsl(var(--gold-dim))",
+          shadow: "hsl(var(--gold-shadow))",
           foreground: "hsl(var(--background))",
         },
         "blue-accent": {
           DEFAULT: "hsl(var(--blue-accent))",
+        },
+        "teal-accent": {
+          DEFAULT: "hsl(var(--teal-accent))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+        },
+        faint: {
+          DEFAULT: "hsl(var(--text-faint))",
         },
       },
       borderRadius: {
