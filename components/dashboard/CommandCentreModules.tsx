@@ -210,7 +210,7 @@ export function GlowPanel({
   return (
     <section
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/[0.09] bg-[linear-gradient(150deg,hsl(219_16%_11%/0.94),hsl(220_19%_5%/0.9)_58%,hsl(220_20%_4%/0.94))] p-4 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.09),inset_0_-1px_0_hsl(43_53%_54%/0.05),0_22px_54px_-34px_hsl(0_0%_0%/0.95)] backdrop-blur-2xl",
+        "liquid-glow group relative overflow-hidden rounded-2xl border border-white/[0.09] bg-[linear-gradient(160deg,hsl(46_80%_92%/0.07),hsl(46_80%_92%/0.015)_15%,transparent_30%),linear-gradient(150deg,hsl(219_16%_11%/0.94),hsl(220_19%_5%/0.9)_58%,hsl(220_20%_4%/0.94))] p-4 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),inset_0_-1px_0_hsl(43_53%_54%/0.05),inset_0_-14px_30px_-20px_hsl(39_55%_28%/0.3),0_22px_54px_-34px_hsl(0_0%_0%/0.95)] backdrop-blur-2xl",
         variant === "emphasis" &&
           "border-gold/[0.18] shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),inset_0_-1px_0_hsl(43_53%_54%/0.08),0_28px_70px_-34px_hsl(0_0%_0%/0.95),0_0_54px_-26px_hsl(43_53%_54%/0.5)]",
         variant === "alert" &&
@@ -354,9 +354,13 @@ export function ClientProgressEngine({
 
       <div className="relative mt-5 min-h-[500px] overflow-hidden rounded-2xl border border-gold/[0.08] bg-black/20 px-3 py-4 md:min-h-[560px]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--gold)/0.1),transparent_36%),radial-gradient(circle_at_54%_42%,hsl(var(--teal-accent)/0.07),transparent_32%)]" />
+        <div className="engine-energy-haze pointer-events-none absolute left-1/2 top-1/2 hidden size-[410px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14] md:block" />
-        <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 hidden size-[314px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.2] md:block" />
+        <div className="engine-energy pointer-events-none absolute left-1/2 top-1/2 hidden size-[324px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
+        <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 hidden size-[306px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.16] md:block" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-accent/[0.1] md:block" />
+        <div className="engine-wave pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
+        <div className="engine-wave engine-wave-late pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
 
         {arrowPositions.map((position) => (
           <ChevronRight
@@ -369,22 +373,30 @@ export function ClientProgressEngine({
         ))}
 
         <div className="relative z-10 mx-auto grid max-w-[280px] justify-items-center pt-4 md:absolute md:left-1/2 md:top-1/2 md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:pt-0">
-          <div className="dashboard-engine-core grid size-44 place-items-center rounded-full border border-gold/[0.28] bg-[radial-gradient(circle_at_38%_30%,hsl(44_80%_90%/0.16),transparent_22%),radial-gradient(circle_at_62%_48%,hsl(var(--gold)/0.3),transparent_30%),radial-gradient(circle_at_center,hsl(var(--teal-accent)/0.14),hsl(220_20%_6%/0.94)_62%)] shadow-[inset_0_1px_0_hsl(44_80%_90%/0.18),0_0_48px_-10px_hsl(var(--gold)/0.55),0_0_48px_-16px_hsl(var(--teal-accent)/0.4)]">
+          <div className="dashboard-engine-core grid size-48 place-items-center rounded-full border border-gold/[0.3] bg-[radial-gradient(circle_at_32%_24%,hsl(46_85%_92%/0.22),transparent_26%),radial-gradient(circle_at_62%_48%,hsl(var(--gold)/0.32),transparent_32%),radial-gradient(circle_at_50%_88%,hsl(var(--teal-accent)/0.2),transparent_38%),radial-gradient(circle_at_center,hsl(var(--teal-accent)/0.12),hsl(220_20%_6%/0.94)_64%)] shadow-[inset_0_1px_0_hsl(44_80%_90%/0.25),inset_0_-14px_28px_-16px_hsl(var(--teal-accent)/0.25),0_0_54px_-8px_hsl(var(--gold)/0.6),0_0_60px_-14px_hsl(var(--teal-accent)/0.45)]">
             <div className="text-center">
-              <div className="mx-auto grid size-10 place-items-center rounded-full border border-gold/30 bg-black/30 text-gold">
+              <div className="mx-auto grid size-10 place-items-center rounded-full border border-gold/30 bg-black/30 text-gold shadow-[0_0_18px_-4px_hsl(var(--gold)/0.7)]">
                 <Sparkles className="size-5" />
               </div>
-              <p className="mt-3 text-[20px] font-semibold leading-none text-foreground">
+              <p className="mt-2.5 text-[20px] font-semibold leading-none text-foreground">
                 Sarah
               </p>
               <p className="mt-1 cmd-label text-muted-foreground/72">
                 Client Discovery
               </p>
-              <div className="mx-auto mt-3 w-fit rounded-lg border border-gold/25 bg-black/30 px-3 py-2">
+              <div className="mx-auto mt-2.5 w-fit rounded-lg border border-gold/25 bg-black/30 px-3 py-1.5 shadow-[inset_0_1px_0_hsl(44_80%_90%/0.1)]">
                 <p className="cmd-label text-muted-foreground/52">In flow</p>
-                <p className="mt-1 text-[22px] font-semibold leading-none text-foreground tabular-nums">
+                <p className="mt-0.5 text-[20px] font-semibold leading-none text-foreground tabular-nums">
                   {totalFilesInFlow}
                 </p>
+                <div className="mx-auto mt-1.5 flex h-2 items-end justify-center gap-[3px]" aria-hidden>
+                  {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
+                    <span
+                      key={bar}
+                      className="freq-bar h-full w-[2px] rounded-full bg-teal-accent/70"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -432,7 +444,7 @@ function EngineStageNode({
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-black/[0.42] p-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.1),0_16px_34px_-28px_hsl(0_0%_0%/0.95)] backdrop-blur-xl md:absolute md:z-20 md:w-40",
+        "rounded-2xl border bg-[linear-gradient(165deg,hsl(46_80%_92%/0.06),transparent_30%),linear-gradient(180deg,hsl(220_16%_9%/0.55),hsl(220_20%_4%/0.6))] p-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.14),0_16px_34px_-28px_hsl(0_0%_0%/0.95)] backdrop-blur-xl md:absolute md:z-20 md:w-40",
         toneBorder[stage.tone],
         stage.state === "active" && "dashboard-stage-active",
         className,

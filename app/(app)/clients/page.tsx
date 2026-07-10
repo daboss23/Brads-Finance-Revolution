@@ -252,12 +252,12 @@ export default function ClientsPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 align-middle">
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex min-w-[140px] items-center gap-2.5">
                         <progress
                           value={client.progress}
                           max={100}
                           className={cn(
-                            "bmk-progress w-24",
+                            "bmk-progress w-24 shrink-0",
                             client.status === "in-progress" ? "bmk-progress-blue" : ""
                           )}
                         />
