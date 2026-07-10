@@ -1,4 +1,5 @@
 import { saveFactFind, getFactFind } from "@/lib/sarah-fact-find-store";
+import { validateOnboardingToken } from "@/lib/security/onboarding-access";
 import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
 
 export const runtime = "nodejs";
@@ -30,6 +31,12 @@ export async function POST(req: Request) {
         { error: "clientId, token and data are required." },
         { status: 400 },
       );
+    }
+
+    const access = validateOnboardingToken(token);
+    if (!access.ok || access.link.clientId !== clientId) {
+      err("token rejected", { reason: access.ok ? "client-mismatch" : access.reason });
+      return Response.json({ error: "A valid session link is required." }, { status: 401 });
     }
 
     saveFactFind({

@@ -32,14 +32,44 @@ defines how the codebase and deployments protect that data.
    `ELEVENLABS_API_KEY`. A leaked sandbox key must never grant anything in
    production.
 
-## 2. API keys and secrets
+## 2. Adviser authentication
+
+The entire adviser surface (dashboard, clients, compliance, SOA, all
+internal APIs) sits behind `middleware.ts`. Only the client onboarding flow
+and its token-guarded APIs are public.
+
+- **Credentials**: run `node scripts/generate-credentials.mjs "<password>"`
+  and set the printed `AUTH_PASSWORD_HASH` and `AUTH_SESSION_SECRET` on the
+  Vercel project. The password is hashed with scrypt (memory-hard,
+  GPU-resistant) and never stored; verification is timing-safe.
+- **Sessions**: stateless HMAC-SHA256 signed tokens in an `httpOnly`,
+  `secure`, `SameSite=Lax` cookie, 8-hour expiry. Tampering with one byte
+  invalidates the session (`lib/security/session.ts`).
+- **Throttling**: 5 failed attempts from an IP locks login for 15 minutes.
+- **Fail closed**: a production deployment without auth configured serves
+  nothing (503). Sandbox builds without credentials stay open for
+  development, behind the sandbox banner.
+- **Logging**: every login success/failure, lockout and logout emits a
+  structured security event (`lib/security/access-log.ts`) into the Vercel
+  runtime logs.
+
+## 3. Client API protection
+
+The client-facing endpoints (`/api/sarah`, `/api/sarah/voice`,
+`/api/transcribe`, `/api/complete-fact-find`) never require an adviser
+session, but each request must carry a valid fact find token
+(`x-onboarding-token`). Invalid or expired tokens get a 401 before any AI,
+voice or storage call runs, so the Anthropic and ElevenLabs keys cannot be
+farmed through the public endpoints.
+
+## 4. API keys and secrets
 
 - One key per environment, minimum scope, rotated if ever exposed.
 - Keys live only in Vercel environment variables and `.env.local`
   (gitignored). Never commit keys, and never prefix a secret with
   `NEXT_PUBLIC_` (that ships it to the browser).
 
-## 3. Client onboarding links
+## 5. Client onboarding links
 
 - Fact find tokens are validated in `lib/security/onboarding-access.ts`
   before a Sarah session starts. Unknown or unsent tokens and links older
@@ -48,7 +78,7 @@ defines how the codebase and deployments protect that data.
 - Validity is currently 90 days to keep the demo data usable; tighten to 30
   days at go-live.
 
-## 4. Transport and browser hardening
+## 6. Transport and browser hardening
 
 `next.config.mjs` applies on every route:
 
@@ -58,13 +88,13 @@ defines how the codebase and deployments protect that data.
 - **nosniff, Referrer-Policy, Permissions-Policy** — microphone stays
   available to Sarah (`self`) while camera and geolocation are blocked.
 
-## 5. Audit trail
+## 7. Audit trail
 
 Compliance actions are recorded per client with the checker version that
 produced them (`lib/compliance/audit-trail.ts`) so a Charter or ASIC review
 can reconstruct what rules applied at the time.
 
-## 6. Go-live checklist (before real client data enters production)
+## 8. Go-live checklist (before real client data enters production)
 
 The current build stores fact find data in browser localStorage and static
 demo files. That is fine for the sandbox, but before onboarding real
@@ -72,10 +102,12 @@ clients:
 
 - [ ] Move client records to a real database with encryption at rest and
       per-request access control.
-- [ ] Replace demo tokens with cryptographically random, single-client
-      tokens generated server-side; reduce `LINK_VALIDITY_DAYS` to 30.
-- [ ] Server-side session/authentication for the adviser dashboard (it is
-      currently unauthenticated).
+- [ ] Issue new links with `generateOnboardingToken()` (128-bit random)
+      and retire the short demo tokens; reduce `LINK_VALIDITY_DAYS` to 30.
+- [ ] Move login throttling to a shared store (e.g. Upstash) so limits
+      apply across all serverless instances.
+- [ ] Multi-adviser accounts with per-user credentials, MFA and SSO for
+      firm-scale deployments (single shared adviser credential today).
 - [ ] Extend the audit trail to log data access, not just compliance
       actions, and persist it server-side.
 - [ ] Define a retention and deletion policy (APP 11) and a client access /
@@ -85,7 +117,7 @@ clients:
 - [ ] Review Anthropic and ElevenLabs data processing terms for handling of
       voice and transcript data.
 
-## 7. Reporting a concern
+## 9. Reporting a concern
 
 Suspected data exposure or a vulnerability: contact Brad Lonergan
 immediately, rotate affected keys in Vercel, and record the event in the

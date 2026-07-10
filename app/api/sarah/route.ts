@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { requireOnboardingTokenHeader } from "@/lib/security/onboarding-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -162,6 +163,9 @@ REMEMBER: never output any dashes, asterisks, bullets, or markdown. Plain natura
 };
 
 export async function POST(req: Request) {
+  const denied = requireOnboardingTokenHeader(req);
+  if (denied) return denied;
+
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...args: unknown[]) => console.log(`[sarah:${reqId}]`, ...args);
   const err = (...args: unknown[]) => console.error(`[sarah:${reqId}]`, ...args);

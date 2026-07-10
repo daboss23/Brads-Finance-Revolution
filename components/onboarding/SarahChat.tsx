@@ -56,6 +56,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
   const rafRef = useRef<number | null>(null);
 
   const { isRecording, isTranscribing, error: recorderError, toggle } = useAudioRecorder(
+    token,
     (text) => {
       setInput((prev) => (prev ? `${prev} ${text}` : text));
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -114,7 +115,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     try {
       const res = await fetch("/api/sarah/voice", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-onboarding-token": token ?? "" },
         body: JSON.stringify({ text: cleaned }),
       });
 
@@ -217,7 +218,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     try {
       const res = await fetch("/api/sarah", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-onboarding-token": token ?? "" },
         body: JSON.stringify({ messages: apiMessages, clientName }),
       });
 

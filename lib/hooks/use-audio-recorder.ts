@@ -9,7 +9,10 @@ const SPEECH_RMS_THRESHOLD = 0.025;
 const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 1200;
 const TRANSCRIPT_REVEAL_DELAY_MS = 350;
 
-export function useAudioRecorder(onTranscript: (text: string) => void) {
+export function useAudioRecorder(
+  token: string | undefined,
+  onTranscript: (text: string) => void,
+) {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -161,7 +164,11 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
             `audio.${blobType.includes("mp4") ? "mp4" : "webm"}`
           );
           console.log("[recorder] posting blob to /api/transcribe…");
-          const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+          const res = await fetch("/api/transcribe", {
+            method: "POST",
+            headers: { "x-onboarding-token": token ?? "" },
+            body: fd,
+          });
           console.log("[recorder] /api/transcribe status:", res.status);
           const data = (await res.json().catch(() => null)) as
             | { text?: string; error?: string }

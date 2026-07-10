@@ -1,3 +1,4 @@
+import { requireOnboardingTokenHeader } from "@/lib/security/onboarding-access";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -7,6 +8,9 @@ const ELEVEN_TTS_URL = (voiceId: string) =>
 const MODEL_ID = "eleven_turbo_v2_5";
 
 export async function POST(req: Request) {
+  const denied = requireOnboardingTokenHeader(req);
+  if (denied) return denied;
+
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...a: unknown[]) => console.log(`[sarah-voice:${reqId}]`, ...a);
   const err = (...a: unknown[]) => console.error(`[sarah-voice:${reqId}]`, ...a);

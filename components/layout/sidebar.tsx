@@ -14,6 +14,7 @@ import {
   Vault,
   Settings,
   Menu,
+  LogOut,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,16 @@ function NavLinks({
 function BradProfile() {
   return (
     <div className="flex items-center gap-3 px-2.5">
+      <form action="/api/auth/logout" method="POST" className="order-last">
+        <button
+          type="submit"
+          aria-label="Sign out"
+          title="Sign out"
+          className="grid size-8 place-items-center rounded-lg border border-transparent text-muted-foreground/55 transition hover:border-gold/25 hover:text-gold"
+        >
+          <LogOut className="size-4" />
+        </button>
+      </form>
       <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-gradient-to-b from-gold/20 to-gold/5">
         <span className="text-[12px] font-bold text-gold tracking-tight">BL</span>
         <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[hsl(220_20%_4%)] bg-success" />

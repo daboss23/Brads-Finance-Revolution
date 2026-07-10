@@ -48,3 +48,36 @@ export function validateOnboardingToken(token: string): OnboardingAccess {
   if (isLinkExpired(link)) return { ok: false, reason: "expired" };
   return { ok: true, link };
 }
+
+export const ONBOARDING_TOKEN_HEADER = "x-onboarding-token";
+
+// Cryptographically random link tokens: 128 bits from the platform CSPRNG,
+// base64url encoded. Use this for every new fact find link instead of the
+// short human-picked demo tokens. Server-side only.
+export function generateOnboardingToken(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+// API guard for the client-facing Sarah endpoints: without a valid fact
+// find token in the request header, no AI, voice or transcription calls run.
+// Returns a Response to send on failure, or null when access is allowed.
+export function requireOnboardingTokenHeader(req: Request): Response | null {
+  const token = req.headers.get(ONBOARDING_TOKEN_HEADER) ?? "";
+  const access = validateOnboardingToken(token);
+  if (!access.ok) {
+    console.log(
+      JSON.stringify({
+        type: "security",
+        event: "api-token-denied",
+        at: new Date().toISOString(),
+        reason: access.reason,
+      }),
+    );
+    return Response.json({ error: "A valid session link is required." }, { status: 401 });
+  }
+  return null;
+}
