@@ -1,6 +1,6 @@
+import { IntelligenceEngine } from "@/components/dashboard/IntelligenceEngine";
 import {
   AgentActivityStrip,
-  ClientProgressEngine,
   DashboardHeader,
   FlowReadingCard,
   MetricCard,
@@ -35,7 +35,7 @@ export default function DashboardPage() {
               <PriorityQueue items={dashboard.priorityQueue} />
             </div>
             <div className="order-1 xl:order-1 2xl:order-2">
-              <ClientProgressEngine
+              <IntelligenceEngine
                 stages={dashboard.workflowStages}
                 totalFilesInFlow={dashboard.totalFilesInFlow}
                 averageTimeInFlow={dashboard.averageTimeInFlow}

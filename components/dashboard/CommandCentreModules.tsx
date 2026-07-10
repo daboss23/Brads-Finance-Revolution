@@ -4,11 +4,7 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  CheckCircle2,
-  ChevronRight,
-  ClipboardList,
   FileSignature,
-  Mail,
   Network,
   Orbit,
   PenLine,
@@ -46,17 +42,6 @@ const metricIcons: Record<string, IconComponent> = {
   "ready-meeting": UserCheck,
   "ready-soa": FileSignature,
   "needs-attention": AlertTriangle,
-};
-
-const stageIcons: Record<string, IconComponent> = {
-  "link-sent": Mail,
-  discovery: ClipboardList,
-  "sarah-complete": CheckCircle2,
-  "beacon-structured": RadioTower,
-  "guardian-check": ShieldCheck,
-  "scribe-prep": PenLine,
-  "orion-evidence": Orbit,
-  "atlas-soa": FileSignature,
 };
 
 const agentIcons: Record<AgentActivityItem["name"], IconComponent> = {
@@ -318,186 +303,6 @@ export function MetricCard({ metric }: { metric: DashboardMetric }) {
         {metric.trend}
       </p>
     </GlowPanel>
-  );
-}
-
-export function ClientProgressEngine({
-  stages,
-  totalFilesInFlow,
-  averageTimeInFlow,
-  flowVelocity,
-  conversionToMeeting,
-}: {
-  stages: WorkflowStage[];
-  totalFilesInFlow: number;
-  averageTimeInFlow: string;
-  flowVelocity: string;
-  conversionToMeeting: string;
-}) {
-  return (
-    <GlowPanel
-      eyebrow="System Core"
-      title="Intelligence Flow"
-      variant="emphasis"
-      className="min-h-[548px]"
-      action={
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-success">
-          <span className="status-live size-1.5 rounded-full bg-success text-success" />
-          Live
-        </div>
-      }
-    >
-      <p className="mt-3 max-w-[440px] text-[12px] leading-5 text-muted-foreground/70">
-        Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS
-        carry each file through to signed advice.
-      </p>
-
-      <div className="relative mt-5 min-h-[500px] overflow-hidden rounded-2xl border border-gold/[0.08] bg-black/20 px-3 py-4 md:min-h-[560px]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--gold)/0.1),transparent_36%),radial-gradient(circle_at_54%_42%,hsl(var(--teal-accent)/0.07),transparent_32%)]" />
-        <div className="engine-energy-haze pointer-events-none absolute left-1/2 top-1/2 hidden size-[410px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14] md:block" />
-        <div className="engine-energy pointer-events-none absolute left-1/2 top-1/2 hidden size-[324px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
-        <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 hidden size-[306px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.16] md:block" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-accent/[0.1] md:block" />
-        <div className="engine-wave pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
-        <div className="engine-wave engine-wave-late pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
-
-        {arrowPositions.map((position) => (
-          <ChevronRight
-            key={position}
-            className={cn(
-              "pointer-events-none absolute hidden size-4 text-gold/[0.38] md:block",
-              position,
-            )}
-          />
-        ))}
-
-        <div className="relative z-10 mx-auto grid max-w-[280px] justify-items-center pt-4 md:absolute md:left-1/2 md:top-1/2 md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:pt-0">
-          <div className="dashboard-engine-core grid size-48 place-items-center rounded-full border border-gold/[0.3] bg-[radial-gradient(circle_at_32%_24%,hsl(46_85%_92%/0.22),transparent_26%),radial-gradient(circle_at_62%_48%,hsl(var(--gold)/0.32),transparent_32%),radial-gradient(circle_at_50%_88%,hsl(var(--teal-accent)/0.2),transparent_38%),radial-gradient(circle_at_center,hsl(var(--teal-accent)/0.12),hsl(220_20%_6%/0.94)_64%)] shadow-[inset_0_1px_0_hsl(44_80%_90%/0.25),inset_0_-14px_28px_-16px_hsl(var(--teal-accent)/0.25),0_0_54px_-8px_hsl(var(--gold)/0.6),0_0_60px_-14px_hsl(var(--teal-accent)/0.45)]">
-            <div className="text-center">
-              <div className="mx-auto grid size-10 place-items-center rounded-full border border-gold/30 bg-black/30 text-gold shadow-[0_0_18px_-4px_hsl(var(--gold)/0.7)]">
-                <Sparkles className="size-5" />
-              </div>
-              <p className="mt-2.5 text-[20px] font-semibold leading-none text-foreground">
-                Sarah
-              </p>
-              <p className="mt-1 cmd-label text-muted-foreground/72">
-                Client Discovery
-              </p>
-              <div className="mx-auto mt-2.5 w-fit rounded-lg border border-gold/25 bg-black/30 px-3 py-1.5 shadow-[inset_0_1px_0_hsl(44_80%_90%/0.1)]">
-                <p className="cmd-label text-muted-foreground/52">In flow</p>
-                <p className="mt-0.5 text-[20px] font-semibold leading-none text-foreground tabular-nums">
-                  {totalFilesInFlow}
-                </p>
-                <div className="mx-auto mt-1.5 flex h-2 items-end justify-center gap-[3px]" aria-hidden>
-                  {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
-                    <span
-                      key={bar}
-                      className="freq-bar h-full w-[2px] rounded-full bg-teal-accent/70"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-20 mt-6 grid gap-3 md:static md:mt-0 md:block">
-          {stages.map((stage, index) => (
-            <EngineStageNode
-              key={stage.id}
-              className={nodePositions[index]}
-              index={index + 1}
-              stage={stage}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.08] bg-black/[0.18] p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-center">
-        <EngineStat label="Average time in flow" value={averageTimeInFlow} tone="cyan" />
-        <EngineStat label="Flow velocity" value={flowVelocity} tone="emerald" />
-        <EngineStat label="Conversion to meeting" value={conversionToMeeting} tone="gold" />
-        <Link
-          href="/sarah"
-          className="inline-flex min-h-10 items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 text-[12px] font-medium text-muted-foreground/78 transition hover:border-gold/30 hover:text-gold"
-        >
-          View engine analytics
-          <ArrowRight className="size-3.5" />
-        </Link>
-      </div>
-    </GlowPanel>
-  );
-}
-
-function EngineStageNode({
-  stage,
-  index,
-  className,
-}: {
-  stage: WorkflowStage;
-  index: number;
-  className?: string;
-}) {
-  const Icon = stageIcons[stage.id] ?? Activity;
-
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border bg-[linear-gradient(165deg,hsl(46_80%_92%/0.06),transparent_30%),linear-gradient(180deg,hsl(220_16%_9%/0.55),hsl(220_20%_4%/0.6))] p-3 shadow-[inset_0_1px_0_hsl(44_70%_88%/0.14),0_16px_34px_-28px_hsl(0_0%_0%/0.95)] backdrop-blur-xl md:absolute md:z-20 md:w-40",
-        toneBorder[stage.tone],
-        stage.state === "active" && "dashboard-stage-active",
-        className,
-      )}
-    >
-      <div className="flex items-start gap-2.5">
-        <div
-          className={cn(
-            "relative grid size-9 shrink-0 place-items-center rounded-xl border",
-            toneBorder[stage.tone],
-            toneBg[stage.tone],
-            toneText[stage.tone],
-          )}
-        >
-          <Icon className="size-4" />
-          <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full border border-black/50 bg-card text-[10px] font-semibold text-foreground">
-            {stage.count}
-          </span>
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold text-muted-foreground/52 tabular-nums">
-              {index}
-            </span>
-            <p className="text-[10.5px] font-bold uppercase leading-4 tracking-[0.1em] text-foreground/90">
-              {stage.label}
-            </p>
-          </div>
-          <p className="mt-1 hidden text-[10.5px] leading-4 text-muted-foreground/68 lg:block">
-            {stage.description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EngineStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: DashboardTone;
-}) {
-  return (
-    <div className="border-white/[0.08] px-2 sm:border-r">
-      <p className="text-[11px] text-muted-foreground/58">{label}</p>
-      <p className={cn("mt-1 text-[16px] font-semibold tabular-nums", toneText[tone])}>
-        {value}
-      </p>
-    </div>
   );
 }
 
