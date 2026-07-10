@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { SarahChat } from "@/components/onboarding/SarahChat";
-import { getLinkByToken } from "@/lib/sarah-data";
+import { LinkUnavailable } from "@/components/onboarding/LinkUnavailable";
+import { validateOnboardingToken } from "@/lib/security/onboarding-access";
 import { markFactFindCompleted } from "@/lib/review-store";
 
 export default function OnboardingPage({
@@ -11,8 +12,14 @@ export default function OnboardingPage({
   params: { token: string };
 }) {
   const router = useRouter();
-  const link = getLinkByToken(params.token);
-  const clientName = link?.clientName ?? "there";
+  const access = validateOnboardingToken(params.token);
+
+  if (!access.ok) {
+    return <LinkUnavailable reason={access.reason} />;
+  }
+
+  const link = access.link;
+  const clientName = link.clientName;
 
   function handleComplete() {
     if (link?.clientId) markFactFindCompleted(link.clientId);

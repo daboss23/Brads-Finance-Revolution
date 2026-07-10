@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { SandboxBanner } from "@/components/system/SandboxBanner";
 
 const geist = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={cn(geist.variable, geistMono.variable, "font-sans antialiased")}>
+        <SandboxBanner />
         {children}
       </body>
     </html>
