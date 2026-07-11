@@ -1,6 +1,10 @@
 // In-memory store of completed Sarah fact finds, keyed by clientId.
-// Phase 1 mock: ephemeral per server instance. Real persistence will move
-// to a database when integrations come online.
+//
+// This module stays dependency-free so it can be imported from client
+// components (the compliance checker runs in the browser against the demo
+// data). Durable encrypted persistence lives in
+// lib/secure-store/fact-find-persistence.ts, which is server-only and
+// writes through this map.
 
 import type { SarahFactFind } from "./sarah-fact-find-schema";
 import { getDemoFactFind } from "./sarah-fact-find-demo";
@@ -22,6 +26,9 @@ function getStore(): GlobalStore {
   return g[STORE_KEY] as GlobalStore;
 }
 
+// In-memory write only. On the server, prefer persistFactFind from
+// lib/secure-store/fact-find-persistence.ts, which encrypts and stores
+// durably before updating this map.
 export function saveFactFind(entry: StoredFactFind): void {
   getStore().map.set(entry.clientId, entry);
   console.log(

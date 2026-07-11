@@ -1,4 +1,9 @@
-import { saveFactFind, getFactFind } from "@/lib/sarah-fact-find-store";
+import { getFactFind } from "@/lib/sarah-fact-find-store";
+import {
+  persistFactFind,
+  ensureFactFindsHydrated,
+} from "@/lib/secure-store/fact-find-persistence";
+import { EncryptionKeyMissingError } from "@/lib/secure-store";
 import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
 
 export const runtime = "nodejs";
@@ -32,12 +37,23 @@ export async function POST(req: Request) {
       );
     }
 
-    saveFactFind({
-      clientId,
-      token,
-      receivedAt: new Date().toISOString(),
-      data,
-    });
+    try {
+      await persistFactFind({
+        clientId,
+        token,
+        receivedAt: new Date().toISOString(),
+        data,
+      });
+    } catch (e) {
+      if (e instanceof EncryptionKeyMissingError) {
+        err("refused unencrypted write:", e.message);
+        return Response.json(
+          { error: "Server storage is not configured securely. Data was not saved." },
+          { status: 503 },
+        );
+      }
+      throw e;
+    }
 
     log("Sarah fact find received for", clientId, "via token", token);
     // Stub notification — wire to email/Slack when integrations come online.
@@ -56,6 +72,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  await ensureFactFindsHydrated();
   const url = new URL(req.url);
   const clientId = url.searchParams.get("clientId");
   if (!clientId) {

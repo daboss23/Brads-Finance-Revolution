@@ -410,6 +410,38 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             Shared only with your Newcastle Financial Services adviser. You can
             pause at any time and pick up where you left off.
           </p>
+
+          {/* APP 5 collection notice — Privacy Act 1988 (Cth) */}
+          <details className="mt-4 w-full max-w-[460px] text-left">
+            <summary className="cursor-pointer text-[12px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground">
+              How your personal information is collected and used
+            </summary>
+            <div className="mt-2 space-y-2 rounded-xl bg-foreground/[0.03] p-4 text-[12px] leading-relaxed text-muted-foreground/70">
+              <p>
+                Newcastle Financial Services (BMK Financial Services, AFSL
+                authorisation via Charter Financial Planning, AFSL 234665)
+                collects the personal and financial information you share in
+                this session to prepare your financial advice, meet legal
+                obligations under the Corporations Act 2001 (Cth), and
+                verify your identity where required.
+              </p>
+              <p>
+                Your information is encrypted in storage, is reviewed only by
+                your adviser and their support staff, and is disclosed only to
+                product providers you ask us to deal with, our licensee for
+                compliance purposes, or where the law requires it. It is not
+                sold or used for marketing without your consent.
+              </p>
+              <p>
+                You may request access to or correction of your information at
+                any time, or make a privacy complaint, by contacting Brad
+                Lonergan. If unresolved, you can contact the Office of the
+                Australian Information Commissioner (oaic.gov.au). Providing
+                information is optional, but without it we may not be able to
+                give you appropriate advice.
+              </p>
+            </div>
+          </details>
         </div>
       </div>
     );

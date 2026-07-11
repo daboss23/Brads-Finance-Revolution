@@ -71,6 +71,18 @@ export function logAudit(
   const store = load();
   store.entries.push(entry);
   save(store);
+  // Durable copy: append to the server's encrypted audit store. Fire and
+  // forget — localStorage keeps the UI instant, the server copy is the
+  // permanent record that survives browser and machine changes.
+  if (typeof window !== "undefined") {
+    void fetch("/api/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    }).catch(() => {
+      // Offline or backend down — the local copy still exists.
+    });
+  }
   return entry;
 }
 

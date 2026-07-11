@@ -10,6 +10,7 @@ import { CLIENTS, type SectionStatus } from "@/lib/data";
 import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getFactFind } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { sarahToReviewAnswers } from "@/lib/sarah-fact-find-schema";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_CONFIG } from "@/lib/data";
@@ -50,7 +51,7 @@ function sectionHasSarahData(
   return Object.values(fields).some((v) => v && v.trim() !== "");
 }
 
-export default function FactFindReviewPage({
+export default async function FactFindReviewPage({
   params,
 }: {
   params: { id: string };
@@ -59,6 +60,7 @@ export default function FactFindReviewPage({
   if (!client) notFound();
 
   const sampleAnswers = getClientAnswers(client.id);
+  await ensureFactFindsHydrated();
   const sarahEntry = getFactFind(client.id);
   const sarahAnswers = sarahEntry ? sarahToReviewAnswers(sarahEntry.data) : null;
 

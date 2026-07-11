@@ -9,6 +9,7 @@ import {
 import { buildClientAgentInput } from "@/lib/agents/client-input";
 import { runAgent } from "@/lib/agents/run-agent";
 import type { AgentId } from "@/lib/agents/types";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export async function POST(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  await ensureFactFindsHydrated();
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {

@@ -13,6 +13,7 @@ import {
 import { CLIENTS, STATUS_CONFIG } from "@/lib/data";
 import { getClientProfile } from "@/lib/client-profiles";
 import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { STRATEGY_LABELS } from "@/lib/forms";
 import { checkCompliance } from "@/lib/compliance/compliance-checker";
 import { snapshotsForStrategies } from "@/lib/soa/market-data";
@@ -21,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { SoaGeneratorRunner } from "@/components/soa/SoaGeneratorRunner";
 
-export default function GenerateSoaPage({
+export default async function GenerateSoaPage({
   params,
 }: {
   params: { id: string };
@@ -30,6 +31,7 @@ export default function GenerateSoaPage({
   if (!client) notFound();
 
   const readiness = getGenerationReadiness(client.id);
+  await ensureFactFindsHydrated();
   const factFind = getFactFindOrDemo(client.id);
   const profile = getClientProfile(client.id);
   const strategies = profile?.strategies ?? [];
