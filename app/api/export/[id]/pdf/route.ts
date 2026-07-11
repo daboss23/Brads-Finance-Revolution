@@ -4,6 +4,7 @@ import { CLIENTS } from "@/lib/data";
 import { FACT_FIND_SECTIONS, type FactFindSection } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getLogoPng } from "@/lib/export-logo";
+import { findClient } from "@/lib/data/client-repository";
 
 // ── Layout constants ──────────────────────────────────────────────────────────
 const PW = 595, PH = 842;          // A4 points
@@ -66,7 +67,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const clientMaybe = CLIENTS.find((c) => c.id === params.id);
+  const clientMaybe = await findClient(params.id);
   if (!clientMaybe) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const client = clientMaybe;
 

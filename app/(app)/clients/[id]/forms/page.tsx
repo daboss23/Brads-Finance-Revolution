@@ -8,9 +8,10 @@ import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistenc
 import { recommendStrategies } from "@/lib/strategy-recommender";
 import { ClientFormsWorkspace } from "@/components/forms/ClientFormsWorkspace";
 import { ClientTabs } from "@/components/clients/ClientTabs";
+import { findClient } from "@/lib/data/client-repository";
 
 export default async function FormsPage({ params }: { params: { id: string } }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   await ensureFactFindsHydrated();

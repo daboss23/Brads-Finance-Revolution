@@ -21,13 +21,14 @@ import { getGenerationReadiness } from "@/lib/soa/soa-generator";
 import { Badge } from "@/components/ui/badge";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { SoaGeneratorRunner } from "@/components/soa/SoaGeneratorRunner";
+import { findClient } from "@/lib/data/client-repository";
 
 export default async function GenerateSoaPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const readiness = getGenerationReadiness(client.id);

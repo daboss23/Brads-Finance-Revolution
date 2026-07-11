@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { ClientCompliancePanel } from "@/components/compliance/ClientCompliancePanel";
 import { AuditTimeline } from "@/components/compliance/AuditTimeline";
+import { findClient } from "@/lib/data/client-repository";
 
-export default function ClientCompliancePage({
+export default async function ClientCompliancePage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const initial = checkCompliance(client.id);

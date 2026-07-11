@@ -22,6 +22,7 @@ import { CLIENTS } from "@/lib/data";
 import { FACT_FIND_SECTIONS, type Field } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getLogoPng } from "@/lib/export-logo";
+import { findClient } from "@/lib/data/client-repository";
 
 // ── Colour constants (OOXML hex, no #) ────────────────────────────────────────
 const NAVY   = "0E2444";
@@ -204,7 +205,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const answers = getClientAnswers(client.id);

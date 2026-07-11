@@ -6,13 +6,14 @@ import { getClientProfile } from "@/lib/client-profiles";
 import { generateSoa, SoaGenerationError } from "@/lib/soa/soa-generator";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { SoaReviewView } from "@/components/soa/SoaReviewView";
+import { findClient } from "@/lib/data/client-repository";
 
-export default function ClientSoaPage({
+export default async function ClientSoaPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   let initial;

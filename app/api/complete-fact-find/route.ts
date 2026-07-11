@@ -4,7 +4,9 @@ import {
   ensureFactFindsHydrated,
 } from "@/lib/secure-store/fact-find-persistence";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
-import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
+import { updateRealClient } from "@/lib/clients/real-client-store";
+import { notifyAdviser } from "@/lib/notify";
+import { normalizeFactFind, type SarahFactFind } from "@/lib/sarah-fact-find-schema";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
         clientId,
         token,
         receivedAt: new Date().toISOString(),
-        data,
+        data: normalizeFactFind(data),
       });
     } catch (e) {
       if (e instanceof EncryptionKeyMissingError) {
@@ -59,8 +61,20 @@ export async function POST(req: Request) {
     }
 
     log("Sarah fact find received for", clientId, "via token", token);
-    // Stub notification — wire to email/Slack when integrations come online.
-    console.log(`[notify] Brad: fact find ready for client ${clientId}`);
+
+    // Move the client along the pipeline (real clients only; demo clients
+    // are static) and tell Brad the file is ready to review.
+    const completion = data.completionPercentage ?? 0;
+    await updateRealClient(clientId, {
+      status: completion >= 80 ? "ready-for-meeting" : "review-required",
+      progress: completion,
+      lastActivity: "Fact find completed",
+    }).catch((e) => err("client status update failed:", e));
+    await notifyAdviser(
+      `Fact find ready: ${clientId}`,
+      `A client has completed their Financial Discovery Session (${completion}% complete).\n\n` +
+        `Review it here: https://bmk-crm-revolution.vercel.app/clients/${clientId}/fact-find-review`,
+    );
 
     return Response.json({
       ok: true,

@@ -15,6 +15,7 @@ const PUBLIC_PREFIXES = [
   "/onboarding/",
   "/api/sarah",
   "/api/transcribe",
+  "/api/onboarding/",
   "/_next/",
   "/favicon.ico",
 ];

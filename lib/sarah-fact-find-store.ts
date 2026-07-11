@@ -6,7 +6,7 @@
 // lib/secure-store/fact-find-persistence.ts, which is server-only and
 // writes through this map.
 
-import type { SarahFactFind } from "./sarah-fact-find-schema";
+import { normalizeFactFind, type SarahFactFind } from "./sarah-fact-find-schema";
 import { getDemoFactFind } from "./sarah-fact-find-demo";
 
 export interface StoredFactFind {
@@ -49,7 +49,9 @@ export function getFactFind(clientId: string): StoredFactFind | undefined {
 // the recommender and form pre-fill have something to work with.
 export function getFactFindOrDemo(clientId: string): SarahFactFind | undefined {
   const live = getStore().map.get(clientId);
-  if (live) return live.data;
+  // Normalize on the way out so records saved by older builds (or
+  // interrupted sessions) always have every section present.
+  if (live) return normalizeFactFind(live.data);
   return getDemoFactFind(clientId);
 }
 

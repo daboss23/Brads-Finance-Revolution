@@ -1,3 +1,4 @@
+import { findClient } from "@/lib/data/client-repository";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -23,12 +24,12 @@ import {
   SoaGateClient,
 } from "@/components/compliance/SoaGateClient";
 
-export default function ClientDetailPage({
+export default async function ClientDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const completeSections = client.factFindSections.filter(

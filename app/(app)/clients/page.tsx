@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -71,7 +71,27 @@ export default function ClientsPage() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [createdLink, setCreatedLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", mobile: "", notes: "" });
+
+  // Load real client records from the encrypted store and merge ahead of
+  // the demo pipeline.
+  useEffect(() => {
+    void fetch("/api/clients")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { clients?: Client[] } | null) => {
+        if (data?.clients?.length) {
+          setClients((prev) => {
+            const known = new Set(prev.map((c) => c.id));
+            return [...data.clients!.filter((c) => !known.has(c.id)), ...prev];
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => {
     const byStatus =
@@ -120,17 +140,44 @@ export default function ClientsPage() {
     [clients],
   );
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name || !form.email || !form.mobile) return;
-    const newClient = buildNewClient(form.name, form.email, form.mobile, form.notes);
-    setClients((prev) => [newClient, ...prev]);
-    setSuccess(true);
-    setTimeout(() => {
-      setOpen(false);
-      setSuccess(false);
-      setForm({ name: "", email: "", mobile: "", notes: "" });
-    }, 1800);
+    if (!form.name || !form.email || !form.mobile || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        client?: Client;
+        onboardingPath?: string;
+        error?: string;
+      };
+      if (!data.ok || !data.client) {
+        setError(data.error ?? "Could not save the client. Try again.");
+        return;
+      }
+      setClients((prev) => [data.client!, ...prev]);
+      setCreatedLink(data.onboardingPath ? window.location.origin + data.onboardingPath : null);
+      setSuccess(true);
+    } catch {
+      setError("Could not reach the server. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function closeDialog() {
+    setOpen(false);
+    setSuccess(false);
+    setCreatedLink(null);
+    setCopied(false);
+    setError(null);
+    setForm({ name: "", email: "", mobile: "", notes: "" });
   }
 
   return (
@@ -304,14 +351,38 @@ export default function ClientsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           {success ? (
-            <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
+            <div className="flex flex-col items-center justify-center py-8 px-6 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 border border-success/30 mb-4">
                 <CheckCircle2 className="h-6 w-6 text-success" />
               </div>
               <p className="text-base font-semibold text-foreground">Client added</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {form.name} has been added to your pipeline.
+                {form.name} is in your pipeline. Send them their private
+                discovery link:
               </p>
+              {createdLink && (
+                <div className="mt-4 w-full">
+                  <div className="rounded-lg border border-gold/25 bg-black/25 px-3 py-2.5 text-[12.5px] text-foreground/85 break-all select-all">
+                    {createdLink}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(createdLink).then(() => setCopied(true));
+                    }}
+                    className="btn-gold mt-3 w-full rounded px-4 py-2 text-sm font-medium"
+                  >
+                    {copied ? "Copied" : "Copy link"}
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="mt-3 rounded border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+              >
+                Done
+              </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
@@ -356,6 +427,11 @@ export default function ClientsPage() {
                 </div>
               </div>
 
+              {error && (
+                <p className="mx-6 -mt-1 mb-2 rounded-lg bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
+                  {error}
+                </p>
+              )}
               <DialogFooter>
                 <button
                   type="button"
@@ -366,9 +442,10 @@ export default function ClientsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="btn-gold rounded px-4 py-2 text-sm font-medium transition-colors"
+                  disabled={saving}
+                  className="btn-gold rounded px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
                 >
-                  Add Client
+                  {saving ? "Saving…" : "Add Client"}
                 </button>
               </DialogFooter>
             </form>

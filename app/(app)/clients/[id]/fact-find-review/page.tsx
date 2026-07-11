@@ -21,6 +21,7 @@ import { EditableFactFindValue } from "@/components/fact-find-review/EditableFac
 import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { AgentIntelligencePanel } from "@/components/agents/AgentIntelligencePanel";
+import { findClient } from "@/lib/data/client-repository";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -56,7 +57,7 @@ export default async function FactFindReviewPage({
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const sampleAnswers = getClientAnswers(client.id);
