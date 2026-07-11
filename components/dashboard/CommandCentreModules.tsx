@@ -117,27 +117,6 @@ const priorityClasses: Record<PriorityLevel, string> = {
   low: "border-white/[0.12] bg-white/[0.05] text-muted-foreground",
 };
 
-const nodePositions = [
-  "md:left-1/2 md:top-0 md:-translate-x-1/2",
-  "md:right-[3%] md:top-[12%]",
-  "md:right-0 md:top-1/2 md:-translate-y-1/2",
-  "md:right-[3%] md:bottom-[10%]",
-  "md:left-1/2 md:bottom-0 md:-translate-x-1/2",
-  "md:left-[3%] md:bottom-[10%]",
-  "md:left-0 md:top-1/2 md:-translate-y-1/2",
-  "md:left-[3%] md:top-[12%]",
-];
-
-const arrowPositions = [
-  "right-[31%] top-[8%] rotate-[23deg]",
-  "right-[11%] top-[27%] rotate-[68deg]",
-  "right-[11%] bottom-[27%] rotate-[113deg]",
-  "right-[31%] bottom-[8%] rotate-[158deg]",
-  "left-[31%] bottom-[8%] rotate-[203deg]",
-  "left-[11%] bottom-[27%] rotate-[248deg]",
-  "left-[11%] top-[27%] rotate-[293deg]",
-  "left-[31%] top-[8%] rotate-[338deg]",
-];
 
 export function DashboardHeader({
   activeFiles,
@@ -341,6 +320,20 @@ export function ClientProgressEngine({
   flowVelocity: string;
   conversionToMeeting: string;
 }) {
+  const countFor = (...ids: string[]) =>
+    stages
+      .filter((stage) => ids.includes(stage.id))
+      .reduce((sum, stage) => sum + stage.count, 0);
+
+  // Five clear stages: the whole journey in one readable line.
+  const pipeline = [
+    { name: "Sarah", label: "Discovery", count: countFor("link-sent", "discovery"), detail: "Clients completing their Financial Discovery session" },
+    { name: "Beacon", label: "Structuring", count: countFor("beacon-structured", "sarah-complete"), detail: "Fact finds structured for adviser review" },
+    { name: "Guardian", label: "Compliance", count: countFor("guardian-check"), detail: "Best interests and risk screening" },
+    { name: "Scribe + Orion", label: "Evidence", count: countFor("scribe-prep", "orion-evidence"), detail: "Meeting briefs and evidence packs assembled" },
+    { name: "ATLAS", label: "SOA", count: countFor("atlas-soa"), detail: "Strategy synthesis and Statement of Advice drafting" },
+  ];
+
   return (
     <GlowPanel
       eyebrow="System Core"
@@ -354,72 +347,53 @@ export function ClientProgressEngine({
         </div>
       }
     >
-      <p className="mt-3 max-w-[440px] text-[12px] leading-5 text-muted-foreground/70">
-        Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS
-        carry each file through to signed advice.
-      </p>
-
-      <div className="depth-grid relative mt-5 min-h-[500px] overflow-hidden rounded-2xl border border-gold/[0.12] bg-black/30 px-3 py-4 shadow-[inset_0_2px_18px_hsl(220_25%_2%/0.75),inset_0_1px_0_hsl(44_70%_88%/0.07)] md:min-h-[560px]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--gold)/0.1),transparent_36%),radial-gradient(circle_at_54%_42%,hsl(var(--teal-accent)/0.07),transparent_32%)]" />
-        {/* glass dome over the chamber — top sheen + corner refraction */}
+      {/* Engine chamber — the orb owns the space */}
+      <div className="depth-grid relative mt-4 flex min-h-[380px] items-center justify-center overflow-hidden rounded-2xl border border-gold/[0.12] bg-black/30 shadow-[inset_0_2px_18px_hsl(220_25%_2%/0.75),inset_0_1px_0_hsl(44_70%_88%/0.07)]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--gold)/0.1),transparent_40%)]" />
         <div className="glass-grain pointer-events-none absolute inset-0 z-30 rounded-2xl" />
-        <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-[linear-gradient(168deg,hsl(46_85%_93%/0.05),transparent_22%),radial-gradient(60%_30%_at_50%_0%,hsl(46_85%_93%/0.045),transparent_70%)]" />
         <span className="pointer-events-none absolute inset-x-10 top-0 z-30 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14] md:block" />
-        <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 hidden size-[306px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.16] md:block" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-accent/[0.1] md:block" />
-        <div className="engine-wave pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
-        <div className="engine-wave engine-wave-late pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14]" />
+        <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 size-[306px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.16]" />
 
-        {arrowPositions.map((position) => (
-          <ChevronRight
-            key={position}
-            className={cn(
-              "pointer-events-none absolute hidden size-4 text-gold/[0.38] md:block",
-              position,
-            )}
-          />
-        ))}
-
-        <div className="relative z-10 mx-auto grid max-w-[280px] justify-items-center pt-4 md:absolute md:left-1/2 md:top-1/2 md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:pt-0">
-          <div className="relative grid size-56 place-items-center">
-            {/* 3D Fusion Core — same engine as Sarah's live session */}
-            <EngineCore3D className="pointer-events-none absolute left-1/2 top-1/2 size-[340px] -translate-x-1/2 -translate-y-1/2" />
-            <div className="relative z-10 text-center">
-              <p className="text-[20px] font-semibold leading-none text-foreground drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.9)]">
-                Sarah
-              </p>
-              <p className="mt-1 cmd-label text-muted-foreground/72">
-                Client Discovery
-              </p>
-              <div className="mx-auto mt-2.5 w-fit rounded-lg border border-gold/25 bg-black/45 px-3 py-1.5 shadow-[inset_0_1px_0_hsl(44_80%_90%/0.1)] backdrop-blur-sm">
-                <p className="cmd-label text-muted-foreground/52">In flow</p>
-                <p className="mt-0.5 text-[20px] font-semibold leading-none text-foreground tabular-nums">
-                  {totalFilesInFlow}
-                </p>
-                <div className="mx-auto mt-1.5 flex h-2 items-end justify-center gap-[3px]" aria-hidden>
-                  {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
-                    <span
-                      key={bar}
-                      className="freq-bar h-full w-[2px] rounded-full bg-teal-accent/70"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="relative grid size-60 place-items-center">
+          <EngineCore3D className="pointer-events-none absolute left-1/2 top-1/2 size-[360px] -translate-x-1/2 -translate-y-1/2" />
+          <div className="relative z-10 text-center">
+            <p className="cmd-label text-gold/85">Intelligence Engine</p>
+            <p className="mt-2 text-[30px] font-semibold leading-none text-foreground tabular-nums drop-shadow-[0_2px_12px_hsl(220_25%_2%/0.95)]">
+              {totalFilesInFlow}
+            </p>
+            <p className="mt-1 text-[12px] text-foreground/70 drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.9)]">
+              active files
+            </p>
           </div>
         </div>
+      </div>
 
-        <div className="relative z-20 mt-6 grid gap-3 md:static md:mt-0 md:block">
-          {stages.map((stage, index) => (
-            <EngineStageNode
-              key={stage.id}
-              className={nodePositions[index]}
-              index={index + 1}
-              stage={stage}
-            />
-          ))}
-        </div>
+      {/* The pipeline — five stages, one glance */}
+      <div className="mt-4 flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-0">
+        {pipeline.map((stage, index) => (
+          <div key={stage.name} className="contents">
+            {index > 0 && (
+              <div className="hidden h-px min-w-3 flex-1 bg-[linear-gradient(90deg,hsl(var(--gold)/0.05),hsl(var(--gold)/0.4),hsl(var(--gold)/0.05))] md:block" />
+            )}
+            <div
+              title={stage.detail}
+              className="glass-chip group flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition hover:border-gold/30 md:flex-col md:items-center md:justify-center md:gap-0.5 md:px-4 md:text-center"
+            >
+              <div className="md:contents">
+                <p className="text-[13px] font-semibold leading-tight text-foreground whitespace-nowrap">
+                  {stage.name}
+                </p>
+                <p className="cmd-label mt-0.5 text-muted-foreground/60">
+                  {stage.label}
+                </p>
+              </div>
+              <p className="text-[12px] font-medium text-gold/90 tabular-nums whitespace-nowrap md:mt-1">
+                {stage.count} {stage.count === 1 ? "file" : "files"}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="mt-4 grid gap-3 rounded-2xl glass-chip p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-center">
@@ -435,57 +409,6 @@ export function ClientProgressEngine({
         </Link>
       </div>
     </GlowPanel>
-  );
-}
-
-function EngineStageNode({
-  stage,
-  index,
-  className,
-}: {
-  stage: WorkflowStage;
-  index: number;
-  className?: string;
-}) {
-  const Icon = stageIcons[stage.id] ?? Activity;
-
-  return (
-    <div
-      className={cn(
-        "glass-card rounded-2xl p-3 transition-shadow duration-300 md:absolute md:z-20 md:w-40",
-        toneBorder[stage.tone],
-        stage.state === "active" && "dashboard-stage-active",
-        className,
-      )}
-    >
-      <div className="flex items-start gap-2.5">
-        <div
-          className={cn(
-            "glass-orb relative grid size-9 shrink-0 place-items-center rounded-xl",
-            toneBorder[stage.tone],
-            toneText[stage.tone],
-          )}
-        >
-          <Icon className="size-4" />
-          <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full border border-black/50 bg-card text-[10px] font-semibold text-foreground">
-            {stage.count}
-          </span>
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold text-muted-foreground/52 tabular-nums">
-              {index}
-            </span>
-            <p className="text-[10.5px] font-bold uppercase leading-4 tracking-[0.1em] text-foreground/90">
-              {stage.label}
-            </p>
-          </div>
-          <p className="mt-1 hidden text-[10.5px] leading-4 text-muted-foreground/68 lg:block">
-            {stage.description}
-          </p>
-        </div>
-      </div>
-    </div>
   );
 }
 
