@@ -1,5 +1,9 @@
-// Shared GLSL snippets for the plasma orb.
-// Simplex 3D noise (Ashima / Stefan Gustavson) + fbm + curl approximation.
+// GLSL for Sarah's Fusion Core.
+//
+// Two plasma poles — molten orange fire and electric blue energy — collide
+// inside one sphere at a rotating white-hot fusion seam. A frequency ring
+// of spectrum bands circles the equator and reacts to Sarah's state.
+// Everything runs on the GPU; the CPU only eases uniforms between states.
 
 export const NOISE_GLSL = /* glsl */ `
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -61,8 +65,6 @@ float fbm(vec3 p) {
   return v;
 }
 
-// Lightweight curl approximation: two snoise samples, take perpendicular gradient.
-// Much cheaper than full 6-sample curl noise.
 vec3 curlNoise(vec3 p) {
   float n1 = snoise(p + vec3(31.41, 0.0, 0.0));
   float n2 = snoise(p + vec3(0.0, 17.21, 0.0));
@@ -71,7 +73,9 @@ vec3 curlNoise(vec3 p) {
 }
 `;
 
-// Plasma shell: noise-displaced sphere with fresnel rim + animated emissive plasma surface.
+// ── Fusion shell ─────────────────────────────────────────────────────────────
+// Noise-displaced sphere. The fragment shader owns the dual-pole flame field.
+
 export const PLASMA_VERT = /* glsl */ `
 ${NOISE_GLSL}
 
@@ -81,17 +85,19 @@ uniform float uSpeed;
 
 varying vec3 vNormal;
 varying vec3 vViewDir;
-varying vec3 vWorldPos;
+varying vec3 vObjPos;
 
 void main() {
   vec3 pos = position;
   float t = uTime * uSpeed * 0.25;
-  float n1 = fbm(pos * 1.8 + vec3(0.0, t, 0.0));
-  float disp = n1 * uDisplacement;
+  // Flame-biased displacement: noise scrolls along the surface normal's
+  // vertical component so peaks stretch upward like flame licks.
+  float n1 = fbm(pos * 1.8 + vec3(0.0, -t * 1.6, 0.0));
+  float lick = fbm(pos * 3.2 + vec3(t * 0.4, -t * 2.2, 0.0)) * max(normal.y, 0.0);
+  float disp = (n1 + lick * 0.6) * uDisplacement;
   vec3 displaced = pos + normal * disp;
   vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
-  vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
-  vWorldPos = worldPos.xyz;
+  vObjPos = pos;
   vNormal = normalize(normalMatrix * normal);
   vViewDir = normalize(-mvPosition.xyz);
   gl_Position = projectionMatrix * mvPosition;
@@ -103,73 +109,77 @@ ${NOISE_GLSL}
 
 uniform float uTime;
 uniform float uSpeed;
-uniform vec3 uColorA;
-uniform vec3 uColorB;
-uniform vec3 uColorC;
+uniform vec3 uWarmDeep;   // molten core orange
+uniform vec3 uWarmBright; // fire highlight
+uniform vec3 uCoolDeep;   // deep electric blue
+uniform vec3 uCoolBright; // plasma cyan highlight
+uniform vec3 uAxis;       // fusion axis in object space (rotates on CPU)
 uniform float uIntensity;
-uniform float uHueShift;
+uniform float uSeamHeat;  // how hot the collision seam burns
 
 varying vec3 vNormal;
 varying vec3 vViewDir;
-varying vec3 vWorldPos;
-
-vec3 cyclePalette(float t) {
-  vec3 a = vec3(0.0, 0.86, 1.0);
-  vec3 b = vec3(0.47, 0.86, 1.0);
-  vec3 c = vec3(0.7, 0.47, 1.0);
-  vec3 d = vec3(1.0, 1.0, 1.0);
-  vec3 e = vec3(1.0, 0.84, 0.4);
-  float ft = fract(t);
-  float seg = ft * 5.0;
-  int i = int(floor(seg));
-  float u = fract(seg);
-  vec3 c0;
-  vec3 c1;
-  if (i == 0) { c0 = a; c1 = b; }
-  else if (i == 1) { c0 = b; c1 = c; }
-  else if (i == 2) { c0 = c; c1 = d; }
-  else if (i == 3) { c0 = d; c1 = e; }
-  else { c0 = e; c1 = a; }
-  return mix(c0, c1, u);
-}
+varying vec3 vObjPos;
 
 void main() {
   vec3 N = normalize(vNormal);
   vec3 V = normalize(vViewDir);
   float fres = pow(1.0 - max(dot(N, V), 0.0), 2.5);
 
-  float t = uTime * uSpeed * 0.35;
-  float n = fbm(vWorldPos * 2.2 + vec3(t, t * 0.7, -t));
-  float veins = smoothstep(0.4, 0.95, abs(n) * 1.35);
+  float t = uTime * uSpeed;
+  vec3 P = normalize(vObjPos);
 
-  vec3 baseA = mix(uColorA, uColorB, smoothstep(-0.4, 0.6, n));
-  vec3 hueShifted = mix(baseA, cyclePalette(uTime * 0.06 + n * 0.2), uHueShift);
-  vec3 emissive = hueShifted * (0.4 + veins * 1.2) * uIntensity;
+  // Pole field: -1 = fully cool, +1 = fully warm; noise makes the frontier
+  // ragged so the two plasmas interlock like flames, not a painted line.
+  float pole = dot(P, normalize(uAxis));
+  float frontier = fbm(vObjPos * 2.6 + vec3(0.0, -t * 0.55, t * 0.2)) * 0.55;
+  float f = clamp(pole + frontier, -1.0, 1.0);
+  float warmMix = smoothstep(-0.25, 0.25, f);
 
-  // Gold vein highlights: only on the brightest plasma peaks, so the orb
-  // stays cyan/blue overall with warm glints where energy concentrates.
-  vec3 gold = vec3(1.0, 0.78, 0.32);
-  float goldMask = smoothstep(0.62, 0.95, veins) * (0.7 + 0.3 * sin(uTime * 0.8));
-  emissive = mix(emissive, gold * (0.6 + veins * 0.9) * uIntensity, goldMask * 0.55);
+  // Flame body: vertical-scrolling turbulence per pole. Veins are kept
+  // thin and sharp so most of the sphere stays deep and dark — the flames
+  // read as filaments of fire, not a wash of light.
+  float warmFlame = fbm(vObjPos * 2.4 + vec3(t * 0.3, -t * 1.5, 0.0));
+  float coolFlame = fbm(vObjPos * 2.8 + vec3(-t * 0.4, -t * 1.1, t * 0.5));
+  float warmVeins = smoothstep(0.34, 0.9, abs(warmFlame) * 1.5);
+  float coolVeins = smoothstep(0.34, 0.9, abs(coolFlame) * 1.5);
 
-  vec3 rim = uColorC * fres * (1.1 + uIntensity * 0.35);
-  // Subtle gold accent on the rim as well.
-  rim += gold * fres * 0.18 * goldMask;
+  vec3 warm = mix(uWarmDeep, uWarmBright, warmVeins);
+  vec3 cool = mix(uCoolDeep, uCoolBright, coolVeins);
+  vec3 body = mix(cool, warm, warmMix);
+  float veins = mix(coolVeins, warmVeins, warmMix);
+
+  // Fusion seam: a tight ribbon where the poles collide, flickering hot.
+  float seam = 1.0 - abs(f);
+  seam = pow(smoothstep(0.72, 1.0, seam), 2.4);
+  float seamFlicker = 0.7 + 0.3 * snoise(vec3(vObjPos.xy * 4.0, t * 1.8));
+  vec3 seamColor = mix(vec3(1.0, 0.9, 0.72), vec3(0.8, 0.93, 1.0), 0.5 - 0.5 * pole);
+
+  vec3 emissive = body * (0.22 + veins * 1.35) * uIntensity
+                + seamColor * seam * seamFlicker * uSeamHeat * uIntensity * 0.8;
+
+  // Rim light follows the pole underneath it.
+  vec3 rimColor = mix(uCoolBright, uWarmBright, warmMix);
+  vec3 rim = rimColor * fres * (0.55 + uIntensity * 0.25)
+           + seamColor * fres * seam * 0.35;
 
   vec3 color = emissive + rim;
-  // Soft tone-mapping so bright states don't blow to pure white.
-  color = color / (1.0 + color * 0.4);
-  float alpha = clamp(0.32 + fres * 0.7 + veins * 0.5, 0.0, 1.0);
+  color = color / (1.0 + color * 0.55);
+  float alpha = clamp(0.2 + fres * 0.5 + veins * 0.62 + seam * 0.45, 0.0, 1.0);
   gl_FragColor = vec4(color, alpha);
 }
 `;
 
-// Atmosphere halo: backside sphere, inverse fresnel for soft outer bloom.
+// ── Atmosphere halo ──────────────────────────────────────────────────────────
+// Backside sphere; halo colour blends warm/cool around the fusion axis.
+
 export const ATMOSPHERE_VERT = /* glsl */ `
 varying vec3 vNormal;
 varying vec3 vViewDir;
+varying vec3 vObjPos;
 void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vObjPos = position;
   vNormal = normalize(normalMatrix * normal);
   vViewDir = normalize(-mv.xyz);
   gl_Position = projectionMatrix * mv;
@@ -177,28 +187,29 @@ void main() {
 `;
 
 export const ATMOSPHERE_FRAG = /* glsl */ `
-uniform vec3 uColor;
+uniform vec3 uWarm;
+uniform vec3 uCool;
+uniform vec3 uAxis;
 uniform float uIntensity;
 varying vec3 vNormal;
 varying vec3 vViewDir;
+varying vec3 vObjPos;
 void main() {
-  // Atmosphere is rendered on the BackSide. For a back-facing surface the
-  // original geometry normal points away from the camera, so dot(N,V) goes
-  // negative. Using abs() means the halo is brightest at the silhouette
-  // (where the dot product crosses zero) and falls off both at the rim
-  // and toward the back centre.
   float fres = pow(1.0 - abs(dot(normalize(vNormal), normalize(vViewDir))), 3.0);
-  vec3 col = uColor * fres * uIntensity * 0.6;
+  float warmMix = smoothstep(-0.5, 0.5, dot(normalize(vObjPos), normalize(uAxis)));
+  vec3 col = mix(uCool, uWarm, warmMix) * fres * uIntensity * 0.6;
   gl_FragColor = vec4(col, fres * 0.55);
 }
 `;
 
-// Core singularity: small dark sphere with subtle rim glow.
+// ── Core singularity ─────────────────────────────────────────────────────────
+
 export const CORE_FRAG = /* glsl */ `
 uniform vec3 uRim;
 uniform float uIntensity;
 varying vec3 vNormal;
 varying vec3 vViewDir;
+varying vec3 vObjPos;
 void main() {
   float fres = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewDir)), 0.0), 2.2);
   vec3 dark = vec3(0.02, 0.02, 0.05);
@@ -207,101 +218,72 @@ void main() {
 }
 `;
 
-// Filament system: each vertex carries (tendrilId, pathU) attributes.
-// Vertex shader places points on a curl-noise-displaced path radiating outward from origin.
-export const FILAMENT_VERT = /* glsl */ `
+// ── Frequency ring ───────────────────────────────────────────────────────────
+// Spectrum-analyzer bands orbiting the equator. Each point belongs to a band
+// (aBand) and a rung within it (aRung); bands rise and fall with layered
+// noise, mirrored above and below the equator. uAudio drives amplitude.
+
+export const FREQ_VERT = /* glsl */ `
 ${NOISE_GLSL}
 
-attribute float aPathU;
-attribute float aTendril;
+attribute float aBand;
+attribute float aRung;
+attribute float aSide;
 
 uniform float uTime;
-uniform float uSpeed;
-uniform float uReach;
-uniform float uCoreRadius;
-uniform float uIntensity;
-uniform float uCurlAmount;
+uniform float uAudio;
+uniform float uRadius;
 uniform float uPixelSize;
 
-varying float vTendril;
-varying float vAlpha;
+varying float vHeat;
+varying float vFade;
 
 void main() {
-  // Stable per-tendril seed.
-  float seed = aTendril * 13.137;
-  float theta = aTendril * 2.39996323;
-  float phi = mod(seed * 7.71, 3.14159265);
-  vec3 dir = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
+  float bandAngle = aBand * 6.2831853;
+  // Layered pseudo-spectrum: three sine/noise octaves per band so motion
+  // reads as frequency data, not a uniform wave.
+  float s1 = snoise(vec3(aBand * 7.3, uTime * 1.35, 0.0));
+  float s2 = snoise(vec3(aBand * 19.1, uTime * 2.6, 4.7));
+  float wave = sin(bandAngle * 3.0 + uTime * 2.2);
+  float level = clamp(0.5 + 0.45 * s1 + 0.3 * s2 + 0.2 * wave, 0.05, 1.3);
+  level *= uAudio;
 
-  // Radius along filament: starts at core edge, extends to reach.
-  float r = mix(uCoreRadius, uCoreRadius + uReach, aPathU);
+  // Rung climbs the band; points above the level fade out.
+  float h = aRung * 0.5 * level;
+  vFade = 1.0 - smoothstep(0.75, 1.0, aRung);
 
-  // Sample curl noise to push the filament off the radial line organically.
-  float t = uTime * uSpeed * 0.25;
-  vec3 sample1 = dir * (r * 0.5) + vec3(seed, t, 0.0);
-  vec3 offset = curlNoise(sample1 * 0.8) * uCurlAmount * aPathU;
+  float a = bandAngle + uTime * 0.12;
+  vec3 pos = vec3(cos(a) * uRadius, h * aSide, sin(a) * uRadius);
 
-  // Add a longitudinal flicker so the filament breathes along its length.
-  float flicker = snoise(vec3(aTendril * 0.7, uTime * uSpeed * 0.6 + aPathU * 3.5, 0.0));
-  offset *= 1.0 + flicker * 0.35;
-
-  vec3 worldPos = dir * r + offset;
-
-  vec4 mv = modelViewMatrix * vec4(worldPos, 1.0);
+  vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
-  // Sprite size: thicker near root, thinner at tip; pulse over time.
-  float pulse = 0.6 + 0.4 * sin(uTime * uSpeed * 2.0 + aTendril * 1.7);
-  float taper = mix(2.4, 0.4, smoothstep(0.0, 1.0, aPathU));
-  gl_PointSize = taper * pulse * uPixelSize * (300.0 / -mv.z);
+  gl_PointSize = (1.6 - aRung * 0.9) * uPixelSize * (34.0 / -mv.z);
 
-  vTendril = aTendril;
-  // Alpha falls off near tip; brighter when uIntensity is high.
-  vAlpha = (1.0 - aPathU * 0.85) * (0.6 + uIntensity * 0.6);
+  // Heat: which pole this band sits over (x axis = warm side).
+  vHeat = smoothstep(-0.7, 0.7, cos(a));
 }
 `;
 
-export const FILAMENT_FRAG = /* glsl */ `
-uniform vec3 uColorBright;
-uniform vec3 uColorDeep;
-uniform float uHueShift;
-uniform float uTime;
-varying float vTendril;
-varying float vAlpha;
-
-vec3 cyclePalette(float t) {
-  vec3 a = vec3(0.4, 0.86, 1.0);
-  vec3 b = vec3(0.7, 0.47, 1.0);
-  vec3 c = vec3(1.0, 1.0, 1.0);
-  vec3 d = vec3(1.0, 0.84, 0.4);
-  float ft = fract(t);
-  float seg = ft * 4.0;
-  int i = int(floor(seg));
-  float u = fract(seg);
-  vec3 c0;
-  vec3 c1;
-  if (i == 0) { c0 = a; c1 = b; }
-  else if (i == 1) { c0 = b; c1 = c; }
-  else if (i == 2) { c0 = c; c1 = d; }
-  else { c0 = d; c1 = a; }
-  return mix(c0, c1, u);
-}
-
+export const FREQ_FRAG = /* glsl */ `
+uniform vec3 uWarm;
+uniform vec3 uCool;
+uniform float uAudio;
+varying float vHeat;
+varying float vFade;
 void main() {
-  // Soft circular point sprite.
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
   float core = smoothstep(0.5, 0.0, d);
-  float halo = smoothstep(0.5, 0.15, d);
-
-  vec3 bright = mix(uColorBright, cyclePalette(uTime * 0.08 + vTendril * 0.07), uHueShift);
-  vec3 col = mix(uColorDeep, bright, core);
-  float a = vAlpha * (halo * 0.85 + core * 0.6);
-  gl_FragColor = vec4(col, a);
+  vec3 col = mix(uCool, uWarm, vHeat);
+  gl_FragColor = vec4(col, core * vFade * (0.16 + uAudio * 0.38));
 }
 `;
 
-// Ember particles: floating GPU points, drift outward, twinkle.
+// ── Embers ───────────────────────────────────────────────────────────────────
+// Drifting sparks; each ember is warm or cool depending on which pole it
+// escaped from, and curls upward like a spark leaving a fire.
+
 export const EMBER_VERT = /* glsl */ `
 ${NOISE_GLSL}
 
@@ -313,8 +295,10 @@ uniform float uSpeed;
 uniform float uCoreRadius;
 uniform float uReach;
 uniform float uIntensity;
+uniform vec3 uAxis;
 
 varying float vAlpha;
+varying float vHeat;
 
 void main() {
   float life = mod(uTime * 0.18 * uSpeed + aLife, 1.0);
@@ -324,24 +308,29 @@ void main() {
   float r = mix(uCoreRadius, uCoreRadius + uReach * 0.55, life);
   vec3 sample1 = dir * r + vec3(aSeed, uTime * 0.05, 0.0);
   vec3 wobble = curlNoise(sample1 * 0.6) * (0.08 * uReach);
-  vec3 pos = dir * r + wobble;
+  // Sparks rise as they age.
+  vec3 pos = dir * r + wobble + vec3(0.0, life * life * 0.5, 0.0);
 
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
   float twinkle = 0.6 + 0.4 * sin(uTime * 2.0 + aSeed * 12.0);
-  gl_PointSize = (1.0 + (1.0 - life) * 1.8) * twinkle * (300.0 / -mv.z);
+  gl_PointSize = (1.0 + (1.0 - life) * 1.8) * twinkle * (52.0 / -mv.z);
   vAlpha = (1.0 - life) * (0.35 + uIntensity * 0.2);
+  vHeat = smoothstep(-0.4, 0.4, dot(dir, normalize(uAxis)));
 }
 `;
 
 export const EMBER_FRAG = /* glsl */ `
-uniform vec3 uColor;
+uniform vec3 uWarm;
+uniform vec3 uCool;
 varying float vAlpha;
+varying float vHeat;
 void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
   float core = smoothstep(0.5, 0.0, d);
-  gl_FragColor = vec4(uColor, vAlpha * core);
+  vec3 col = mix(uCool, uWarm, vHeat);
+  gl_FragColor = vec4(col, vAlpha * core);
 }
 `;

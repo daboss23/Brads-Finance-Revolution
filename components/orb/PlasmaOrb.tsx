@@ -1,5 +1,9 @@
 "use client";
 
+// Sarah's Fusion Core: dual-plasma reactor with a frequency ring.
+// Orange fire and electric blue energy collide at a rotating white-hot
+// seam; a spectrum ring around the equator dances with Sarah's state.
+
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -11,106 +15,68 @@ import {
   CORE_FRAG,
   EMBER_VERT,
   EMBER_FRAG,
+  FREQ_VERT,
+  FREQ_FRAG,
 } from "./shaders";
 
 export type OrbState = "idle" | "speaking" | "listening" | "thinking";
 
-type StateUniforms = {
+// The palette is fixed — molten orange vs electric blue is the identity.
+// States change energy, not hue: intensity, turbulence, seam heat, how the
+// fusion axis moves, and how hard the frequency ring drives.
+const WARM_DEEP = new THREE.Color("#c2410c");
+const WARM_BRIGHT = new THREE.Color("#ffb45e");
+const COOL_DEEP = new THREE.Color("#1d4ed8");
+const COOL_BRIGHT = new THREE.Color("#7fd4ff");
+const ATMO_WARM = new THREE.Color("#ff7a2f");
+const ATMO_COOL = new THREE.Color("#3f8dff");
+const RIM_HOT = new THREE.Color("#ffe9c4");
+
+type StateEnergy = {
   intensity: number;
-  hueShift: number;
   speed: number;
   displacement: number;
   reach: number;
-  plasmaA: THREE.Color;
-  plasmaB: THREE.Color;
-  plasmaC: THREE.Color;
-  atmoColor: THREE.Color;
-  rimColor: THREE.Color;
-  emberColor: THREE.Color;
+  seamHeat: number;
+  audio: number;      // frequency ring amplitude
+  axisTilt: number;   // how far the fusion axis wanders off horizontal
+  axisSpin: number;   // how fast the seam sweeps around the orb
 };
 
-const STATE_TARGETS: Record<OrbState, StateUniforms> = {
+const STATE_TARGETS: Record<OrbState, StateEnergy> = {
   idle: {
-    intensity: 1.0,
-    hueShift: 0.0,
-    speed: 0.55,
-    displacement: 0.14,
-    reach: 0.55,
-    plasmaA: new THREE.Color("#0a1f6e"),
-    plasmaB: new THREE.Color("#1ea0ff"),
-    plasmaC: new THREE.Color("#84d8ff"),
-    atmoColor: new THREE.Color("#3aa7ff"),
-    rimColor: new THREE.Color("#8edcff"),
-    emberColor: new THREE.Color("#bfe5ff"),
-  },
-  thinking: {
-    intensity: 0.9,
-    hueShift: 0.0,
-    speed: 0.95,
-    displacement: 0.2,
-    reach: 0.5,
-    plasmaA: new THREE.Color("#2a0e60"),
-    plasmaB: new THREE.Color("#7b2fff"),
-    plasmaC: new THREE.Color("#dbb6ff"),
-    atmoColor: new THREE.Color("#9a55ff"),
-    rimColor: new THREE.Color("#d6b3ff"),
-    emberColor: new THREE.Color("#d8c2ff"),
+    intensity: 0.95, speed: 0.5, displacement: 0.13, reach: 0.55,
+    seamHeat: 0.55, audio: 0.28, axisTilt: 0.25, axisSpin: 0.1,
   },
   listening: {
-    intensity: 1.05,
-    hueShift: 0.0,
-    speed: 0.75,
-    displacement: 0.16,
-    reach: 0.7,
-    plasmaA: new THREE.Color("#062d4d"),
-    plasmaB: new THREE.Color("#26d6ff"),
-    plasmaC: new THREE.Color("#ffd87a"),
-    atmoColor: new THREE.Color("#2bd6e8"),
-    rimColor: new THREE.Color("#ffe07a"),
-    emberColor: new THREE.Color("#a8efff"),
+    intensity: 1.1, speed: 0.75, displacement: 0.16, reach: 0.7,
+    seamHeat: 0.8, audio: 0.55, axisTilt: 0.4, axisSpin: 0.16,
+  },
+  thinking: {
+    intensity: 1.0, speed: 1.15, displacement: 0.21, reach: 0.5,
+    seamHeat: 1.0, audio: 0.4, axisTilt: 0.85, axisSpin: 0.45,
   },
   speaking: {
-    intensity: 0.95,
-    hueShift: 0.35,
-    speed: 1.5,
-    displacement: 0.2,
-    reach: 0.85,
-    plasmaA: new THREE.Color("#1a266e"),
-    plasmaB: new THREE.Color("#3a7dff"),
-    plasmaC: new THREE.Color("#7dc3ff"),
-    atmoColor: new THREE.Color("#5fb0ff"),
-    rimColor: new THREE.Color("#9ed4ff"),
-    emberColor: new THREE.Color("#c7e4ff"),
+    intensity: 1.15, speed: 1.4, displacement: 0.19, reach: 0.85,
+    seamHeat: 1.25, audio: 1.0, axisTilt: 0.35, axisSpin: 0.22,
   },
 };
 
-function cloneStateUniforms(s: StateUniforms): StateUniforms {
-  return {
-    intensity: s.intensity,
-    hueShift: s.hueShift,
-    speed: s.speed,
-    displacement: s.displacement,
-    reach: s.reach,
-    plasmaA: s.plasmaA.clone(),
-    plasmaB: s.plasmaB.clone(),
-    plasmaC: s.plasmaC.clone(),
-    atmoColor: s.atmoColor.clone(),
-    rimColor: s.rimColor.clone(),
-    emberColor: s.emberColor.clone(),
-  };
-}
-
-const EMBER_COUNT = 140;
+const EMBER_COUNT = 160;
+const FREQ_BANDS = 96;
+const FREQ_RUNGS = 7;
 
 export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
   const plasmaMatRef = useRef<THREE.ShaderMaterial>(null);
   const atmoMatRef = useRef<THREE.ShaderMaterial>(null);
   const coreMatRef = useRef<THREE.ShaderMaterial>(null);
   const emberMatRef = useRef<THREE.ShaderMaterial>(null);
+  const freqMatRef = useRef<THREE.ShaderMaterial>(null);
   const shellGroupRef = useRef<THREE.Group>(null);
 
-  const currentRef = useRef<StateUniforms>(cloneStateUniforms(STATE_TARGETS[state]));
-  const lastTargetRef = useRef<OrbState>(state);
+  const currentRef = useRef<StateEnergy>({ ...STATE_TARGETS[state] });
+  const targetStateRef = useRef<OrbState>(state);
+  const axisRef = useRef(new THREE.Vector3(1, 0, 0));
 
   const emberGeometry = useMemo(() => {
     const geom = new THREE.BufferGeometry();
@@ -128,32 +94,64 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
     return geom;
   }, []);
 
+  // Frequency ring: FREQ_BANDS columns × FREQ_RUNGS points, mirrored above
+  // and below the equator.
+  const freqGeometry = useMemo(() => {
+    const count = FREQ_BANDS * FREQ_RUNGS * 2;
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const band = new Float32Array(count);
+    const rung = new Float32Array(count);
+    const side = new Float32Array(count);
+    let i = 0;
+    for (let b = 0; b < FREQ_BANDS; b++) {
+      for (let r = 0; r < FREQ_RUNGS; r++) {
+        for (const s of [1, -1]) {
+          band[i] = b / FREQ_BANDS;
+          rung[i] = r / (FREQ_RUNGS - 1);
+          side[i] = s;
+          i++;
+        }
+      }
+    }
+    geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute("aBand", new THREE.BufferAttribute(band, 1));
+    geom.setAttribute("aRung", new THREE.BufferAttribute(rung, 1));
+    geom.setAttribute("aSide", new THREE.BufferAttribute(side, 1));
+    geom.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 6);
+    return geom;
+  }, []);
+
   const plasmaUniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uSpeed: { value: currentRef.current.speed },
       uDisplacement: { value: currentRef.current.displacement },
-      uColorA: { value: currentRef.current.plasmaA.clone() },
-      uColorB: { value: currentRef.current.plasmaB.clone() },
-      uColorC: { value: currentRef.current.plasmaC.clone() },
+      uWarmDeep: { value: WARM_DEEP.clone() },
+      uWarmBright: { value: WARM_BRIGHT.clone() },
+      uCoolDeep: { value: COOL_DEEP.clone() },
+      uCoolBright: { value: COOL_BRIGHT.clone() },
+      uAxis: { value: new THREE.Vector3(1, 0, 0) },
       uIntensity: { value: currentRef.current.intensity },
-      uHueShift: { value: currentRef.current.hueShift },
+      uSeamHeat: { value: currentRef.current.seamHeat },
     }),
-    []
+    [],
   );
   const atmoUniforms = useMemo(
     () => ({
-      uColor: { value: currentRef.current.atmoColor.clone() },
+      uWarm: { value: ATMO_WARM.clone() },
+      uCool: { value: ATMO_COOL.clone() },
+      uAxis: { value: new THREE.Vector3(1, 0, 0) },
       uIntensity: { value: currentRef.current.intensity },
     }),
-    []
+    [],
   );
   const coreUniforms = useMemo(
     () => ({
-      uRim: { value: currentRef.current.rimColor.clone() },
+      uRim: { value: RIM_HOT.clone() },
       uIntensity: { value: currentRef.current.intensity },
     }),
-    []
+    [],
   );
   const emberUniforms = useMemo(
     () => ({
@@ -162,31 +160,50 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
       uCoreRadius: { value: 1.1 },
       uReach: { value: currentRef.current.reach * 2.5 },
       uIntensity: { value: currentRef.current.intensity },
-      uColor: { value: currentRef.current.emberColor.clone() },
+      uAxis: { value: new THREE.Vector3(1, 0, 0) },
+      uWarm: { value: WARM_BRIGHT.clone() },
+      uCool: { value: COOL_BRIGHT.clone() },
     }),
-    []
+    [],
+  );
+  const freqUniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uAudio: { value: currentRef.current.audio },
+      uRadius: { value: 1.62 },
+      uPixelSize: { value: 1.6 },
+      uWarm: { value: WARM_BRIGHT.clone() },
+      uCool: { value: COOL_BRIGHT.clone() },
+    }),
+    [],
   );
 
   useFrame((stateRf, dt) => {
     const elapsed = stateRf.clock.elapsedTime;
 
-    if (state !== lastTargetRef.current) {
-      lastTargetRef.current = state;
-    }
-    const target = STATE_TARGETS[lastTargetRef.current];
+    if (state !== targetStateRef.current) targetStateRef.current = state;
+    const target = STATE_TARGETS[targetStateRef.current];
     const k = Math.min(1, dt * 3.2);
     const cur = currentRef.current;
     cur.intensity = THREE.MathUtils.lerp(cur.intensity, target.intensity, k);
-    cur.hueShift = THREE.MathUtils.lerp(cur.hueShift, target.hueShift, k);
     cur.speed = THREE.MathUtils.lerp(cur.speed, target.speed, k);
     cur.displacement = THREE.MathUtils.lerp(cur.displacement, target.displacement, k);
     cur.reach = THREE.MathUtils.lerp(cur.reach, target.reach, k);
-    cur.plasmaA.lerp(target.plasmaA, k);
-    cur.plasmaB.lerp(target.plasmaB, k);
-    cur.plasmaC.lerp(target.plasmaC, k);
-    cur.atmoColor.lerp(target.atmoColor, k);
-    cur.rimColor.lerp(target.rimColor, k);
-    cur.emberColor.lerp(target.emberColor, k);
+    cur.seamHeat = THREE.MathUtils.lerp(cur.seamHeat, target.seamHeat, k);
+    cur.audio = THREE.MathUtils.lerp(cur.audio, target.audio, k);
+    cur.axisTilt = THREE.MathUtils.lerp(cur.axisTilt, target.axisTilt, k);
+    cur.axisSpin = THREE.MathUtils.lerp(cur.axisSpin, target.axisSpin, k);
+
+    // The fusion axis sweeps slowly around the orb and nods with the
+    // state's tilt — thinking makes the seam churn, idle lets it drift.
+    const spin = elapsed * cur.axisSpin;
+    axisRef.current
+      .set(
+        Math.cos(spin),
+        Math.sin(elapsed * 0.31) * cur.axisTilt,
+        Math.sin(spin) * 0.6,
+      )
+      .normalize();
 
     if (plasmaMatRef.current) {
       const u = plasmaMatRef.current.uniforms;
@@ -194,20 +211,16 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
       u.uSpeed.value = cur.speed;
       u.uDisplacement.value = cur.displacement;
       u.uIntensity.value = cur.intensity;
-      u.uHueShift.value = cur.hueShift;
-      (u.uColorA.value as THREE.Color).copy(cur.plasmaA);
-      (u.uColorB.value as THREE.Color).copy(cur.plasmaB);
-      (u.uColorC.value as THREE.Color).copy(cur.plasmaC);
+      u.uSeamHeat.value = cur.seamHeat;
+      (u.uAxis.value as THREE.Vector3).copy(axisRef.current);
     }
     if (atmoMatRef.current) {
       const u = atmoMatRef.current.uniforms;
-      (u.uColor.value as THREE.Color).copy(cur.atmoColor);
       u.uIntensity.value = cur.intensity;
+      (u.uAxis.value as THREE.Vector3).copy(axisRef.current);
     }
     if (coreMatRef.current) {
-      const u = coreMatRef.current.uniforms;
-      (u.uRim.value as THREE.Color).copy(cur.rimColor);
-      u.uIntensity.value = cur.intensity;
+      coreMatRef.current.uniforms.uIntensity.value = cur.intensity;
     }
     if (emberMatRef.current) {
       const u = emberMatRef.current.uniforms;
@@ -215,70 +228,92 @@ export function PlasmaOrb({ state = "idle" }: { state?: OrbState }) {
       u.uSpeed.value = cur.speed;
       u.uReach.value = cur.reach * 2.5;
       u.uIntensity.value = cur.intensity;
-      (u.uColor.value as THREE.Color).copy(cur.emberColor);
+      (u.uAxis.value as THREE.Vector3).copy(axisRef.current);
+    }
+    if (freqMatRef.current) {
+      const u = freqMatRef.current.uniforms;
+      u.uTime.value = elapsed;
+      u.uAudio.value = cur.audio;
     }
 
     if (shellGroupRef.current) {
       shellGroupRef.current.rotation.y += dt * 0.06 * cur.speed;
       shellGroupRef.current.rotation.x =
-        Math.sin(elapsed * 0.18 * cur.speed) * 0.18;
+        Math.sin(elapsed * 0.18 * cur.speed) * 0.16;
     }
   });
 
   return (
-    <group ref={shellGroupRef}>
-      <mesh>
-        <sphereGeometry args={[0.85, 24, 24]} />
-        <shaderMaterial
-          ref={coreMatRef}
-          vertexShader={ATMOSPHERE_VERT}
-          fragmentShader={CORE_FRAG}
-          uniforms={coreUniforms}
-          transparent
-          depthWrite={false}
-        />
-      </mesh>
+    <>
+      <group ref={shellGroupRef}>
+        <mesh>
+          <sphereGeometry args={[0.85, 24, 24]} />
+          <shaderMaterial
+            ref={coreMatRef}
+            vertexShader={ATMOSPHERE_VERT}
+            fragmentShader={CORE_FRAG}
+            uniforms={coreUniforms}
+            transparent
+            depthWrite={false}
+          />
+        </mesh>
 
-      <mesh>
-        <icosahedronGeometry args={[1.05, 4]} />
-        <shaderMaterial
-          ref={plasmaMatRef}
-          vertexShader={PLASMA_VERT}
-          fragmentShader={PLASMA_FRAG}
-          uniforms={plasmaUniforms}
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
+        <mesh>
+          <icosahedronGeometry args={[1.05, 4]} />
+          <shaderMaterial
+            ref={plasmaMatRef}
+            vertexShader={PLASMA_VERT}
+            fragmentShader={PLASMA_FRAG}
+            uniforms={plasmaUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
 
-      {/* Atmospheric halo — backside sphere, inverse fresnel for soft bloom */}
-      <mesh>
-        <sphereGeometry args={[1.28, 24, 24]} />
-        <shaderMaterial
-          ref={atmoMatRef}
-          vertexShader={ATMOSPHERE_VERT}
-          fragmentShader={ATMOSPHERE_FRAG}
-          uniforms={atmoUniforms}
-          transparent
-          depthWrite={false}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
+        {/* Atmospheric halo — dual-tinted around the fusion axis */}
+        <mesh>
+          <sphereGeometry args={[1.28, 24, 24]} />
+          <shaderMaterial
+            ref={atmoMatRef}
+            vertexShader={ATMOSPHERE_VERT}
+            fragmentShader={ATMOSPHERE_FRAG}
+            uniforms={atmoUniforms}
+            transparent
+            depthWrite={false}
+            side={THREE.BackSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
 
-      {/* Embers — drifting GPU points around the orb */}
-      <points geometry={emberGeometry} frustumCulled={false}>
-        <shaderMaterial
-          ref={emberMatRef}
-          vertexShader={EMBER_VERT}
-          fragmentShader={EMBER_FRAG}
-          uniforms={emberUniforms}
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </points>
-    </group>
+        {/* Embers — sparks escaping each pole, rising as they fade */}
+        <points geometry={emberGeometry} frustumCulled={false}>
+          <shaderMaterial
+            ref={emberMatRef}
+            vertexShader={EMBER_VERT}
+            fragmentShader={EMBER_FRAG}
+            uniforms={emberUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </points>
+      </group>
+
+      {/* Frequency ring — stays level while the shell rotates inside it */}
+      <group rotation={[0.42, 0, -0.12]}>
+        <points geometry={freqGeometry} frustumCulled={false}>
+          <shaderMaterial
+            ref={freqMatRef}
+            vertexShader={FREQ_VERT}
+            fragmentShader={FREQ_FRAG}
+            uniforms={freqUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </points>
+      </group>
+    </>
   );
 }

@@ -37,6 +37,7 @@ The platform is a black and gold luxury financial command system: private bankin
 - Red only for critical blockers. Amber for pressure and review states.
 - No white backgrounds anywhere; no rainbow gradients.
 - New UI work must use existing HSL tokens or document additions here first.
+- Sarah Fusion Core (WebGL orb): fixed dual-plasma palette — molten orange `#c2410c→#ffb45e` vs electric blue `#1d4ed8→#7fd4ff`, white-hot fusion seam, gold rim `#ffe9c4`. States (idle/listening/thinking/speaking) modulate energy (intensity, seam heat, frequency-ring amplitude, axis motion), never hue. These plasma values live in `components/orb/` only and are not general UI tokens.
 
 ## 3. Typography
 
