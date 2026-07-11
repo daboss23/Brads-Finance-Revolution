@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<title>BMK CRM Platform — Security &amp; Data Protection Report</title>
+<style>
+  :root {
+    --ink: #101319;
+    --ink-soft: #1B2029;
+    --paper: #FBF9F4;
+    --body: #333A44;
+    --muted: #6B7280;
+    --gold: #B8922E;
+    --gold-deep: #8C7326;
+    --line: #E5E0D2;
+    --good: #2E6B4F;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Bitstream Charter", "Charter", serif;
+    color: var(--body);
+    background: var(--paper);
+    font-size: 9.8pt;
+    line-height: 1.5;
+  }
+  .sans { font-family: "Liberation Sans", Arial, sans-serif; }
+
+  .page { page-break-after: always; padding: 18mm 20mm 12mm; }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── Cover ─────────────────────────────────────────── */
+  .cover {
+    background: var(--ink);
+    color: #EDE7D8;
+    padding: 26mm 22mm 20mm;
+    height: 281mm;
+    display: flex; flex-direction: column;
+  }
+  .cover .brand {
+    font-family: "Liberation Sans", Arial, sans-serif;
+    font-size: 9pt; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .cover .rule { height: 1px; background: linear-gradient(90deg, var(--gold), transparent 70%); margin: 8mm 0 22mm; }
+  .cover h1 {
+    font-size: 34pt; font-weight: normal; line-height: 1.18;
+    color: #F5F0E2; max-width: 130mm; text-wrap: balance;
+  }
+  .cover .subtitle { margin-top: 8mm; font-size: 12.5pt; color: #B9B29E; max-width: 120mm; font-style: italic; }
+  .cover .meta {
+    margin-top: auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 12mm;
+    border-top: 1px solid rgba(184,146,46,.35); padding-top: 8mm;
+  }
+  .cover .meta div { font-family: "Liberation Sans", Arial, sans-serif; font-size: 8.5pt; }
+  .cover .meta .k { letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5mm; }
+  .cover .meta .v { color: #D9D2BE; font-size: 10pt; }
+  .cover .sigil {
+    width: 16mm; height: 16mm; border: 1px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Liberation Sans", Arial, sans-serif; font-size: 8pt; letter-spacing: .1em;
+    color: var(--gold); margin-bottom: 10mm;
+  }
+
+  /* ── Interior typography ───────────────────────────── */
+  .eyebrow {
+    font-family: "Liberation Sans", Arial, sans-serif;
+    font-size: 8pt; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--gold-deep); margin-bottom: 3mm;
+  }
+  h2 {
+    font-size: 17pt; font-weight: normal; color: var(--ink);
+    line-height: 1.25; margin-bottom: 6mm; text-wrap: balance;
+  }
+  h3 { font-size: 11.5pt; color: var(--ink); margin: 5.5mm 0 2mm; font-weight: bold; }
+  p + p { margin-top: 3mm; }
+  .lede { font-size: 11pt; line-height: 1.55; color: var(--ink-soft); max-width: 150mm; }
+  strong { color: var(--ink); }
+
+  .goldline { height: 2px; width: 22mm; background: var(--gold); margin-bottom: 8mm; }
+
+  /* ── Components ────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; margin: 4mm 0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 8.5pt; }
+  th {
+    text-align: left; font-size: 7.5pt; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--gold-deep); border-bottom: 1.5px solid var(--gold);
+    padding: 0 3mm 2mm 0; font-weight: bold;
+  }
+  tr { page-break-inside: avoid; }
+  td { border-bottom: 1px solid var(--line); padding: 2.2mm 3mm 2.2mm 0; vertical-align: top; line-height: 1.45; }
+  td.layer { font-family: "Bitstream Charter", serif; font-size: 10pt; color: var(--ink); white-space: nowrap; }
+
+  .verified { page-break-inside: avoid;
+    background: #F1EDE0; border-left: 2.5px solid var(--gold);
+    padding: 3mm 5mm; margin: 3.2mm 0;
+    font-size: 9pt; line-height: 1.5;
+  }
+  .verified .tag {
+    font-family: "Liberation Sans", Arial, sans-serif; font-size: 7.5pt;
+    letter-spacing: .2em; text-transform: uppercase; color: var(--good);
+    display: block; margin-bottom: 1.5mm; font-weight: bold;
+  }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+
+  ul { margin: 2.5mm 0 2.5mm 5mm; }
+  li { margin-bottom: 1.8mm; }
+  li::marker { color: var(--gold); }
+
+  .status { display: inline-block; font-family: "Liberation Sans", Arial, sans-serif; font-size: 7.5pt; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; padding: 1mm 2.5mm; border-radius: 1mm; }
+  .status.live { background: #E2EAE2; color: var(--good); }
+  .status.next { background: #EFE9D9; color: var(--gold-deep); }
+
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt; background: #F1EDE0; padding: 0.4mm 1.4mm; border-radius: 1mm; color: var(--ink); }
+
+  .footer-note { margin-top: 5mm; padding-top: 4mm; border-top: 1px solid var(--line); font-family: "Liberation Sans", Arial, sans-serif; font-size: 8pt; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══ -->
+<section class="cover">
+  <div class="sigil">BMK</div>
+  <div class="brand">BMK Financial Services · Client Data Protection</div>
+  <div class="rule"></div>
+  <h1>Security &amp; Data Protection Report</h1>
+  <p class="subtitle">How the BMK CRM platform protects client financial information — from the first word a client says to Sarah, to the signed Statement of Advice.</p>
+  <div class="meta">
+    <div><div class="k">Prepared for</div><div class="v">Brad Lonergan, BMK Financial Services</div></div>
+    <div><div class="k">Date</div><div class="v">July 2026</div></div>
+    <div><div class="k">Platform</div><div class="v">BMK CRM — AI-powered client onboarding &amp; advice pipeline</div></div>
+    <div><div class="k">Scope</div><div class="v">Encryption, access control, audit, privacy compliance</div></div>
+  </div>
+</section>
+
+<!-- ═══ EXECUTIVE SUMMARY ═══ -->
+<section class="page">
+  <div class="eyebrow">Executive Summary</div>
+  <h2>Client data is encrypted before it is stored, gated behind adviser sign-in, and every action leaves a permanent record.</h2>
+  <div class="goldline"></div>
+  <p class="lede">A financial planning practice holds the most sensitive information a client will ever share: income, debts, superannuation, insurance, health, and family circumstances. The BMK CRM platform was built on the assumption that this data will be attacked, and that the practice must be able to prove — to a client, a licensee, or a regulator — exactly how it was protected and who touched it.</p>
+
+  <h3>The three commitments</h3>
+  <p><strong>1. Nothing is stored readable.</strong> Every client record is encrypted by the platform itself with AES-256-GCM — the same cipher class used in banking — <em>before</em> it reaches any database or disk. Someone who steals the entire database gets ciphertext and nothing else. If an encryption key is not configured, the platform refuses to save client data at all rather than save it unprotected.</p>
+  <p><strong>2. Nobody gets in without proving who they are.</strong> Every adviser page and data endpoint sits behind sign-in with optional two-factor authentication from an authenticator app. Five failed attempts lock the account for fifteen minutes. Clients never need accounts — each client onboarding session runs on its own private link.</p>
+  <p><strong>3. Everything leaves a trail.</strong> Compliance actions, sign-ins, failed logins, and lockouts are appended to an encrypted, append-only event log — a permanent history that an ASIC or licensee review can reconstruct years later.</p>
+
+  <h3>Security posture at a glance</h3>
+  <table>
+    <tr><th>Control area</th><th>Status</th><th>In one line</th></tr>
+    <tr><td class="layer">Encryption at rest</td><td><span class="status live">Live</span></td><td>AES-256-GCM applied by the application; tamper-evident; verified against the stored files.</td></tr>
+    <tr><td class="layer">Fail-closed storage</td><td><span class="status live">Live</span></td><td>No encryption key configured means no client data is written. Ever.</td></tr>
+    <tr><td class="layer">Adviser authentication</td><td><span class="status live">Live</span></td><td>Password + authenticator-app code, lockout on brute force, 12-hour sessions.</td></tr>
+    <tr><td class="layer">Durable audit trail</td><td><span class="status live">Live</span></td><td>Encrypted, append-only record of compliance and security events.</td></tr>
+    <tr><td class="layer">Rate limiting</td><td><span class="status live">Live</span></td><td>Every public endpoint throttled per source to blunt abuse and credential stuffing.</td></tr>
+    <tr><td class="layer">Privacy notice (APP 5)</td><td><span class="status live">Live</span></td><td>Collection notice shown to every client before their discovery session begins.</td></tr>
+    <tr><td class="layer">Multi-adviser &amp; SSO</td><td><span class="status next">Roadmap</span></td><td>Current sign-in is single-adviser; SSO planned before multi-firm rollout.</td></tr>
+    <tr><td class="layer">Independent penetration test</td><td><span class="status next">Roadmap</span></td><td>Recommended before onboarding external firms.</td></tr>
+  </table>
+</section>
+
+<!-- ═══ DEFENCE IN DEPTH ═══ -->
+<section class="page">
+  <div class="eyebrow">Architecture</div>
+  <h2>Defence in depth: five layers between an attacker and a client's file</h2>
+  <div class="goldline"></div>
+  <p class="lede">No single control is trusted to hold. Each layer assumes the one in front of it has already failed.</p>
+
+  <table>
+    <tr><th style="width:30mm">Layer</th><th>What it does</th><th>What it defeats</th></tr>
+    <tr><td class="layer">1 · Transport</td><td>All traffic served over HTTPS (TLS) via Vercel's edge network. Session cookies are HttpOnly, SameSite, and Secure — invisible to page scripts.</td><td>Eavesdropping on café Wi-Fi; cookie theft via injected scripts.</td></tr>
+    <tr><td class="layer">2 · Access</td><td>Middleware gate on every adviser page and API. Signed 12-hour sessions; two-factor codes from an authenticator app; uniform error messages that never reveal whether an email exists.</td><td>Stolen passwords used alone; account probing; forgotten logged-in tabs.</td></tr>
+    <tr><td class="layer">3 · Abuse control</td><td>Per-source rate limits on sign-in, the client discovery session, transcription, and every write endpoint. Fifteen-minute lockout after five failed sign-ins, with each attempt logged.</td><td>Brute-force and credential-stuffing attacks; runaway API abuse and its costs.</td></tr>
+    <tr><td class="layer">4 · Storage</td><td>Field-level AES-256-GCM encryption applied by the application before data reaches Postgres or disk. GCM authenticates as it encrypts, so an altered record fails loudly instead of returning corrupted data. Refuses to operate unencrypted in production.</td><td>Database theft; backup leaks; a compromised or curious hosting provider; silent tampering.</td></tr>
+    <tr><td class="layer">5 · Audit</td><td>Append-only encrypted event log for compliance actions and security events, stamped with actor, timestamp, and the rules version in force at the time.</td><td>"Who changed this and when?" going unanswered in a dispute, licensee review, or ASIC inquiry.</td></tr>
+  </table>
+
+  <h3>The client's journey, protected end to end</h3>
+  <p>A client opens their private onboarding link and — before a single question is asked — sees a privacy collection notice covering purpose, disclosure, and their access and complaint rights under the Privacy Act. Their conversation with Sarah travels over TLS. The completed fact find is encrypted the moment it arrives and stored as ciphertext. When Brad reviews it the next morning, he signs in with his password and authenticator code; the platform decrypts the record for his session, and the compliance check he runs is written into the permanent audit trail. At no point does readable client data sit on a disk, in a backup, or in a database console.</p>
+</section>
+
+<!-- ═══ CONTROLS DETAIL ═══ -->
+<section class="page">
+  <div class="eyebrow">Controls in Detail — I</div>
+  <h2>Encryption &amp; storage</h2>
+  <div class="goldline"></div>
+
+  <h3>Application-level AES-256-GCM</h3>
+  <p>Encryption happens inside the platform, not in the database. The database provider — whether Neon, Supabase, or Vercel Postgres — only ever receives an opaque envelope (<code>enc1.…</code>) containing the initialisation vector, authentication tag, and ciphertext. This is a materially stronger position than "the database is encrypted": it protects against the provider itself, against misconfigured backups, and against anyone reading the database directly.</p>
+  <div class="verified"><span class="tag">Verified in testing</span>The stored data files were inspected byte-for-byte after live use: they contain only <code>enc1</code> ciphertext envelopes. No client name, figure, or answer appears anywhere in storage.</div>
+
+  <h3>Tamper evidence</h3>
+  <p>GCM is an <em>authenticated</em> cipher: it detects modification as well as hiding content. A record altered by even one bit fails decryption with an explicit error rather than silently returning wrong financial figures — the failure mode that matters most when the data feeds a Statement of Advice.</p>
+  <div class="verified"><span class="tag">Verified in testing</span>A stored record was deliberately corrupted; the platform rejected it loudly and continued serving the surrounding healthy records.</div>
+
+  <h3>Fails closed, never open</h3>
+  <p>If the encryption key is absent in production, the platform refuses to accept client data — the save returns an error and nothing touches disk. A misconfigured deployment can never quietly accumulate unencrypted files.</p>
+  <div class="verified"><span class="tag">Verified in testing</span>A production server was started with no key configured. The save endpoint returned "Data was not saved" and the storage directory remained empty.</div>
+
+  <h3>Durability across restarts and deploys</h3>
+  <p>Encrypted records are rehydrated into the running platform at every boot, so completed fact finds survive server restarts, redeployments, and infrastructure moves. The same layer runs against Postgres in production and encrypted local files in development — identical security properties in both.</p>
+  <div class="verified"><span class="tag">Verified in testing</span>A fact find was saved, the server was killed and restarted, and the record was retrieved intact — decrypted from storage, not from memory.</div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">Controls in Detail — II</div>
+  <h2>Access, abuse control &amp; audit</h2>
+  <div class="goldline"></div>
+
+  <h3>Adviser sign-in with two-factor authentication</h3>
+  <ul>
+    <li>Passwords are stored only as <strong>scrypt</strong> hashes — a deliberately expensive algorithm designed to make cracking stolen hashes impractical — and compared in constant time.</li>
+    <li>Optional <strong>authenticator-app codes</strong> (Google Authenticator, Authy, 1Password) using the same TOTP standard as the major banks.</li>
+    <li><strong>Five failed attempts lock the account for fifteen minutes</strong>, and the lockout itself is written to the security log.</li>
+    <li>Error messages are identical for a wrong email and a wrong password, so an attacker cannot discover which emails have accounts.</li>
+    <li>Sessions are cryptographically signed, expire after twelve hours, and live in cookies that page scripts cannot read.</li>
+  </ul>
+  <div class="verified"><span class="tag">Verified in testing</span>The full flow was exercised live: unauthenticated visits redirect to sign-in; API calls without a session receive 401; wrong passwords and wrong authenticator codes are rejected; the sixth failed attempt triggers the lockout; a correct password plus a correct code issues a working session.</div>
+
+  <h3>Clients never need passwords</h3>
+  <p>Client onboarding runs on private per-session links, so clients face no account creation and no password to lose. The endpoints Sarah needs stay public and rate limited; everything that <em>reads</em> client data back requires an adviser session.</p>
+
+  <h3>Rate limiting on every public surface</h3>
+  <p>Sign-in attempts, fact-find submissions, Sarah conversation turns, voice transcription, and audit writes are each throttled per source address. This blunts brute-force attacks and protects against abuse of the platform's paid AI services.</p>
+
+  <h3>A permanent, encrypted audit trail</h3>
+  <p>Two event streams are appended to encrypted, append-only storage: <strong>compliance events</strong> (checks run, blockers resolved, certificates generated, adviser sign-offs — each stamped with the compliance-rules version in force) and <strong>security events</strong> (sign-ins, failures, lockouts, sign-outs, with source address and timestamp). Records can be added but not rewritten — the property a regulator looks for in an audit trail.</p>
+  <div class="verified"><span class="tag">Verified in testing</span>Failed sign-ins and lockouts were confirmed landing in the encrypted event store, retrievable after a server restart.</div>
+</section>
+
+<!-- ═══ REGULATORY ═══ -->
+<section class="page">
+  <div class="eyebrow">Regulatory Alignment</div>
+  <h2>Where this lands against Australian obligations</h2>
+  <div class="goldline"></div>
+
+  <table>
+    <tr><th style="width:44mm">Obligation</th><th>How the platform addresses it</th></tr>
+    <tr><td class="layer">Privacy Act — APP 5<br><span class="sans" style="font-size:8pt;color:var(--muted)">Notification of collection</span></td><td>Every client sees a plain-language collection notice on the onboarding screen before any question is asked: what is collected, why, who it is disclosed to, and how to access, correct, or complain (including the OAIC pathway).</td></tr>
+    <tr><td class="layer">Privacy Act — APP 11<br><span class="sans" style="font-size:8pt;color:var(--muted)">Security of personal information</span></td><td>"Reasonable steps" is met with encryption at rest, authenticated access, abuse controls, and logging — controls proportionate to the sensitivity of full financial fact finds.</td></tr>
+    <tr><td class="layer">Corporations Act<br><span class="sans" style="font-size:8pt;color:var(--muted)">Record-keeping, s912G / RG 175</span></td><td>The append-only audit trail preserves who did what and when, stamped with the compliance-rules version — supporting reconstruction of best-interests-duty evidence years later.</td></tr>
+    <tr><td class="layer">Licensee obligations<br><span class="sans" style="font-size:8pt;color:var(--muted)">Charter, AFSL 234665</span></td><td>Compliance checks, sign-offs, and certificates flow through the audited pipeline, giving the licensee a queryable history rather than a filing cabinet.</td></tr>
+    <tr><td class="layer">Notifiable Data Breaches<br><span class="sans" style="font-size:8pt;color:var(--muted)">Part IIIC, Privacy Act</span></td><td>Encryption materially changes breach analysis: stolen ciphertext without the key is generally not "likely to result in serious harm". The security event log supports rapid assessment of what happened.</td></tr>
+  </table>
+
+  <h3>An honest answer to "is it compliant?"</h3>
+  <p>The <em>technical</em> controls now in place meet or exceed what APP 11 asks of a practice this size, and the audit design directly serves Corporations Act record-keeping. But security compliance is never a finished state, and two categories remain open:</p>
+  <ul>
+    <li><strong>Operational practices</strong> — key custody (the encryption key held in a password manager Brad controls), a written data-breach response plan, and a backup/recovery routine. These are procedures, not code.</li>
+    <li><strong>Independent assurance</strong> — before other firms put their clients' data on the platform, an external penetration test and privacy review is the professional standard, and would be expected in any licensee's due diligence.</li>
+  </ul>
+
+  <h3>Roadmap</h3>
+  <table>
+    <tr><th>Item</th><th>Why</th><th>When it matters</th></tr>
+    <tr><td>Multi-adviser accounts &amp; SSO</td><td>Per-user identity and permissions</td><td>Before any second adviser or firm joins</td></tr>
+    <tr><td>Shared rate-limit store</td><td>Consistent limits across servers</td><td>When traffic needs multiple instances</td></tr>
+    <tr><td>Key rotation tooling</td><td>Re-encrypt under a new key in place</td><td>Annual hygiene, or on key exposure</td></tr>
+    <tr><td>External penetration test</td><td>Independent validation of all of the above</td><td>Before multi-firm rollout</td></tr>
+  </table>
+
+  <div class="footer-note">Prepared July 2026 from the implemented codebase of the BMK CRM platform (repository: Brads-Finance-Revolution). Every control marked "Verified in testing" was exercised against a live build during implementation, not inferred from design documents. Configuration steps for production activation are documented in SECURITY.md within the repository.</div>
+</section>
+
+</body>
+</html>
