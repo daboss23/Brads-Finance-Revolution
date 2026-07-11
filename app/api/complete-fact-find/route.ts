@@ -5,11 +5,14 @@ import {
 } from "@/lib/secure-store/fact-find-persistence";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
+import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const rl = rateLimit("fact-find", clientIp(req), 10, 60);
+  if (!rl.allowed) return rateLimited(rl);
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...a: unknown[]) => console.log(`[complete-fact-find:${reqId}]`, ...a);
   const err = (...a: unknown[]) => console.error(`[complete-fact-find:${reqId}]`, ...a);

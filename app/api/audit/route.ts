@@ -1,3 +1,4 @@
+import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 // Durable audit trail endpoint.
 //
 // Compliance and security events are appended to the encrypted secure
@@ -22,6 +23,8 @@ interface AuditEventBody {
 }
 
 export async function POST(req: Request) {
+  const rl = rateLimit("audit", clientIp(req), 60, 60);
+  if (!rl.allowed) return rateLimited(rl);
   try {
     const body = (await req.json().catch(() => null)) as AuditEventBody | null;
     if (!body || !body.clientId || !body.action) {

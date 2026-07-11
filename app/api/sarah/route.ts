@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -162,6 +163,8 @@ REMEMBER: never output any dashes, asterisks, bullets, or markdown. Plain natura
 };
 
 export async function POST(req: Request) {
+  const rl = rateLimit("sarah", clientIp(req), 30, 60);
+  if (!rl.allowed) return rateLimited(rl);
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...args: unknown[]) => console.log(`[sarah:${reqId}]`, ...args);
   const err = (...args: unknown[]) => console.error(`[sarah:${reqId}]`, ...args);

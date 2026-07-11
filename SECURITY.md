@@ -69,12 +69,53 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - To rotate: decrypt-and-re-encrypt migration is required (the `enc1.`
   version prefix exists so a future `enc2.` rotation can run in place).
 
-## 8. Known gaps / roadmap
+## 8. Rate limiting
+
+All public endpoints are rate limited per source IP
+(`lib/rate-limit.ts`): sign-in (10/min with 15-minute lockout after 5
+failed attempts), fact-find submission (10/min), Sarah conversation
+(30/min), transcription (30/min), audit and state writes. Limits are
+per server instance — adequate for a single-adviser deployment; swap in
+a shared store (Upstash/Postgres) when going multi-instance.
+
+## 9. Adviser sign-in with MFA
+
+Session-cookie authentication protects every adviser page and API.
+Client-facing onboarding stays public (clients authenticate via their
+per-session link token). Enforcement switches on when both
+`ADVISER_PASSWORD_HASH` and `AUTH_SESSION_SECRET` are set; without them
+the platform runs open in demo mode and logs a warning.
+
+Setup:
+
+```bash
+# 1. Password hash (prompts so the password never lands in shell history):
+npx tsx scripts/hash-password.ts
+
+# 2. Session secret:
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# 3. Optional TOTP secret for authenticator-app MFA:
+npx tsx -e "import {generateTotpSecret, otpauthUrl} from './lib/auth/totp'; const s=generateTotpSecret(); console.log(s); console.log(otpauthUrl(s,'brad@bmk.com.au'))"
+```
+
+Set in Vercel: `ADVISER_EMAIL`, `ADVISER_PASSWORD_HASH`,
+`AUTH_SESSION_SECRET`, and optionally `ADVISER_TOTP_SECRET` (scan the
+otpauth URL as a QR code into Google Authenticator/Authy/1Password).
+
+Properties: scrypt password hashing, constant-time comparison, uniform
+error messages (no user enumeration), 15-minute lockout after 5
+failures, HMAC-SHA256 signed HttpOnly SameSite cookies with 12-hour
+expiry, RFC 6238 TOTP with ±1 step drift tolerance, and every sign-in,
+failure, lockout, and logout appended to the encrypted security event
+log.
+
+## 10. Known gaps / roadmap
 
 In priority order:
 
-1. Move the SOA review store and remaining localStorage state server-side.
-2. Multi-adviser accounts with MFA/SSO (required before multi-firm use).
-3. Shared-store rate limiting on public endpoints (onboarding token API).
-4. APP 5 privacy collection notice on the onboarding intro screen.
-5. Real DocuSign integration with webhook signature verification.
+1. Multi-adviser accounts and SSO (current auth is single-adviser).
+2. Shared-store rate limiting for multi-instance deployments.
+3. Real DocuSign integration with webhook signature verification.
+4. Key rotation tooling (enc2 envelope migration).
+5. Independent penetration test before onboarding other firms.

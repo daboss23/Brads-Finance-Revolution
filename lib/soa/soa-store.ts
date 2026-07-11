@@ -3,6 +3,7 @@
 // without round-tripping.
 
 import type { SoaDocument, SoaStatus, SectionId } from "./soa-template";
+import { mirrorToServer } from "../state-sync";
 
 const STORE_KEY = "__bmk_soa_store__";
 const CLIENT_STORE_KEY = "bmk-crm-soa-store-v1";
@@ -40,7 +41,23 @@ export function saveSoa(doc: SoaDocument): void {
     const map = clientLoad();
     map[doc.clientId] = doc;
     clientSave(map);
+    // Durable encrypted copy on the server — survives browser resets
+    // and server restarts alike.
+    mirrorToServer("soa-documents", doc.clientId, doc);
   }
+}
+
+// Seed the local cache from the encrypted server copy when this browser
+// has no SOAs yet (new machine, cleared storage).
+if (typeof window !== "undefined" && !localStorage.getItem(CLIENT_STORE_KEY)) {
+  void fetch("/api/state?namespace=soa-documents")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data: { state?: Record<string, SoaDocument> } | null) => {
+      if (data?.state && Object.keys(data.state).length && !localStorage.getItem(CLIENT_STORE_KEY)) {
+        clientSave(data.state);
+      }
+    })
+    .catch(() => {});
 }
 
 export function getSoa(clientId: string): SoaDocument | undefined {

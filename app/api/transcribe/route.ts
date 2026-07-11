@@ -1,3 +1,4 @@
+import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -6,6 +7,8 @@ const ELEVENLABS_STT_URL = "https://api.elevenlabs.io/v1/speech-to-text";
 const SCRIBE_MODEL_ID = "scribe_v1";
 
 export async function POST(req: Request) {
+  const rl = rateLimit("transcribe", clientIp(req), 30, 60);
+  if (!rl.allowed) return rateLimited(rl);
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...a: unknown[]) => console.log(`[transcribe:${reqId}]`, ...a);
   const err = (...a: unknown[]) => console.error(`[transcribe:${reqId}]`, ...a);

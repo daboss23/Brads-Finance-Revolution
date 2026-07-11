@@ -1,3 +1,5 @@
+import { mirrorToServer, pullFromServer } from "./state-sync";
+
 const STORAGE_KEY = "bmk-crm-review-v1";
 
 interface ReviewStore {
@@ -27,6 +29,18 @@ function load(): ReviewStore {
 function save(state: ReviewStore): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Durable encrypted copy on the server — survives browser resets.
+  mirrorToServer("review-store", "all", state);
+}
+
+// Seed the local cache from the encrypted server copy when this browser
+// has no state yet (new machine, cleared storage).
+if (typeof window !== "undefined" && !localStorage.getItem(STORAGE_KEY)) {
+  void pullFromServer<ReviewStore>("review-store", "all").then((remote) => {
+    if (remote && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+    }
+  });
 }
 
 export function getReviewStore(): ReviewStore {
