@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EngineCore3D } from "./EngineCore3D";
 import type { ComponentType, ReactNode } from "react";
 import {
   Activity,
@@ -364,9 +365,7 @@ export function ClientProgressEngine({
         <div className="glass-grain pointer-events-none absolute inset-0 z-30 rounded-2xl" />
         <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-[linear-gradient(168deg,hsl(46_85%_93%/0.05),transparent_22%),radial-gradient(60%_30%_at_50%_0%,hsl(46_85%_93%/0.045),transparent_70%)]" />
         <span className="pointer-events-none absolute inset-x-10 top-0 z-30 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" />
-        <div className="engine-energy-haze pointer-events-none absolute left-1/2 top-1/2 hidden size-[410px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.14] md:block" />
-        <div className="engine-energy pointer-events-none absolute left-1/2 top-1/2 hidden size-[324px] -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
         <div className="dashboard-engine-orbit pointer-events-none absolute left-1/2 top-1/2 hidden size-[306px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/[0.16] md:block" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 hidden size-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-accent/[0.1] md:block" />
         <div className="engine-wave pointer-events-none absolute left-1/2 top-1/2 hidden size-48 -translate-x-1/2 -translate-y-1/2 rounded-full md:block" />
@@ -383,18 +382,17 @@ export function ClientProgressEngine({
         ))}
 
         <div className="relative z-10 mx-auto grid max-w-[280px] justify-items-center pt-4 md:absolute md:left-1/2 md:top-1/2 md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:pt-0">
-          <div className="dashboard-engine-core grid size-48 place-items-center rounded-full border border-gold/[0.3] bg-[radial-gradient(circle_at_32%_24%,hsl(46_85%_92%/0.22),transparent_26%),radial-gradient(circle_at_62%_48%,hsl(var(--gold)/0.32),transparent_32%),radial-gradient(circle_at_50%_88%,hsl(var(--teal-accent)/0.2),transparent_38%),radial-gradient(circle_at_center,hsl(var(--teal-accent)/0.12),hsl(220_20%_6%/0.94)_64%)] shadow-[inset_0_1px_0_hsl(44_80%_90%/0.25),inset_0_-14px_28px_-16px_hsl(var(--teal-accent)/0.25),0_0_54px_-8px_hsl(var(--gold)/0.6),0_0_60px_-14px_hsl(var(--teal-accent)/0.45)]">
-            <div className="text-center">
-              <div className="mx-auto grid size-10 place-items-center rounded-full border border-gold/30 bg-black/30 text-gold shadow-[0_0_18px_-4px_hsl(var(--gold)/0.7)]">
-                <Sparkles className="size-5" />
-              </div>
-              <p className="mt-2.5 text-[20px] font-semibold leading-none text-foreground">
+          <div className="relative grid size-56 place-items-center">
+            {/* 3D Fusion Core — same engine as Sarah's live session */}
+            <EngineCore3D className="pointer-events-none absolute left-1/2 top-1/2 size-[340px] -translate-x-1/2 -translate-y-1/2" />
+            <div className="relative z-10 text-center">
+              <p className="text-[20px] font-semibold leading-none text-foreground drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.9)]">
                 Sarah
               </p>
               <p className="mt-1 cmd-label text-muted-foreground/72">
                 Client Discovery
               </p>
-              <div className="mx-auto mt-2.5 w-fit rounded-lg border border-gold/25 bg-black/30 px-3 py-1.5 shadow-[inset_0_1px_0_hsl(44_80%_90%/0.1)]">
+              <div className="mx-auto mt-2.5 w-fit rounded-lg border border-gold/25 bg-black/45 px-3 py-1.5 shadow-[inset_0_1px_0_hsl(44_80%_90%/0.1)] backdrop-blur-sm">
                 <p className="cmd-label text-muted-foreground/52">In flow</p>
                 <p className="mt-0.5 text-[20px] font-semibold leading-none text-foreground tabular-nums">
                   {totalFilesInFlow}
