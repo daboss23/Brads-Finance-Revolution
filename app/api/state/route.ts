@@ -15,6 +15,7 @@ const ALLOWED_NAMESPACES = new Set([
   "soa-documents",
   "client-strategies",
   "voice-learner",
+  "training-corpus",
 ]);
 
 export async function POST(req: Request) {

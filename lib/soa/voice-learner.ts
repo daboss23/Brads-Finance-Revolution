@@ -6,6 +6,7 @@
 
 import type { SectionId } from "./soa-template";
 import type { StrategyKey } from "../forms";
+import { mirrorToServer, pullFromServer } from "../state-sync";
 
 const STORE_KEY = "bmk-crm-voice-learning-v1";
 const FULL_CALIBRATION_TARGET = 50;
@@ -51,6 +52,18 @@ function save(state: VoiceStoreData): void {
   } catch {
     // ignore quota
   }
+  // Durable encrypted copy — the voice calibration follows Brad across
+  // machines instead of living in one browser.
+  mirrorToServer("voice-learner", "all", state);
+}
+
+// Seed from the encrypted server copy on a fresh browser.
+if (typeof window !== "undefined" && !localStorage.getItem(STORE_KEY)) {
+  void pullFromServer<VoiceStoreData>("voice-learner", "all").then((remote) => {
+    if (remote && !localStorage.getItem(STORE_KEY)) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(remote));
+    }
+  });
 }
 
 function makeId(): string {
