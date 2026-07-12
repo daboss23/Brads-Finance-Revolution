@@ -17,6 +17,11 @@ type AgentInput = {
   answers?: Record<string, Record<string, string>>;
   bradReviewed?: boolean;
   approvedForSOA?: boolean;
+  compliance?: {
+    score: number;
+    blockers: string[];
+    warnings: string[];
+  };
 };
 
 const REQUIRED_SECTIONS = [
@@ -96,27 +101,31 @@ function runBeacon(input: AgentInput): BeaconOutput {
 function runGuardian(input: AgentInput): GuardianOutput {
   const client = getClient(input);
   const beacon = runBeacon(input);
-  const criticalFlags = [
+  const criticalFlags = input.compliance?.blockers ?? [
     ...(!beacon.cleanFactFind["goals-objectives"] ? ["Goals and objectives incomplete"] : []),
     ...(!beacon.cleanFactFind.superannuation ? ["Superannuation details missing"] : []),
     ...(!beacon.cleanFactFind.insurance ? ["Insurance details need adviser review"] : []),
   ];
-  const warningFlags = beacon.vagueFields.map((field) => `Vague answer requires clarification: ${field}`);
-  const blockedFromSOA = criticalFlags.length > 0 || !input.bradReviewed;
+  const warningFlags = input.compliance?.warnings ??
+    beacon.vagueFields.map((field) => `Vague answer requires clarification: ${field}`);
+  const blockedFromSOA = criticalFlags.length > 0;
   return {
-    complianceScore: Math.max(48, Math.min(96, client.progress - criticalFlags.length * 8)),
+    complianceScore:
+      input.compliance?.score ??
+      Math.max(48, Math.min(96, client.progress - criticalFlags.length * 8)),
     consentStatus: "partial",
     criticalFlags,
     warningFlags,
     adviserReviewFlags: [
       "Confirm consent to proceed before advice preparation",
-      "Brad must review all assumptions before SOA generation",
+      input.bradReviewed
+        ? "Brad review recorded"
+        : "Brad must review all assumptions before approval and client send",
     ],
     blockedFromSOA,
     reasonsBlocked: blockedFromSOA
       ? [
           ...criticalFlags,
-          ...(!input.bradReviewed ? ["Brad review has not been marked complete"] : []),
         ]
       : [],
     recommendedNextActions: blockedFromSOA

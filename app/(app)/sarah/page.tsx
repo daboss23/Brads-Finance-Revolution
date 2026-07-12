@@ -93,7 +93,7 @@ export default function SarahPage() {
   ).length;
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Page header */}
       <div className="flex items-end justify-between mb-12">
@@ -114,7 +114,7 @@ export default function SarahPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-6 gap-4 mb-12">
+      <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         {[
           { label: "Links Sent", value: metrics.sent, icon: LinkIcon, color: "text-blue-accent", bg: "bg-blue-accent/15", accent: "from-blue-accent/50" },
           { label: "Opened", value: metrics.opened, icon: ExternalLink, color: "text-sky-400", bg: "bg-sky-400/15", accent: "from-sky-400/50" },
@@ -143,7 +143,7 @@ export default function SarahPage() {
       </div>
 
       {/* Two-column: Sarah intelligence + Drop-off */}
-      <div className="grid grid-cols-[1fr_320px] gap-6 mb-12">
+      <div className="mb-12 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
 
         {/* Sarah intelligence panel */}
         <div className="rounded-lg glass-card overflow-hidden">
@@ -207,7 +207,7 @@ export default function SarahPage() {
 
         {/* Drop-off analysis */}
         <div className="rounded-lg glass-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+          <div className="border-b border-border bg-card px-5 py-4">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Common Drop-off Points
             </h2>
@@ -226,15 +226,15 @@ export default function SarahPage() {
                       {incomplete}/{CLIENTS.length}
                     </span>
                   </div>
-                  <div className="h-1 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full",
-                        i === 0 ? "bg-warning/70" : i === 1 ? "bg-warning/60" : "bg-gold/40"
-                      )}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <progress
+                    value={pct}
+                    max={100}
+                    aria-label={`${section} drop-off ${pct}%`}
+                    className={cn(
+                      "bmk-progress h-1 w-full",
+                      i < 2 ? "bmk-progress-amber" : "",
+                    )}
+                  />
                 </div>
               );
             })}
@@ -258,7 +258,7 @@ export default function SarahPage() {
         <div className="rounded-lg border border-border overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+              <tr className="border-b border-border bg-card">
                 {["Client", "Link Status", "Progress", "Sent", "Last Activity", "Actions"].map((h) => (
                   <th
                     key={h}
@@ -360,6 +360,7 @@ export default function SarahPage() {
                       <Link
                         href={`/onboarding/${link.token}`}
                         target="_blank"
+                        rel="noopener noreferrer"
                         title="Open client fact find experience"
                         className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/[0.07] px-2.5 py-1.5 text-[11px] font-medium text-gold/80 hover:bg-gold/[0.12] hover:text-gold transition-all duration-150"
                       >

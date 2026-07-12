@@ -1,16 +1,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { AGENTS, STATUS_META, AgentTone } from "@/lib/agents";
+import { AGENTS, STATUS_META } from "@/lib/agents";
 import { SparkBars } from "@/components/ui/spark-bars";
 import { cn } from "@/lib/utils";
-
-const TONE_FILL: Record<AgentTone, string> = {
-  blue: "bg-blue-accent/70",
-  orange: "bg-warning/70",
-  gold: "bg-gold/70",
-  emerald: "bg-success/70",
-  violet: "bg-teal-accent/70",
-};
 
 export function AgentActivityStrip() {
   const cleared = AGENTS.reduce((s, a) => s + a.completedToday, 0);
@@ -62,12 +54,12 @@ export function AgentActivityStrip() {
                 {agent.activeTask}
               </p>
               <div className="flex items-center gap-3">
-                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.05]">
-                  <div
-                    className={cn("h-full rounded-full", TONE_FILL[agent.tone])}
-                    style={{ width: `${agent.workload}%` }}
-                  />
-                </div>
+                <progress
+                  value={agent.workload}
+                  max={100}
+                  aria-label={`${agent.name} workload ${agent.workload}%`}
+                  className="bmk-progress h-1 flex-1"
+                />
                 <SparkBars data={agent.throughput} tone={agent.tone} className="h-5 w-14" />
               </div>
             </Link>

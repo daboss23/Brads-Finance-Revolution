@@ -41,6 +41,9 @@ export async function POST(req: Request) {
     if (audio.size === 0) {
       return Response.json({ error: "Empty audio." }, { status: 400 });
     }
+    if (audio.size > 25 * 1024 * 1024) {
+      return Response.json({ error: "Audio file is too large." }, { status: 413 });
+    }
 
     const out = new FormData();
     out.append("model_id", SCRIBE_MODEL_ID);

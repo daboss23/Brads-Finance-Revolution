@@ -37,9 +37,10 @@ export function TelemetryRing({
   const dash = (pct / 100) * c;
   const gid = `ring-${tone}-${size}-${Math.round(pct)}`;
   const [from, to] = TONE_STOPS[tone];
+  const sizeClass = size === 104 ? "size-[104px]" : "size-[132px]";
 
   return (
-    <div className={cn("relative inline-grid place-items-center", className)} style={{ width: size, height: size }}>
+    <div className={cn("relative inline-grid place-items-center", sizeClass, className)}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={gid} x1="0%" y1="0%" x2="100%" y2="100%">

@@ -140,7 +140,7 @@ export function ClientFormsWorkspace({
         {recommendations.length === 0 ? (
           <EmptyHint text="Waiting on a completed fact find." />
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             {recommendations.map((r) => {
               const isApproved = approved.includes(r.strategyKey);
               return (
@@ -173,7 +173,7 @@ export function ClientFormsWorkspace({
             />
           </button>
           {showAll && (
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
               {otherStrategies.map((k) => (
                 <ManualStrategyCard
                   key={k}
@@ -316,7 +316,7 @@ function StrategyLibrary({
         />
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {filtered.map((s) => {
           const isApproved = approved.includes(s.id);
           return (
@@ -461,7 +461,7 @@ function CustomStrategyForm({
       <p className="text-[10.5px] font-bold tracking-[0.18em] uppercase text-gold/90 mb-4">
         New custom strategy
       </p>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="mb-4 grid gap-4 md:grid-cols-2">
         <label className="block">
           <span className="text-[12px] text-muted-foreground/85 mb-1.5 block tracking-tight">
             Strategy name

@@ -63,12 +63,12 @@ export function ProgressRail({
 
         {/* Progress bar */}
         <div className="flex-1">
-          <div className="h-[3px] rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gold transition-all duration-700 ease-out"
-              style={{ width: `${overallPct}%` }}
-            />
-          </div>
+          <progress
+            value={overallPct}
+            max={100}
+            aria-label={`Discovery ${overallPct}% complete`}
+            className="bmk-progress h-[3px] w-full"
+          />
         </div>
 
         {/* XP */}

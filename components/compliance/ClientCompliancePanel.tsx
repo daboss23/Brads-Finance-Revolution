@@ -109,7 +109,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
 
       {/* Summary */}
       <div className="rounded-lg glass-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto] gap-6 px-7 py-6">
+        <div className="grid gap-6 px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-7 sm:py-6">
           <div>
             <div className="flex items-center gap-2.5 mb-2.5">
               <OverallIcon
@@ -189,7 +189,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       {(result.blockers.length > 0 ||
         result.missingInformation.length > 0 ||
         result.warnings.length > 0) && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <IssueLane
             label="Blockers"
             count={result.blockers.length}

@@ -1,3 +1,5 @@
+import { clientIp, rateLimit, rateLimited } from "@/lib/rate-limit";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -7,6 +9,9 @@ const ELEVEN_TTS_URL = (voiceId: string) =>
 const MODEL_ID = "eleven_turbo_v2_5";
 
 export async function POST(req: Request) {
+  const rl = rateLimit("sarah-voice", clientIp(req), 30, 60);
+  if (!rl.allowed) return rateLimited(rl);
+
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...a: unknown[]) => console.log(`[sarah-voice:${reqId}]`, ...a);
   const err = (...a: unknown[]) => console.error(`[sarah-voice:${reqId}]`, ...a);
@@ -45,6 +50,9 @@ export async function POST(req: Request) {
     const text = (body as { text: string }).text.trim();
     if (!text) {
       return Response.json({ error: "Empty text." }, { status: 400 });
+    }
+    if (text.length > 4_000) {
+      return Response.json({ error: "Text is too long." }, { status: 413 });
     }
     log("text length:", text.length);
 

@@ -26,7 +26,7 @@ export async function GET(
     footerLeft: `Financial Fact Find — ${client.name} · Newcastle Financial Services`,
   });
 
-  return new NextResponse(pdf, {
+  return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="fact-find-${client.id}.pdf"`,

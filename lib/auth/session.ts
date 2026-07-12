@@ -16,14 +16,20 @@ export interface SessionPayload {
 
 function b64url(bytes: Uint8Array): string {
   let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
+  for (let i = 0; i < bytes.length; i += 1) {
+    bin += String.fromCharCode(bytes[i]);
+  }
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function b64urlDecode(s: string): Uint8Array {
+function b64urlDecode(s: string): Uint8Array<ArrayBuffer> {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(b64 + "=".repeat((4 - (b64.length % 4)) % 4));
-  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes;
 }
 
 async function hmacKey(secret: string): Promise<CryptoKey> {

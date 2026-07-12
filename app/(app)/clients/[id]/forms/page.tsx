@@ -21,7 +21,7 @@ export default async function FormsPage({ params }: { params: { id: string } }) 
   const defaultApproved = profile?.strategies ?? [];
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Back */}
       <Link

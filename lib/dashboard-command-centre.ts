@@ -101,7 +101,7 @@ export type CommandCentreDashboard = {
   };
   nextBestActions: NextBestActionItem[];
   agentActivity: AgentActivityItem[];
-  systemStatus: "All systems operational" | "Mock mode active";
+  systemStatus: "All systems operational" | "Mock mode active" | "Demo mode ready";
   mockModeActive: boolean;
   dataSourceLabel: string;
 };
@@ -122,8 +122,10 @@ type DashboardBaseState = {
 
 export function getCommandCentreDashboard(): CommandCentreDashboard {
   const state = getDashboardBaseState();
-  const mockModeActive =
-    !process.env.ANTHROPIC_API_KEY || !process.env.ELEVENLABS_API_KEY;
+  // Agent JSON providers intentionally remain deterministic for the showcase,
+  // even when Sarah's voice/API keys are configured. Keep the dashboard honest
+  // until live provider execution and prompt safety gates are enabled.
+  const mockModeActive = true;
   const sarahComplete = CLIENTS.filter(
     (client) =>
       client.status === "complete" ||
@@ -252,7 +254,7 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
       },
     ],
     agentActivity: buildAgentActivity(mockModeActive),
-    systemStatus: mockModeActive ? "Mock mode active" : "All systems operational",
+    systemStatus: "Demo mode ready",
     mockModeActive,
     dataSourceLabel:
       "Derived from CLIENTS, SOA pipeline rows, compliance state, and dashboard mock telemetry.",

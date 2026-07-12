@@ -47,8 +47,8 @@ export function SoaReviewView({ initial, strategies }: Props) {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
             <FileText className="h-4 w-4 text-gold" />
           </div>
@@ -77,7 +77,7 @@ export function SoaReviewView({ initial, strategies }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_340px] gap-8 items-start">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8 xl:items-start">
         <div className="space-y-5">
           {doc.sections.map((section) => (
             <SoaSection
@@ -89,7 +89,7 @@ export function SoaReviewView({ initial, strategies }: Props) {
             />
           ))}
         </div>
-        <div className="sticky top-8">
+        <div className="xl:sticky xl:top-8">
           <SoaReviewPanel doc={doc} onChange={setDoc} />
         </div>
       </div>

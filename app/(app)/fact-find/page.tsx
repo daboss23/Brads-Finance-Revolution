@@ -45,7 +45,7 @@ export default function FactFindPage() {
   const secondRow = completionBySection.slice(4);
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Page header */}
       <div className="mb-10">
@@ -61,7 +61,7 @@ export default function FactFindPage() {
       </div>
 
       {/* KPI cards — same pattern as dashboard */}
-      <div className="grid grid-cols-3 gap-4 mb-12">
+      <div className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[
           {
             label: "Clients Fully Complete",
@@ -108,7 +108,7 @@ export default function FactFindPage() {
       </div>
 
       {/* Section completion — first 4 */}
-      <div className="grid grid-cols-4 gap-5 mb-5">
+      <div className="mb-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {firstRow.map(({ section, complete, inProgress, pct }) => (
           <SectionCard
             key={section}
@@ -122,7 +122,7 @@ export default function FactFindPage() {
       </div>
 
       {/* Section completion — last 3 (wider) */}
-      <div className="grid grid-cols-3 gap-5 mb-14">
+      <div className="mb-14 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {secondRow.map(({ section, complete, inProgress, pct }) => (
           <SectionCard
             key={section}
@@ -151,7 +151,7 @@ export default function FactFindPage() {
       <div className="rounded-lg border border-border overflow-x-auto">
         <table className="w-full table-fixed">
           <thead>
-            <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+            <tr className="border-b border-border bg-card">
               <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-[280px]">
                 Client
               </th>

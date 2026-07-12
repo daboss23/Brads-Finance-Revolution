@@ -30,7 +30,7 @@ export default async function ClientSoaPage({
   const strategies = profile?.strategies ?? [];
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
       <Link
         href={`/clients/${client.id}`}
         className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"

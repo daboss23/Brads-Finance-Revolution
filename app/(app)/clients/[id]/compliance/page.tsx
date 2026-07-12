@@ -20,7 +20,7 @@ export default async function ClientCompliancePage({
   const initial = checkCompliance(client.id);
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
       <Link
         href={`/clients/${client.id}`}
         className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"
@@ -53,7 +53,7 @@ export default async function ClientCompliancePage({
 
       <ClientTabs clientId={client.id} />
 
-      <div className="grid grid-cols-[1fr_380px] gap-8 items-start">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-8 xl:items-start">
         <ClientCompliancePanel
           clientId={client.id}
           clientName={client.name}

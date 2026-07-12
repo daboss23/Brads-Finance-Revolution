@@ -8,6 +8,19 @@ const TONE_FILL: Record<string, string> = {
   orange: "bg-warning/70",
 };
 
+const HEIGHTS = [
+  "h-[10%]",
+  "h-[20%]",
+  "h-[30%]",
+  "h-[40%]",
+  "h-[50%]",
+  "h-[60%]",
+  "h-[70%]",
+  "h-[80%]",
+  "h-[90%]",
+  "h-full",
+];
+
 /** Compact telemetry bars — a lightweight in-house sparkline, no chart lib. */
 export function SparkBars({
   data,
@@ -22,16 +35,16 @@ export function SparkBars({
   return (
     <div className={cn("flex items-end gap-[3px] h-10", className)}>
       {data.map((v, i) => {
-        const h = Math.max(8, Math.round((v / max) * 100));
+        const heightClass = HEIGHTS[Math.min(9, Math.max(0, Math.ceil((v / max) * 10) - 1))];
         const isLast = i === data.length - 1;
         return (
           <div
             key={i}
             className={cn(
               "flex-1 rounded-[2px] transition-all",
+              heightClass,
               isLast ? TONE_FILL[tone] : "bg-white/[0.08]"
             )}
-            style={{ height: `${h}%` }}
           />
         );
       })}

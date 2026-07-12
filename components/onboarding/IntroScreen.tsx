@@ -53,7 +53,7 @@ export function IntroScreen({ firstName, onBegin }: Props) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid gap-3 sm:grid-cols-3 sm:gap-5">
           {[
             { label: "Sections", value: FACT_FIND_SECTIONS.length.toString() },
             { label: "Est. time", value: `${ESTIMATED_MINUTES} min` },

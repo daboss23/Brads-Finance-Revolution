@@ -60,7 +60,7 @@ export function CompletionCertificate({ clientFullName, xpEarned, completedDate 
             </p>
 
             {/* Sections */}
-            <div className="grid grid-cols-2 gap-2.5 mb-8 text-left">
+            <div className="mb-8 grid gap-2.5 text-left sm:grid-cols-2">
               {FACT_FIND_SECTIONS.map((s) => (
                 <div key={s.id} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-success/80" />

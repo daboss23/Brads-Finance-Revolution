@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const dashboard = getCommandCentreDashboard();
 
   return (
-    <main className="relative isolate min-h-[100dvh] overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
+    <div className="relative isolate min-h-[100dvh] overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_12%,hsl(var(--gold)/0.09),transparent_30%),radial-gradient(circle_at_85%_6%,hsl(var(--teal-accent)/0.05),transparent_26%),radial-gradient(circle_at_50%_115%,hsl(var(--gold-shadow)/0.3),transparent_38%),linear-gradient(150deg,hsl(219_18%_9%),hsl(220_20%_3%)_58%,hsl(222_20%_5%))]" />
       <div className="absolute inset-x-8 top-5 -z-10 h-28 rounded-full bg-gold/[0.06] blur-3xl" />
       <div className="absolute bottom-0 right-10 -z-10 size-56 rounded-full bg-teal-accent/[0.05] blur-3xl" />
@@ -67,6 +67,6 @@ export default function DashboardPage() {
           />
         </div>
       </section>
-    </main>
+    </div>
   );
 }

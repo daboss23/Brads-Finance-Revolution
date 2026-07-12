@@ -277,7 +277,9 @@ function buildProceduralSections(
 ): SoaSectionContent[] {
   if (!factFind) throw new Error("Fact find required");
 
-  const firstName = clientName.split(" ")[0];
+  const isJointClient = clientName.includes("&") || /\band\b/i.test(clientName);
+  const clientAddress = isJointClient ? "James and Fiona" : clientName.split(" ")[0];
+  const responsibleClient = isJointClient ? clientName.replace("&", "and") : clientAddress;
   const meta = (id: string) => resolveStrategyMeta(id, customStrategies);
   const caseStudies = getCaseStudiesForStrategies(
     strategies.filter(isBuiltInStrategy),
@@ -293,9 +295,9 @@ function buildProceduralSections(
   const orionProjectionInputs = orionContext?.evidencePacket.projectionInputs ?? [];
 
   const bodies: Partial<Record<SectionId, string>> = {
-    cover: `This Statement of Advice has been prepared for ${clientName} by Brad Lonergan, Authorised Representative of Charter Financial Planning Limited AFSL 234665, trading as Newcastle Financial Services. It is confidential and prepared for ${firstName}'s personal use only.`,
+    cover: `This Statement of Advice has been prepared for ${clientName} by Brad Lonergan, Authorised Representative of Charter Financial Planning Limited AFSL 234665, trading as Newcastle Financial Services. It is confidential and prepared for your personal use only.`,
 
-    "executive-summary": `${firstName}, this plan covers ${strategies
+    "executive-summary": `${clientAddress}, this plan covers ${strategies
       .map((s) => meta(s).label.toLowerCase())
       .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.${atlasPersonalisation.length > 0 ? ` Adviser context used for this draft includes ${atlasPersonalisation.join(" ")}` : ""}`,
 
@@ -320,7 +322,7 @@ function buildProceduralSections(
           return `Recommendation ${i + 1}: ${m.label}. ${pattern.openingAngle} We recommend this strategy because it fits your circumstances based on what you shared with us. Key things this addresses for you: ${pattern.mustCover.slice(0, 2).join("; ")}. Alternatives considered and not chosen: standard product without active review, do nothing. Implementation steps are documented in the implementation plan below.`;
         }
         // Catalogue or custom strategy: reason from its description.
-        return `Recommendation ${i + 1}: ${m.label}. ${m.description} We recommend this strategy because it fits your circumstances based on what you shared with us. Alternatives considered and not chosen: standard product without active review, do nothing. This recommendation is adviser reviewed. Implementation steps are documented in the implementation plan below.`;
+        return `Recommendation ${i + 1}: ${m.label}. ${m.description} We recommend this strategy because it fits your circumstances based on what you shared with us. Alternatives considered and not chosen: standard product without active review, do nothing. This recommendation requires adviser review. Implementation steps are documented in the implementation plan below.`;
       });
 
       const evidenceNote =
@@ -347,7 +349,7 @@ function buildProceduralSections(
 
     "retirement-projections": `Your retirement projection is set out below using conservative assumptions. We will update this every year at your annual review.${atlasAssumptions.length > 0 ? ` The current modelling assumptions for this draft are ${atlasAssumptions.join(" ")}` : ""}${orionProjectionInputs.length > 0 ? ` Key inputs include ${orionProjectionInputs.map((item) => `${item.label}: ${item.value}`).join(". ")}.` : ""}`,
 
-    implementation: `1. Sign and return this SOA. Responsible: ${firstName}. By: within 14 days.\n2. Brad and Colleen lodge all provider applications. Responsible: Brad. By: within 7 days of signed SOA.\n3. Annual review meeting. Responsible: Brad and ${firstName}. By: 12 months from sign date.`,
+    implementation: `1. Sign and return this SOA. Responsible: ${responsibleClient}. By: within 14 days.\n2. Brad and Colleen lodge all provider applications. Responsible: Brad. By: within 7 days of signed SOA.\n3. Annual review meeting. Responsible: Brad and ${responsibleClient}. By: 12 months from sign date.`,
 
     "ongoing-service": `Your ongoing service is the BMK Annual Review package. It includes an annual review meeting, quarterly check-in, ad hoc support for life events and all provider liaison work.`,
 

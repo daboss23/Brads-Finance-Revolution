@@ -115,7 +115,7 @@ export default async function ClientDetailPage({
                 Contact Information
               </h2>
             </div>
-            <div className="px-6 py-5 grid grid-cols-2 gap-5">
+            <div className="grid gap-5 px-5 py-5 sm:grid-cols-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.email}</span>

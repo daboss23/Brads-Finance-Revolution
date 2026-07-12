@@ -68,7 +68,11 @@ export default function LoginPage() {
         <form onSubmit={submit} className="space-y-4">
           {!mfaStep && (
             <>
+              <label htmlFor="adviser-email" className="sr-only">
+                Adviser email
+              </label>
               <input
+                id="adviser-email"
                 type="email"
                 required
                 autoComplete="username"
@@ -77,7 +81,11 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-xl border border-border bg-foreground/[0.04] px-4 py-3 text-sm outline-none placeholder:text-foreground/35 focus:border-gold/50"
               />
+              <label htmlFor="adviser-password" className="sr-only">
+                Password
+              </label>
               <input
+                id="adviser-password"
                 type="password"
                 required
                 autoComplete="current-password"
@@ -89,21 +97,27 @@ export default function LoginPage() {
             </>
           )}
           {mfaStep && (
-            <input
-              type="text"
-              required
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              placeholder="123456"
-              value={totp}
-              onChange={(e) => setTotp(e.target.value)}
-              className="w-full rounded-xl border border-border bg-foreground/[0.04] px-4 py-3 text-center text-lg tracking-[0.4em] outline-none placeholder:text-foreground/25 focus:border-gold/50"
-            />
+            <>
+              <label htmlFor="adviser-totp" className="sr-only">
+                Six digit authenticator code
+              </label>
+              <input
+                id="adviser-totp"
+                type="text"
+                required
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="123456"
+                value={totp}
+                onChange={(e) => setTotp(e.target.value)}
+                className="w-full rounded-xl border border-border bg-foreground/[0.04] px-4 py-3 text-center text-lg tracking-[0.4em] outline-none placeholder:text-foreground/25 focus:border-gold/50"
+              />
+            </>
           )}
 
           {error && (
-            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
+            <p role="alert" aria-live="polite" className="rounded-lg bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
               {error}
             </p>
           )}
@@ -111,6 +125,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={busy}
+            aria-busy={busy}
             className="btn-gold w-full rounded-xl px-6 py-3.5 text-[14px] font-bold uppercase tracking-[0.05em] transition-[filter] hover:brightness-105 disabled:opacity-60"
           >
             {busy ? "Checking…" : mfaStep ? "Verify" : "Sign in"}

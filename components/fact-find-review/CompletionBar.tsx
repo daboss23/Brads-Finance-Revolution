@@ -25,19 +25,19 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
           {pct}%
         </span>
       </div>
-      <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
-        <div
-          className={cn(
-            "h-full rounded-full transition-all",
-            pct >= 80
-              ? "bg-success/80"
-              : pct >= 40
-                ? "bg-warning/80"
-                : "bg-red-500/80",
-          )}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <progress
+        value={pct}
+        max={100}
+        aria-label={`Fact find ${pct}% complete`}
+        className={cn(
+          "bmk-progress w-full",
+          pct >= 80
+            ? "bmk-progress-emerald"
+            : pct >= 40
+              ? "bmk-progress-amber"
+              : "bmk-progress-blue",
+        )}
+      />
       {missingSections && missingSections.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-muted-foreground">
