@@ -10,6 +10,10 @@ import {
 } from "@/lib/soa/soa-generator";
 import { recordPlanGenerated } from "@/lib/soa/voice-learner";
 import { logAudit } from "@/lib/compliance/audit-trail";
+import { getApprovedStrategies } from "@/lib/client-strategy-store";
+import { getCatalogueStrategy } from "@/lib/strategy-catalogue";
+import { saveSoa } from "@/lib/soa/soa-store";
+import type { SoaDocument } from "@/lib/soa/soa-template";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -43,8 +47,19 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
     setStates(fresh);
 
     try {
+      // Send Brad's approved strategies (built-in, catalogue and custom) plus
+      // the names/descriptions for catalogue/custom ones, so the SOA reflects
+      // exactly what was approved on the Strategies tab.
+      const approved = getApprovedStrategies(clientId);
+      const customStrategies = approved
+        .map((id) => getCatalogueStrategy(id))
+        .filter((s): s is NonNullable<typeof s> => Boolean(s))
+        .map((s) => ({ id: s.id, name: s.name, description: s.description }));
+
       const res = await fetch(`/api/soa/${clientId}/generate`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ strategies: approved, customStrategies }),
       });
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`);
@@ -71,6 +86,11 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               [stage]: status === "starting" ? "running" : "done",
             }));
           } else if (event.name === "complete") {
+            // Persist the generated document so the review page shows exactly
+            // what was generated, including catalogue/custom strategies.
+            if (event.data.doc) {
+              saveSoa(event.data.doc as SoaDocument);
+            }
             recordPlanGenerated(clientId);
             logAudit(clientId, "certificate-generated", "Brad", {
               format: "SOA",
