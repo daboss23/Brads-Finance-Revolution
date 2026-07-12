@@ -4,7 +4,11 @@ import {
   ensureFactFindsHydrated,
 } from "@/lib/secure-store/fact-find-persistence";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
-import { updateRealClient } from "@/lib/clients/real-client-store";
+import {
+  getRealClientByToken,
+  updateRealClient,
+} from "@/lib/clients/real-client-store";
+import { getLinkByToken } from "@/lib/sarah-data";
 import { notifyAdviser } from "@/lib/notify";
 import { normalizeFactFind, type SarahFactFind } from "@/lib/sarah-fact-find-schema";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
@@ -42,6 +46,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // This route is public because clients submit from their onboarding link.
+    // Bind that bearer token to the submitted client id before accepting any
+    // financial data, otherwise a valid token could overwrite another file.
+    const realClient = await getRealClientByToken(token);
+    const demoLink = realClient ? undefined : getLinkByToken(token);
+    const tokenClientId = realClient?.id ?? demoLink?.clientId;
+    if (!tokenClientId || tokenClientId !== clientId) {
+      err("invalid client token binding");
+      return Response.json(
+        { error: "Invalid or expired onboarding link." },
+        { status: 403 },
+      );
+    }
+
     try {
       await persistFactFind({
         clientId,
@@ -60,7 +78,7 @@ export async function POST(req: Request) {
       throw e;
     }
 
-    log("Sarah fact find received for", clientId, "via token", token);
+    log("Sarah fact find received for", clientId);
 
     // Move the client along the pipeline (real clients only; demo clients
     // are static) and tell Brad the file is ready to review.
@@ -84,7 +102,7 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     const m = e instanceof Error ? e.message : String(e);
     err("fatal:", m);
-    return Response.json({ error: `Fatal: ${m}` }, { status: 500 });
+    return Response.json({ error: "Unable to save the fact find." }, { status: 500 });
   }
 }
 

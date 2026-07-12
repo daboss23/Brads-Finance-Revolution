@@ -29,10 +29,16 @@ export function SoaReviewView({ initial, strategies }: Props) {
     // Pick up any local edits on mount. If none exist, seed localStorage
     // with the server rendered initial so subsequent edits persist.
     const live = getSoa(initial.clientId);
-    if (live) {
+    // Reject legacy or corrupted cache entries stored under the wrong client
+    // key. The server-rendered document is authoritative for identity.
+    if (
+      live?.clientId === initial.clientId &&
+      live.clientName === initial.clientName
+    ) {
       setDoc(live);
     } else {
       saveSoa(initial);
+      setDoc(initial);
     }
   }, [initial]);
 
