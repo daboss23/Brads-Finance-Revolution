@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ["pg"],
+    serverComponentsExternalPackages: ["pg", "puppeteer-core", "@sparticuz/chromium"],
   },
   typescript: {
     // The dashboard page has a pre-existing type quirk against the locked lucide-react version.
