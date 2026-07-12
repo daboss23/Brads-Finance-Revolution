@@ -17,10 +17,34 @@ export const dynamic = "force-dynamic";
 const SOA_AGENT_CHAIN: AgentId[] = ["beacon", "guardian", "scribe", "orion", "atlas"];
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } },
 ) {
   await ensureFactFindsHydrated();
+
+  // The Strategies tab stores Brad's approved strategies (built-in, catalogue
+  // and custom) in the browser. The runner posts them here so generation uses
+  // exactly what Brad approved, with names/descriptions for the custom ones.
+  let approved: string[] | undefined;
+  let customStrategies:
+    | { id: string; name: string; description: string }[]
+    | undefined;
+  try {
+    const body = await req.json();
+    if (Array.isArray(body?.strategies) && body.strategies.length > 0) {
+      approved = body.strategies.filter((s: unknown) => typeof s === "string");
+    }
+    if (Array.isArray(body?.customStrategies)) {
+      customStrategies = body.customStrategies.filter(
+        (c: unknown) =>
+          c &&
+          typeof c === "object" &&
+          typeof (c as { id?: unknown }).id === "string",
+      );
+    }
+  } catch {
+    // No body / invalid JSON — fall back to the client profile or recommender.
+  }
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
@@ -51,6 +75,8 @@ export async function POST(
         }
 
         const doc = generateSoa(params.id, {
+          recommendations: approved,
+          customStrategies,
           onStage: (s: GenerationStage) => {
             emit("stage", {
               stage: s,
@@ -65,6 +91,10 @@ export async function POST(
           generatedAt: doc.generatedAt,
           complianceScore: doc.complianceScore,
           sectionCount: doc.sections.length,
+          // Full document so the browser can persist exactly what was
+          // generated (including catalogue/custom strategies) for the review
+          // page to display — the review page itself can't read localStorage.
+          doc,
         });
       } catch (err) {
         if (err instanceof SoaGenerationError) {

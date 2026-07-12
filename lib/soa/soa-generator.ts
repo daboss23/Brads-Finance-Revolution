@@ -13,6 +13,7 @@ import { getFactFindOrDemo } from "../sarah-fact-find-store";
 import { getClientProfile } from "../client-profiles";
 import { recommendStrategies } from "../strategy-recommender";
 import { STRATEGY_LABELS, type StrategyKey } from "../forms";
+import { SEED_STRATEGIES } from "../strategy-catalogue";
 import { LANGUAGE_TEMPLATES } from "../compliance/knowledge-base";
 import { checkCompliance } from "../compliance/compliance-checker";
 import { logAudit } from "../compliance/audit-trail";
@@ -49,9 +50,56 @@ export class SoaGenerationError extends Error {
   }
 }
 
+/** Metadata for a catalogue or custom strategy that has no built-in pattern. */
+export interface CustomStrategyMeta {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface SoaGenerationOptions {
-  recommendations?: StrategyKey[];
+  /**
+   * Approved strategy ids for this run. May be built-in StrategyKey values or
+   * catalogue/custom ids. When omitted, the generator falls back to the
+   * client profile or the recommender.
+   */
+  recommendations?: string[];
+  /** Names + descriptions for custom strategies (which live in the browser). */
+  customStrategies?: CustomStrategyMeta[];
   onStage?: (stage: GenerationStage) => void;
+}
+
+/** True for the seven built-in strategies that have reasoning patterns wired. */
+function isBuiltInStrategy(id: string): id is StrategyKey {
+  return Object.prototype.hasOwnProperty.call(STRATEGY_PATTERNS, id);
+}
+
+/** Resolve a display label + description for any strategy id. */
+function resolveStrategyMeta(
+  id: string,
+  custom: CustomStrategyMeta[],
+): { label: string; description: string; builtIn: boolean } {
+  if (isBuiltInStrategy(id)) {
+    return { label: STRATEGY_LABELS[id], description: "", builtIn: true };
+  }
+  const fromCustom = custom.find((c) => c.id === id);
+  if (fromCustom) {
+    return {
+      label: fromCustom.name,
+      description: fromCustom.description,
+      builtIn: false,
+    };
+  }
+  const seed = SEED_STRATEGIES.find((s) => s.id === id);
+  if (seed) {
+    return { label: seed.name, description: seed.description, builtIn: false };
+  }
+  // Unknown id — humanise it so generation never crashes.
+  return {
+    label: id.replace(/^custom:/, "").replace(/[-_]/g, " "),
+    description: "",
+    builtIn: false,
+  };
 }
 
 export type GenerationStage =
@@ -115,7 +163,8 @@ export function generateSoa(
     ]);
   }
   const profile = getClientProfile(clientId);
-  const strategies =
+  const customStrategies = options.customStrategies ?? [];
+  const strategies: string[] =
     options.recommendations ??
     profile?.strategies ??
     recommendStrategies(factFind).map((r) => r.strategyKey);
@@ -124,9 +173,14 @@ export function generateSoa(
       "Brad has not approved any strategies for this client. Open the Strategies tab and approve at least one before generating.",
     ]);
   }
+  // Compliance scope and market lookups accept the full approved list. The
+  // built-in-specific checks (.includes on a StrategyKey) simply don't match
+  // catalogue/custom ids, which is correct — those flow through as
+  // recommendation content and still count toward the scope of advice.
+  const strategyList = strategies as StrategyKey[];
 
   stage("compliance-gate");
-  const compliance = checkCompliance(clientId, strategies);
+  const compliance = checkCompliance(clientId, strategyList);
   if (compliance.overallStatus === "failed" || compliance.blockers.length > 0) {
     throw new SoaGenerationError(
       "Compliance gate not cleared",
@@ -135,7 +189,7 @@ export function generateSoa(
   }
 
   stage("fetching-market");
-  const market = snapshotsForStrategies(strategies);
+  const market = snapshotsForStrategies(strategyList);
   const orionContext = readOrionContext(clientId);
   const atlasContext = readAtlasContext(clientId);
 
@@ -145,6 +199,7 @@ export function generateSoa(
     : buildProceduralSections(
         factFind,
         strategies,
+        customStrategies,
         client.name,
         orionContext,
         atlasContext,
@@ -186,7 +241,7 @@ export function generateSoa(
   // Re-run compliance against the assembled document. In production this
   // would scan section bodies for required phrases — for now we trust the
   // earlier gate plus the disclosure section.
-  const final = checkCompliance(clientId, strategies);
+  const final = checkCompliance(clientId, strategyList);
   doc.complianceScore = final.complianceScore;
 
   stage("done");
@@ -214,7 +269,8 @@ export function generateSoa(
 
 function buildProceduralSections(
   factFind: ReturnType<typeof getFactFindOrDemo>,
-  strategies: StrategyKey[],
+  strategies: string[],
+  customStrategies: CustomStrategyMeta[],
   clientName: string,
   orionContext: OrionOutput | null,
   atlasContext: AtlasOutput | null,
@@ -222,7 +278,10 @@ function buildProceduralSections(
   if (!factFind) throw new Error("Fact find required");
 
   const firstName = clientName.split(" ")[0];
-  const caseStudies = getCaseStudiesForStrategies(strategies);
+  const meta = (id: string) => resolveStrategyMeta(id, customStrategies);
+  const caseStudies = getCaseStudiesForStrategies(
+    strategies.filter(isBuiltInStrategy),
+  );
   const incomeRaw = factFind.employmentAndIncome.annualGrossIncome || "your income";
   const superFund = factFind.superannuation.fundName || "your current super fund";
   const superBalance = factFind.superannuation.estimatedBalance || "your current balance";
@@ -237,7 +296,7 @@ function buildProceduralSections(
     cover: `This Statement of Advice has been prepared for ${clientName} by Brad Lonergan, Authorised Representative of Charter Financial Planning Limited AFSL 234665, trading as Newcastle Financial Services. It is confidential and prepared for ${firstName}'s personal use only.`,
 
     "executive-summary": `${firstName}, this plan covers ${strategies
-      .map((s) => STRATEGY_LABELS[s].toLowerCase())
+      .map((s) => meta(s).label.toLowerCase())
       .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.${atlasPersonalisation.length > 0 ? ` Adviser context used for this draft includes ${atlasPersonalisation.join(" ")}` : ""}`,
 
     "about-you": `You are ${factFind.familyAndDependants.relationshipStatus.toLowerCase() || "currently single"} living at ${factFind.personalDetails.address || "your current address"}. ${
@@ -249,23 +308,32 @@ function buildProceduralSections(
 
     "risk-profile": `Your recorded risk profile is ${factFind.goalsAndObjectives.investmentRiskPreference || "Moderate"}. That profile guides every investment recommendation in this plan. We have aligned the recommended asset allocation accordingly. Please confirm this still reflects your attitude to risk by signing the acknowledgement at the back of this document.${atlasThemes.length > 0 ? ` The strategy themes highlighted for your file are ${atlasThemes.map((theme) => theme.toLowerCase()).join(", ")}.` : ""}`,
 
-    recommendations:
-      atlasRecommendations.length > 0
-        ? atlasRecommendations
-            .map((recommendation, i) => {
-              const context =
-                orionHighlights.length > 0
-                  ? ` This is supported by file evidence including ${orionHighlights.join(" ")}`
-                  : "";
-              return `Recommendation ${i + 1}: ${recommendation}${context} Implementation steps are documented in the implementation plan below.`;
-            })
-            .join("\n\n")
-        : strategies
-            .map((s, i) => {
-              const pattern = STRATEGY_PATTERNS[s];
-              return `Recommendation ${i + 1}: ${STRATEGY_LABELS[s]}. ${pattern.openingAngle} We recommend this strategy because it fits your circumstances based on what you shared with us. Key things this addresses for you: ${pattern.mustCover.slice(0, 2).join("; ")}. Alternatives considered and not chosen: standard product without active review, do nothing. Implementation steps are documented in the implementation plan below.`;
-            })
-            .join("\n\n"),
+    // Always produce one recommendation per approved strategy — built-in,
+    // ATO/MLC catalogue or custom — so every strategy Brad pulled in appears
+    // in the plan. The ATLAS agent's tailored narrative is folded in as
+    // additional adviser context after the strategy list.
+    recommendations: (() => {
+      const perStrategy = strategies.map((s, i) => {
+        const m = meta(s);
+        if (isBuiltInStrategy(s)) {
+          const pattern = STRATEGY_PATTERNS[s];
+          return `Recommendation ${i + 1}: ${m.label}. ${pattern.openingAngle} We recommend this strategy because it fits your circumstances based on what you shared with us. Key things this addresses for you: ${pattern.mustCover.slice(0, 2).join("; ")}. Alternatives considered and not chosen: standard product without active review, do nothing. Implementation steps are documented in the implementation plan below.`;
+        }
+        // Catalogue or custom strategy: reason from its description.
+        return `Recommendation ${i + 1}: ${m.label}. ${m.description} We recommend this strategy because it fits your circumstances based on what you shared with us. Alternatives considered and not chosen: standard product without active review, do nothing. This recommendation is adviser reviewed. Implementation steps are documented in the implementation plan below.`;
+      });
+
+      const evidenceNote =
+        orionHighlights.length > 0
+          ? ` This is supported by file evidence including ${orionHighlights.join(" ")}`
+          : "";
+      const adviserContext = atlasRecommendations.map(
+        (recommendation) =>
+          `Adviser consideration: ${recommendation}${evidenceNote}`,
+      );
+
+      return [...perStrategy, ...adviserContext].join("\n\n");
+    })(),
 
     superannuation: `Your super is currently with ${superFund} at ${superBalance}. We recommend reviewing your investment option and contribution rate at the next annual review. ${caseStudies.find((c) => c.strategy === "super-consolidation")?.learning ?? ""}`,
 
