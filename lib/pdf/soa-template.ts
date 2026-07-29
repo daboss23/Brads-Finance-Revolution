@@ -1,7 +1,10 @@
 // Statement of Advice — branded HTML for PDF rendering.
+//
+// Returns the cover and the body separately: the cover is printed edge to
+// edge with no running header, the body carries the header and page numbers.
 
 import type { SoaDocument } from "../soa/soa-template";
-import { docShell, esc, logoDataAttr } from "./doc-theme";
+import { coverShell, docShell, esc, logoDataAttr } from "./doc-theme";
 
 // Body text arrives as plain paragraphs (Brad's voice, no markdown).
 function paragraphs(body: string): string {
@@ -13,15 +16,27 @@ function paragraphs(body: string): string {
     .join("");
 }
 
-export function buildSoaHtml(doc: SoaDocument): string {
+export interface SoaHtml {
+  cover: string;
+  body: string;
+}
+
+export function buildSoaHtml(doc: SoaDocument): SoaHtml {
   const today = new Date(doc.generatedAt).toLocaleDateString("en-AU", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+  const firstName = doc.clientName.split(" ")[0];
 
-  const cover = `
-    <section class="cover">
+  // The "cover" section holds the confidentiality preamble. It belongs on the
+  // contents page as prose, not as a numbered chapter the client reads.
+  const coverSection = doc.sections.find((s) => s.id === "cover");
+  const bodySections = doc.sections.filter((s) => s.id !== "cover");
+
+  const cover = coverShell(
+    `Statement of Advice — ${doc.clientName}`,
+    `<section class="cover">
       <img class="logo" src="${logoDataAttr()}" alt="" />
       <div class="brand">Newcastle Financial Services</div>
       <div class="rule"></div>
@@ -32,27 +47,21 @@ export function buildSoaHtml(doc: SoaDocument): string {
         <div><div class="k">Adviser</div><div class="v">Brad Lonergan</div></div>
         <div><div class="k">Date prepared</div><div class="v">${today}</div></div>
         <div><div class="k">Licensee</div><div class="v">Charter Financial Planning · AFSL 234665</div></div>
-        <div><div class="k">Compliance score</div><div class="v">${doc.complianceScore} / 100</div></div>
+        <div><div class="k">Prepared under</div><div class="v">AFSL 234665</div></div>
       </div>
-    </section>`;
+    </section>`,
+  );
 
-  // Contents page
   const toc = `
     <section class="page">
-      <div class="rhead">
-        <img class="rh-logo" src="${logoDataAttr()}" alt="" />
-        <div class="rh-title">Statement of Advice<strong>${esc(doc.clientName)}</strong></div>
-      </div>
       <div class="eyebrow">Contents</div>
       <h2 class="block">What this document covers</h2>
-      <table>
-        <tr><th style="width:12mm">#</th><th>Section</th><th class="num">Status</th></tr>
-        ${doc.sections
+      <table class="toc">
+        ${bodySections
           .map(
-            (s) => `<tr>
-              <td class="num" style="color:var(--gold);font-weight:700">${String(s.number).padStart(2, "0")}</td>
-              <td style="color:var(--ink)">${esc(s.title)}</td>
-              <td class="num"><span class="pill ${s.needsReview ? "warn" : "good"}">${s.needsReview ? "In review" : "Confirmed"}</span></td>
+            (s, i) => `<tr>
+              <td class="tnum">${String(i + 1).padStart(2, "0")}</td>
+              <td class="ttitle">${esc(s.title)}</td>
             </tr>`,
           )
           .join("")}
@@ -60,18 +69,23 @@ export function buildSoaHtml(doc: SoaDocument): string {
       <div class="callout">
         <div class="ct">About this advice</div>
         This Statement of Advice sets out the strategy recommended for
-        ${esc(doc.clientName.split(" ")[0])}, why it is in their best interests,
-        and what happens next. It should be read in full. Please raise any
-        questions with Brad before acting on the recommendations.
+        ${esc(firstName)}, why it is in their best interests, and what happens
+        next. It should be read in full. Please raise any questions with Brad
+        before acting on the recommendations.
       </div>
+      ${
+        coverSection
+          ? `<div class="preamble">${paragraphs(coverSection.body)}</div>`
+          : ""
+      }
     </section>`;
 
-  const sections = doc.sections
+  const sections = bodySections
     .map(
-      (s) => `
+      (s, i) => `
       <div class="sec">
         <div class="sec-head">
-          <span class="sec-num">${String(s.number).padStart(2, "0")}</span>
+          <span class="sec-num">${String(i + 1).padStart(2, "0")}</span>
           <span class="sec-title">${esc(s.title)}</span>
         </div>
         <div class="sec-rule"></div>
@@ -85,13 +99,12 @@ export function buildSoaHtml(doc: SoaDocument): string {
     )
     .join("");
 
-  // Projection table (optional)
   const projection =
     doc.projections && doc.projections.length
       ? `
       <div class="sec">
         <div class="sec-head">
-          <span class="sec-num">★</span>
+          <span class="sec-num">◆</span>
           <span class="sec-title">Projected Outcome</span>
         </div>
         <div class="sec-rule"></div>
@@ -99,7 +112,8 @@ export function buildSoaHtml(doc: SoaDocument): string {
         strategy over time. Figures are projections based on the assumptions in
         this document and are not guaranteed.</p>
         <table>
-          <tr><th>Age</th><th class="num">Current path</th><th class="num">Recommended</th><th class="num">Difference</th></tr>
+          <thead><tr><th>Age</th><th class="num">Current path</th><th class="num">Recommended</th><th class="num">Difference</th></tr></thead>
+          <tbody>
           ${doc.projections
             .map((p) => {
               const diff = p.recommended - p.current;
@@ -112,6 +126,7 @@ export function buildSoaHtml(doc: SoaDocument): string {
               </tr>`;
             })
             .join("")}
+          </tbody>
         </table>
       </div>`
       : "";
@@ -121,22 +136,22 @@ export function buildSoaHtml(doc: SoaDocument): string {
       ? `<div class="sec">
           <div class="eyebrow">Market context at time of advice</div>
           <table>
-            <tr><th>Indicator</th><th>Value</th><th>Source</th></tr>
+            <thead><tr><th>Indicator</th><th>Value</th><th>Source</th></tr></thead>
+            <tbody>
             ${doc.marketSnapshots
               .map(
                 (m) => `<tr><td style="color:var(--ink)">${esc(m.label)}</td><td>${esc(m.value)}</td><td style="color:var(--muted)">${esc(m.source)}</td></tr>`,
               )
               .join("")}
+            </tbody>
           </table>
         </div>`
       : "";
 
-  const content = `
+  const body = docShell(
+    `Statement of Advice — ${doc.clientName}`,
+    `${toc}
     <section class="page">
-      <div class="rhead">
-        <img class="rh-logo" src="${logoDataAttr()}" alt="" />
-        <div class="rh-title">Statement of Advice<strong>${esc(doc.clientName)}</strong></div>
-      </div>
       ${sections}
       ${projection}
       ${marketNote}
@@ -149,7 +164,8 @@ export function buildSoaHtml(doc: SoaDocument): string {
         Compliance reference ${esc(doc.complianceCertificateId)}. Generated by
         the BMK CRM advice engine, ${today}.
       </div>
-    </section>`;
+    </section>`,
+  );
 
-  return docShell(`Statement of Advice — ${doc.clientName}`, cover + toc + content);
+  return { cover, body };
 }

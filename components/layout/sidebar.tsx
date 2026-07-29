@@ -127,9 +127,11 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="fixed inset-x-0 top-0 z-40 flex items-center justify-between border-b border-gold/[0.1] bg-[hsl(220_20%_4%_/_0.92)] px-3 py-2 backdrop-blur-xl lg:hidden">
+      {/* Height is fixed at h-16 so it matches the pt-16 the main column
+          reserves for it; otherwise the top of every page hides underneath. */}
+      <div className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-gold/[0.1] bg-[hsl(220_20%_4%_/_0.92)] px-3 backdrop-blur-xl lg:hidden">
         <div className="flex items-center">
-          <NewcastleLogoFull size={130} />
+          <NewcastleLogoFull size={46} />
         </div>
         <button
           type="button"

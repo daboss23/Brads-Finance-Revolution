@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -74,6 +74,10 @@ export default function SarahPage() {
   const dropOff = getDropOffData();
   const [copied, setCopied] = useState<string | null>(null);
   const [resent, setResent] = useState<string | null>(null);
+  // Read the origin after mount. Reading it during render makes the server
+  // and browser emit different text and throws away the whole hydrated tree.
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
 
   function copyLink(token: string) {
     const url = `${window.location.origin}/onboarding/${token}`;
@@ -256,7 +260,8 @@ export default function SarahPage() {
         </div>
 
         <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-border bg-card">
                 {["Client", "Link Status", "Progress", "Sent", "Last Activity", "Actions"].map((h) => (
@@ -373,6 +378,7 @@ export default function SarahPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Link format note */}
@@ -381,7 +387,7 @@ export default function SarahPage() {
           <p className="text-[11px] text-muted-foreground/35">
             Links follow the format:{" "}
             <span className="font-mono text-muted-foreground/50">
-              {typeof window !== "undefined" ? window.location.origin : "https://bmkcrm.com.au"}/onboarding/[token]
+              {origin || "https://bmkcrm.com.au"}/onboarding/[token]
             </span>
           </p>
         </div>

@@ -20,9 +20,12 @@ export async function GET(
   const data = getFactFindOrDemo(client.id);
   if (!data) return NextResponse.json({ error: "No fact find available" }, { status: 404 });
 
-  const html = buildFactFindHtml({ clientName: client.name, data });
+  const { cover, body } = buildFactFindHtml({ clientName: client.name, data });
   const pdf = await renderPdf({
-    html,
+    coverHtml: cover,
+    html: body,
+    headerLeft: "Financial Fact Find",
+    headerRight: client.name,
     footerLeft: `Financial Fact Find — ${client.name} · Newcastle Financial Services`,
   });
 

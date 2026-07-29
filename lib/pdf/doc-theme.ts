@@ -34,19 +34,22 @@ export const BRAND_CSS = /* css */ `
     line-height: 1.55;
     background: var(--paper);
   }
-  .page { padding: 20mm 18mm 16mm; page-break-after: always; }
+  /* Body pages. Vertical space comes from the print margins (the running
+     header and footer live there), so only the side gutters are set here. */
+  .page { padding: 0 18mm; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
-  /* Cover */
+  /* Cover — rendered edge to edge in its own pass, so it fills the sheet. */
   .cover {
     background:
       radial-gradient(120% 80% at 80% 0%, rgba(200,168,74,0.16), transparent 55%),
       linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
     color: #eef1f6;
-    height: 274mm;
-    padding: 26mm 22mm 20mm;
+    width: 210mm;
+    height: 297mm;
+    padding: 26mm 22mm 24mm;
     display: flex; flex-direction: column;
-    page-break-after: always;
+    overflow: hidden;
   }
   .cover .logo { width: 30mm; height: 30mm; }
   .cover .brand {
@@ -82,9 +85,14 @@ export const BRAND_CSS = /* css */ `
   .rhead .rh-title { font-size: 8pt; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); text-align: right; }
   .rhead .rh-title strong { display: block; color: var(--ink); font-size: 9.5pt; letter-spacing: 0.04em; margin-top: 1mm; }
 
-  /* Sections */
-  .sec { margin-bottom: 9mm; page-break-inside: avoid; }
-  .sec-head { display: flex; align-items: baseline; gap: 4mm; margin-bottom: 4mm; }
+  /* Sections. Long sections are allowed to flow across a page break —
+     pinning them whole leaves half-empty pages — but a heading never sits
+     alone at the foot of a page, and paragraphs keep two lines together. */
+  .sec { margin-bottom: 9mm; }
+  .sec p { orphans: 2; widows: 2; }
+  .sec-head { display: flex; align-items: baseline; gap: 4mm; margin-bottom: 4mm;
+    page-break-after: avoid; page-break-inside: avoid; }
+  .sec-head + .sec-rule { page-break-after: avoid; }
   .sec-num { font-size: 9pt; font-weight: 700; color: var(--gold);
     font-variant-numeric: tabular-nums; min-width: 8mm; }
   .sec-title { font-size: 14pt; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
@@ -125,14 +133,27 @@ export const BRAND_CSS = /* css */ `
   th { text-align: left; font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--gold); border-bottom: 1.5px solid var(--gold); padding: 0 3mm 2mm 0; }
   td { border-bottom: 1px solid var(--line); padding: 2.4mm 3mm 2.4mm 0; vertical-align: top; }
+  /* Repeat column headings when a table runs over a page, and never split a row. */
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Contents listing */
+  table.toc { margin: 2mm 0 6mm; }
+  table.toc td { padding: 2.8mm 0; }
+  table.toc .tnum { width: 12mm; color: var(--gold); font-weight: 700;
+    font-variant-numeric: tabular-nums; }
+  table.toc .ttitle { color: var(--ink); font-size: 10.5pt; }
+
+  .preamble { margin-top: 6mm; font-size: 9pt; color: var(--muted); }
+  .preamble p { margin-bottom: 2.5mm; }
 
   .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 4mm 0; }
   .stat { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; }
   .stat .sk { font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
   .stat .sv { font-size: 18pt; font-weight: 600; color: var(--ink); margin-top: 1.5mm; font-variant-numeric: tabular-nums; }
 
-  .note { font-size: 8pt; color: var(--muted); line-height: 1.5; margin-top: 6mm; padding-top: 4mm; border-top: 1px solid var(--line); }
+  .note { font-size: 8pt; color: var(--muted); line-height: 1.5; margin-top: 6mm; padding-top: 4mm; border-top: 1px solid var(--line); page-break-inside: avoid; }
 `;
 
 export function logoDataAttr(): string {
@@ -151,4 +172,12 @@ export function docShell(title: string, bodyHtml: string): string {
   return `<!DOCTYPE html><html lang="en-AU"><head><meta charset="utf-8"><title>${esc(
     title,
   )}</title><style>${BRAND_CSS}</style></head><body>${bodyHtml}</body></html>`;
+}
+
+/**
+ * Cover pages are rendered in their own pass with zero print margins, so the
+ * navy artwork bleeds to the edge of the sheet instead of floating on white.
+ */
+export function coverShell(title: string, coverHtml: string): string {
+  return docShell(title, coverHtml);
 }

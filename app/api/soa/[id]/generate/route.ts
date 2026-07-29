@@ -9,12 +9,21 @@ import {
 import { buildClientAgentInput } from "@/lib/agents/client-input";
 import { runAgent } from "@/lib/agents/run-agent";
 import type { AgentId } from "@/lib/agents/types";
+import type { SoaDocument } from "@/lib/soa/soa-template";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SOA_AGENT_CHAIN: AgentId[] = ["beacon", "guardian", "scribe", "orion", "atlas"];
+// Which agent does the real work behind each progress stage. Stages without
+// an agent are either instant bookkeeping or the assembly step itself.
+const STAGE_AGENTS: Partial<Record<GenerationStage, AgentId>> = {
+  "loading-client": "beacon",
+  "compliance-gate": "guardian",
+  "generating-summary": "scribe",
+  "generating-recommendations": "orion",
+  "generating-projections": "atlas",
+};
 
 export async function POST(
   req: NextRequest,
@@ -55,36 +64,41 @@ export async function POST(
       };
 
       try {
-        const stages = getStageOrder();
-        for (const stage of stages) {
+        // Each stage opens, does its real work, then closes, so the progress
+        // panel advances one step at a time instead of lighting every stage
+        // at once while the agent chain runs silently behind it.
+        let doc: SoaDocument | undefined;
+        for (const stage of getStageOrder()) {
           emit("stage", {
             stage,
             label: STAGE_LABELS[stage],
             status: "starting",
           });
-          // Stagger to feel like genuine progress without being slow.
-          await new Promise((r) => setTimeout(r, 220));
-        }
 
-        for (const agentId of SOA_AGENT_CHAIN) {
-          const input = buildClientAgentInput(params.id, agentId);
-          await runAgent(agentId, input, {
-            clientId: params.id,
-            force: false,
+          const agentId = STAGE_AGENTS[stage];
+          if (agentId) {
+            await runAgent(agentId, buildClientAgentInput(params.id, agentId), {
+              clientId: params.id,
+              force: false,
+            });
+          } else if (stage === "assembling") {
+            doc = generateSoa(params.id, {
+              recommendations: approved,
+              customStrategies,
+            });
+          } else {
+            // Bookkeeping stages are instant; hold briefly so the step reads.
+            await new Promise((r) => setTimeout(r, 200));
+          }
+
+          emit("stage", {
+            stage,
+            label: STAGE_LABELS[stage],
+            status: "complete",
           });
         }
 
-        const doc = generateSoa(params.id, {
-          recommendations: approved,
-          customStrategies,
-          onStage: (s: GenerationStage) => {
-            emit("stage", {
-              stage: s,
-              label: STAGE_LABELS[s],
-              status: "complete",
-            });
-          },
-        });
+        if (!doc) throw new Error("SOA assembly did not produce a document.");
 
         emit("complete", {
           clientId: doc.clientId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   XCircle,
@@ -45,9 +45,11 @@ const STATUS_TONE: Record<ComplianceStatus, string> = {
 export function ClientCompliancePanel({ clientId, clientName, initial }: Props) {
   const [result, setResult] = useState<ComplianceResult>(initial);
   const [running, setRunning] = useState(false);
-  const [signedOff, setSignedOff] = useState<boolean>(
-    typeof window !== "undefined" ? Boolean(getSignOff(clientId)) : false,
-  );
+  // Sign-off lives in browser storage, so it can only be read after mount.
+  // Seeding it during render makes the server and browser disagree and costs
+  // the whole hydrated tree.
+  const [signedOff, setSignedOff] = useState(false);
+  useEffect(() => setSignedOff(Boolean(getSignOff(clientId))), [clientId]);
 
   const overall = COMPLIANCE_STATUS_COPY[result.overallStatus];
 

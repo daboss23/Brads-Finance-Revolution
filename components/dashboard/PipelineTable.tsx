@@ -88,7 +88,8 @@ export function PipelineTable() {
 
   return (
     <div className="rounded-xl glass-card overflow-hidden">
-      <table className="w-full">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[880px]">
         <thead>
           <tr className="border-b border-border/60 bg-[hsl(222_24%_6%)]">
             {["Client", "Progress", "Status", "Fact Find Stage", "Next Action", "Meeting", ""].map((h) => (
@@ -165,6 +166,7 @@ export function PipelineTable() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

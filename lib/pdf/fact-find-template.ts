@@ -1,7 +1,7 @@
 // Fact Find Summary — branded HTML for PDF rendering.
 
 import type { SarahFactFind } from "../sarah-fact-find-schema";
-import { docShell, esc, logoDataAttr } from "./doc-theme";
+import { coverShell, docShell, esc, logoDataAttr } from "./doc-theme";
 
 interface FactFindDocInput {
   clientName: string;
@@ -42,7 +42,12 @@ function section(num: number, title: string, fields: Field[]): string {
     </div>`;
 }
 
-export function buildFactFindHtml(input: FactFindDocInput): string {
+export interface FactFindHtml {
+  cover: string;
+  body: string;
+}
+
+export function buildFactFindHtml(input: FactFindDocInput): FactFindHtml {
   const d = input.data;
   const today = new Date().toLocaleDateString("en-AU", {
     day: "numeric",
@@ -69,10 +74,6 @@ export function buildFactFindHtml(input: FactFindDocInput): string {
 
   const content = `
     <section class="page">
-      <div class="rhead">
-        <img class="rh-logo" src="${logoDataAttr()}" alt="" />
-        <div class="rh-title">Financial Fact Find<strong>${esc(input.clientName)}</strong></div>
-      </div>
 
       <div class="callout">
         <div class="ct">Discovery Summary</div>
@@ -117,10 +118,6 @@ export function buildFactFindHtml(input: FactFindDocInput): string {
     </section>
 
     <section class="page">
-      <div class="rhead">
-        <img class="rh-logo" src="${logoDataAttr()}" alt="" />
-        <div class="rh-title">Financial Fact Find<strong>${esc(input.clientName)}</strong></div>
-      </div>
 
       ${section(5, "Assets", [
         ["Owner-occupied property", d.assets.ownerOccupiedPropertyValue],
@@ -156,10 +153,6 @@ export function buildFactFindHtml(input: FactFindDocInput): string {
     </section>
 
     <section class="page">
-      <div class="rhead">
-        <img class="rh-logo" src="${logoDataAttr()}" alt="" />
-        <div class="rh-title">Financial Fact Find<strong>${esc(input.clientName)}</strong></div>
-      </div>
 
       ${section(9, "Insurance", [
         ["Life insurance sum insured", d.insurance.lifeInsuranceSumInsured],
@@ -187,5 +180,8 @@ export function buildFactFindHtml(input: FactFindDocInput): string {
       </div>
     </section>`;
 
-  return docShell(`Fact Find — ${input.clientName}`, cover + content);
+  return {
+    cover: coverShell(`Fact Find — ${input.clientName}`, cover),
+    body: docShell(`Fact Find — ${input.clientName}`, content),
+  };
 }

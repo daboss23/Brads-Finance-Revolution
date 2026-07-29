@@ -18,9 +18,12 @@ export async function GET(
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const doc = generateSoa(client.id);
-  const html = buildSoaHtml(doc);
+  const { cover, body } = buildSoaHtml(doc);
   const pdf = await renderPdf({
-    html,
+    coverHtml: cover,
+    html: body,
+    headerLeft: "Statement of Advice",
+    headerRight: client.name,
     footerLeft: `Statement of Advice — ${client.name} · Newcastle Financial Services`,
   });
 
