@@ -7,15 +7,26 @@ import {
   getRealClient,
   toClient,
 } from "@/lib/clients/real-client-store";
+import {
+  listXplanClients,
+  getXplanClient,
+  isXplanId,
+} from "@/lib/xplan/source";
 
 export async function listAllClients(): Promise<Client[]> {
   const real = await listRealClients();
-  return [...real.map(toClient), ...CLIENTS];
+  // Returns [] unless XPLAN credentials are present, so this is a no-op today.
+  const xplan = await listXplanClients();
+  return [...real.map(toClient), ...xplan.map((r) => r.client), ...CLIENTS];
 }
 
 export async function findClient(clientId: string): Promise<Client | null> {
   const real = await getRealClient(clientId);
   if (real) return toClient(real);
+  if (isXplanId(clientId)) {
+    const record = await getXplanClient(clientId);
+    if (record) return record.client;
+  }
   return CLIENTS.find((client) => client.id === clientId) ?? null;
 }
 

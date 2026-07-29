@@ -56,6 +56,11 @@ function totpAt(secret: string, counter: number): string {
   return String(code % 1_000_000).padStart(6, "0");
 }
 
+/** The code for right now. Used to answer XPLAN's software-token challenge. */
+export function currentTotp(secret: string): string {
+  return totpAt(secret, Math.floor(Date.now() / 1000 / 30));
+}
+
 // Accepts the current step plus one step either side for clock drift.
 export function verifyTotp(secret: string, code: string): boolean {
   const clean = code.replace(/\s+/g, "");
