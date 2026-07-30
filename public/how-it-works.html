@@ -493,6 +493,54 @@
     .rise { opacity: 1 !important; transform: none !important; transition: none !important; }
     * { animation: none !important; }
   }
+
+  /* ---- Print / PDF ----
+     Full-bleed navy: Chrome leaves @page margins unpainted, so the inset
+     comes from the page's own padding instead of a paper margin. */
+  @page { size: A4; margin: 0; }
+
+  @media print {
+    /* Scroll-reveal never fires when printing — nothing may stay hidden. */
+    .rise { opacity: 1 !important; transform: none !important; }
+
+    body { background: var(--navy-deep); }
+    .wrap { padding-inline: 16mm; }
+    section { padding-block: 10mm; }
+    .plate { padding: 8mm; }
+    .head { margin-bottom: 8mm; }
+
+    /* Never split a stage, a card or a comparison across a page break. */
+    .stage, .track, .pair, .found > div, .plate, .gauge > div, tr {
+      break-inside: avoid;
+    }
+    .caption { break-before: avoid; }
+    h1, h2, h3 { break-after: avoid; }
+    .head { break-after: avoid; }
+
+    .open { padding-block: 30mm 20mm; }
+
+    /* background-clip:text does not survive PDF export — the gradient prints
+       as a filled block behind the glyphs. Fall back to solid gold. */
+    .leaf {
+      background: none !important;
+      -webkit-text-fill-color: var(--gold-bright) !important;
+      color: var(--gold-bright) !important;
+    }
+
+    /* A heading must never be stranded on the page above its own content. */
+    .head { break-inside: avoid; break-after: avoid; }
+
+    /* Keep the flowchart whole. It is tall, so fitting one page costs scale;
+       every stage in it is also written out in full below. */
+    .diagram svg { max-height: 178mm; width: auto; margin-inline: auto; }
+
+    /* The rail's absolute hairline does not survive pagination cleanly. */
+    .marker::before { display: none; }
+
+    .roster-scroll, .plate { overflow: visible; }
+    table.roster, .plate .diagram { min-width: 0; }
+  }
+
 </style>
 </head>
 <body>
