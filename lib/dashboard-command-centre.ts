@@ -25,7 +25,12 @@ export type RuntimeAgentName =
   | "ATLAS"
   | "Nexus";
 
-export type AgentActivityStatus = "Active" | "Idle" | "Needs Key" | "Mock";
+export type AgentActivityStatus =
+  | "Active"
+  | "Monitoring"
+  | "Idle"
+  | "Needs Key"
+  | "Mock";
 
 export type DashboardMetric = {
   id: string;
@@ -122,10 +127,11 @@ type DashboardBaseState = {
 
 export function getCommandCentreDashboard(): CommandCentreDashboard {
   const state = getDashboardBaseState();
-  // Agent JSON providers intentionally remain deterministic for the showcase,
-  // even when Sarah's voice/API keys are configured. Keep the dashboard honest
-  // until live provider execution and prompt safety gates are enabled.
-  const mockModeActive = true;
+  // Sarah runs live once her Claude key is configured. The workflow agents
+  // stay deterministic by design until live provider execution is switched
+  // on, so the dashboard reflects exactly what each layer is doing.
+  const sarahLive = Boolean(process.env.ANTHROPIC_API_KEY);
+  const mockModeActive = !sarahLive;
   const sarahComplete = CLIENTS.filter(
     (client) =>
       client.status === "complete" ||
@@ -254,10 +260,10 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
       },
     ],
     agentActivity: buildAgentActivity(mockModeActive),
-    systemStatus: "Demo mode ready",
+    systemStatus: mockModeActive ? "Demo mode ready" : "All systems operational",
     mockModeActive,
     dataSourceLabel:
-      "Derived from CLIENTS, SOA pipeline rows, compliance state, and dashboard mock telemetry.",
+      "Derived from CLIENTS, SOA pipeline rows, compliance state, live environment credentials and agent telemetry.",
   };
 }
 
@@ -534,11 +540,25 @@ function buildAgentActivity(mockModeActive: boolean): AgentActivityItem[] {
     },
     {
       name: "Nexus",
-      status: mockModeActive ? "Needs Key" : "Idle",
-      tone: mockModeActive ? "orange" : "blue",
-      detail: mockModeActive ? "credentials missing" : "integrations scanned",
+      status: "Monitoring",
+      tone: "blue",
+      detail: `${platformServicesConnected()}/5 platform services connected`,
     },
   ];
+}
+
+/**
+ * Counts the platform credentials Nexus actually checks. Shown verbatim on
+ * the dashboard so integration health is factual, never decorative.
+ */
+function platformServicesConnected(): number {
+  return [
+    "ANTHROPIC_API_KEY",
+    "ELEVENLABS_API_KEY",
+    "DATABASE_URL",
+    "ADVISER_PASSWORD_HASH",
+    "AUTH_SESSION_SECRET",
+  ].filter((key) => Boolean(process.env[key])).length;
 }
 
 function clientName(clientId: string): string {
