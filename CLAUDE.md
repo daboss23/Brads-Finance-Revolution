@@ -4,13 +4,12 @@
 
 ## ⛔ CRITICAL RULES — READ FIRST. NO EXCEPTIONS.
 
-> **NEVER** create new branches under any circumstances.
-> **NEVER** use `git checkout -b` or `git switch -c`.
-> **ALWAYS** commit directly to `main`.
-> **ALWAYS** push to `main`. No pull requests. No exceptions.
+> **NEVER** commit directly to `main`.
+> **ALWAYS** work on a feature branch (e.g. `consolidate/newer-variant`), push it,
+> and wait for Brad's approval before merging to `main`.
 > **NEVER** use inline styles.
 > **ALWAYS** use Tailwind utility classes and existing CSS variable tokens.
-> **ALWAYS** use shadcn/ui components — never build UI from scratch.
+> **ALWAYS** use shadcn/ui components — never build UI primitives from scratch.
 > Keep components small and focused.
 
 ---
@@ -18,7 +17,9 @@
 ## Project Overview
 
 A custom CRM and AI-powered client onboarding platform for BMK Financial Services (Brad Lonergan, Newcastle NSW).
-Replaces manual financial planning workflows with an automated pipeline.
+The goal: an automated financial advice operating system where an agent chain carries every client
+from discovery to a Brad-approved Statement of Advice — plans that get measurably better as the
+system learns.
 
 - **Live URL:** bmk-crm-revolution.vercel.app
 - **Repo:** daboss23/Brads-Finance-Revolution
@@ -29,6 +30,7 @@ Replaces manual financial planning workflows with an automated pipeline.
 
 - Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
 - App Router, deployed on Vercel
+- Encrypted persistence: Postgres when `DATABASE_URL` is set, encrypted local files otherwise
 
 ---
 
@@ -36,74 +38,102 @@ Replaces manual financial planning workflows with an automated pipeline.
 
 | Variable | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` | Powers Sarah via Claude Sonnet |
+| `ANTHROPIC_API_KEY` | Powers Sarah via Claude Sonnet; also flips dashboard to "All systems operational" |
 | `ELEVENLABS_API_KEY` | Powers Sarah's voice and transcription |
 | `ELEVENLABS_VOICE_ID` | `qkVB3KAXPWsBoebSnOpJ` |
+| `DATABASE_URL` | Switches secure-store from encrypted files to Postgres (run `db/schema.sql` once) |
+| `ADVISER_EMAIL` / `ADVISER_PASSWORD_HASH` | Adviser sign-in (see `scripts/hash-password.ts`) |
+| `AUTH_SESSION_SECRET` | Signs adviser session cookies |
+| `ADVISER_TOTP_SECRET` | Optional TOTP multi-factor for sign-in |
+| `CRON_SECRET` | Bearer token Vercel Cron sends to `/api/cron/cipher` |
+
+---
+
+## The Agent System (8 agents)
+
+Defined in `lib/agent-system.ts`, executed through `lib/agents/run-agent.ts`
+(caching + telemetry + safe fallbacks), prompts in `lib/agents/prompts.ts`.
+
+| Agent | Role | Flow step |
+|---|---|---|
+| Sarah | Client Discovery — live Claude session producing the fact find | 0 |
+| Beacon | Fact Find Structuring — normalises discovery into adviser-ready data | 1 |
+| Guardian | Compliance & Risk — consent, gaps, SOA blockers | 2 |
+| Scribe | Meeting Intelligence — briefs and adviser questions | 3 |
+| Orion | Evidence Assembly — approved-facts evidence packet | 4 |
+| ATLAS | Strategy & SOA Synthesis — final tailored strategy output | 5 |
+| Cipher | Follow Up & Client Status — stalled clients, daily brief (deterministic) | 6 |
+| Nexus | Integration health — deterministic, never uses AI | — |
+
+**Every workflow agent output feeds the generated SOA** (`lib/soa/soa-generator.ts` reads all five),
+and each document embeds an `agentContributions` provenance record (Sarah → ATLAS).
+
+### Generation flow
+
+Fact Find → Beacon → Guardian → Scribe → Orion → ATLAS → Brad review & approval → Client send.
+Generation streams SSE progress (`/api/soa/[id]/generate`) with a live Agent Intelligence Chain feed;
+manual runs are available at `/api/agents/run`.
 
 ---
 
 ## What Is Built
 
 ### Dashboard — `/dashboard`
-- Client pipeline matrix with fact find completion by section.
-- Status badges: In Progress, Ready for Meeting, Complete, Review Required.
-- SOA Pipeline row with KPI metrics.
+Premium command centre: intelligence engine core, five-stage flow, priority queue, Sarah live brief,
+pipeline snapshot, flow reading, agent activity strip. Agent statuses derive from real environment
+state (keys configured or not).
+
+### Agents — `/agents`
+All eight agents with execution profiles and run history. Telemetry is persisted through the
+encrypted store and hydrated on cold start (`getAgentTelemetryHydrated`).
 
 ### Clients — `/clients` and `/clients/[id]`
-- Client rows show SOA status chip when SOA exists.
-- Shared ClientTabs component across Overview, Fact Find, Strategies, Compliance pages.
+Pipeline matrix, shared ClientTabs across Overview, Fact Find, Strategies, Compliance, SOA pages.
 
 ### Fact Find Review — `/clients/[id]/fact-find-review`
-- Ten section fact find. Sarah answers auto-populate here.
-- Completion bar, missing sections in amber, editable fields.
-- Export to Word and PDF.
-
-### Form Generation — `/clients/[id]/forms`
-- Pre-filled product provider forms for MLC, AIA, AMP MyNorth.
+Ten-section fact find, Sarah answers auto-populate, completion bar, editable fields, export to Word/PDF.
 
 ### Sarah AI — `/onboarding/[token]`
-- Client-facing Financial Discovery Session.
-- Animated plasma energy orb on canvas.
-- ElevenLabs voice — Sarah speaks to client.
-- ElevenLabs Scribe v1 for speech to text.
-- Ten section fact find via natural conversation.
-- Data feeds back to fact find review automatically.
-- Opens with audio check then full greeting.
-- Waits for client response before proceeding.
-- Inactivity check at five minutes.
-- No dashes, no markdown, plain human language only.
-
-### Intro Screen — `/onboarding/[token]` (before session)
-- Newcastle Financial Services logo at `/public/newcastle-logo.png`
-- Financial Discovery Session headline.
-- Begin My Financial Discovery gold button.
-
-### Sarah Dashboard — `/sarah`
-- Fact find link management, KPI cards, drop-off analytics.
+Client-facing Financial Discovery Session: plasma orb, ElevenLabs voice + Scribe transcription,
+ten-section conversational fact find feeding straight into review. Plain punctuation only — no dashes,
+no markdown, ever.
 
 ### Compliance Engine — `/compliance` and `/clients/[id]/compliance`
-- Knowledge base with seven BID steps, six safe harbour steps, Charter AFSL 234665 obligations, ATO 2024/25 thresholds, seven approved language templates.
-- Compliance checker computes score zero to one hundred, returns blockers, warnings, missing info.
-- Audit trail logs all compliance events.
-- Per-client compliance tab with score ring, checklists, issues lanes, Run Check, Download Certificate, Sign-Off actions.
-- PDF certificate at `/api/compliance/[id]/certificate`.
-- SOA gate shows locked panel listing blockers, clears to green when score is sixty or above with no blockers and adviser sign-off recorded.
+BID steps, safe harbour, Charter AFSL 234665 obligations, ATO thresholds, approved language templates.
+Score ring, blockers/warnings lanes, audit trail, PDF certificate, SOA gate at score ≥ 60 with no blockers
+plus adviser sign-off.
 
-### SOA Generation Engine — `/soa`, `/clients/[id]/soa`, `/clients/[id]/soa/generate`
-- Knowledge base with Brad's voice rules, strategy reasoning patterns for seven strategies, six case studies.
-- Five-layer orchestration with staged callbacks, compliance gate enforcement, market snapshot capture, audit hook.
-- SOA Review page with inline-editable sections, comments, reviewed and approved checkboxes, compliance ring, flagged items, approval progress, PDF download, DocuSign stub.
-- Generation page with readiness cards and SSE streaming progress across eight stages.
-- Full client pipeline table with stage badges: Fact Find, Compliance, SOA In Progress, Review, Approved, Sent, Signed.
-- Voice learner records before and after edit pairs.
-- Knowledge base upload at `/settings/knowledge-base` with drag-drop PDFs, Written-by-Brad weighted three times.
-- PDF export at `/api/soa/[id]/pdf` with branded cover, navy and gold header, all sections, footer page numbers.
+### SOA Engine — `/soa`, `/clients/[id]/soa`, `/clients/[id]/soa/generate`
+Five-layer orchestration, compliance gate enforcement, market snapshots, staged SSE generation,
+review page with inline editing (every edit trains the voice learner), PDF export, DocuSign stub.
+
+### Evidence Vault — `/evidence-vault`
+Knowledge layer with live counts derived from the SOA store, fact-find store, voice learner and
+knowledge bases.
+
+### Auth — `/login` + `middleware.ts`
+Session gate with demo-mode fallback, rate limiting, lockout, optional TOTP MFA. Public paths:
+onboarding, Sarah endpoints, cron.
+
+### Automation — `/api/cron/cipher`
+Vercel Cron (21:00 UTC daily = 7am Sydney) runs Cipher's stalled-client scan. Protected by `CRON_SECRET`.
+
+---
+
+## Persistence Model
+
+`lib/secure-store/` — records are always AES-256-GCM envelopes before they hit either backend:
+
+- **Postgres backend:** automatic when `DATABASE_URL` is set (Neon/Supabase/Vercel). One-time setup: `psql "$DATABASE_URL" -f db/schema.sql`.
+- **File backend:** encrypted JSON under `.data/secure-store` for local/dev.
+
+Browser state mirrors to `/api/state` via `lib/state-sync.ts` (localStorage instant reads, server durable copy).
 
 ---
 
 ## Sidebar Order
 
-Dashboard → Clients → Compliance → SOA → Fact Find → Sarah → Settings
+Dashboard → Clients → Sarah → Fact Find → SOA → Compliance → Agents → Evidence Vault → Settings
 
 ---
 
@@ -116,14 +146,8 @@ Dashboard → Clients → Compliance → SOA → Fact Find → Sarah → Setting
 
 ## Current Build Phase
 
-**Phase 5 complete.** Security layer and real client lifecycle shipped:
-- AES-256-GCM encrypted persistence (Postgres via `DATABASE_URL` or local files), fails closed without `DATA_ENCRYPTION_KEY`.
-- Adviser sign-in with TOTP MFA and lockout (`SECURITY.md` §9); middleware gates all adviser pages.
-- Rate limiting, durable encrypted audit trail, APP 5 notice on onboarding.
-- Real clients: Add Client dialog creates encrypted records with private onboarding tokens; fact-find completion advances pipeline status and emails Brad (Resend).
-- Security report at `docs/BMK-CRM-Security-Report.pdf`.
+Agent command centre live; SOA generation consumes the full agent chain with provenance.
 
 **Next priorities:**
-- Production activation: set env vars per SECURITY.md, then pilot one real client end to end.
-- Knowledge vault: actually store and parse uploaded PDFs into the voice engine.
-- DocuSign real integration.
+- Live provider execution for the workflow agents (currently deterministic/mock by design)
+- DocuSign real integration

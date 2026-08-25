@@ -9,6 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth/session";
 
 // Public paths: client onboarding + the endpoints Sarah's session needs.
+// /api/cron/ is exempt from the session gate because Vercel Cron authenticates
+// with CRON_SECRET at the route level instead of an adviser cookie.
 const PUBLIC_PREFIXES = [
   "/login",
   "/api/auth/",
@@ -16,6 +18,7 @@ const PUBLIC_PREFIXES = [
   "/api/sarah",
   "/api/transcribe",
   "/api/onboarding/",
+  "/api/cron/",
   "/_next/",
   "/favicon.ico",
 ];
