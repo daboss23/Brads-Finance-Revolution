@@ -8,7 +8,9 @@ import {
 } from "@/lib/soa/soa-generator";
 import { buildClientAgentInput } from "@/lib/agents/client-input";
 import { runAgent } from "@/lib/agents/run-agent";
-import type { AgentId } from "@/lib/agents/types";
+import { describeAgentOutput } from "@/lib/agents/output-summary";
+import { RUNTIME_AGENT_BLUEPRINTS } from "@/lib/agent-system";
+import type { AgentId, AgentOutput } from "@/lib/agents/types";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 
 export const runtime = "nodejs";
@@ -66,11 +68,33 @@ export async function POST(
           await new Promise((r) => setTimeout(r, 220));
         }
 
+        // Run the intelligence chain live and stream each agent's real
+        // result to the UI as it lands — this is the demo moment where the
+        // command centre visibly thinks.
         for (const agentId of SOA_AGENT_CHAIN) {
+          const blueprint = RUNTIME_AGENT_BLUEPRINTS[agentId];
+          emit("agent", {
+            agentId,
+            name: blueprint.name,
+            role: blueprint.role,
+            status: "running",
+            summary: "",
+            durationMs: 0,
+            cached: false,
+          });
           const input = buildClientAgentInput(params.id, agentId);
-          await runAgent(agentId, input, {
+          const result = await runAgent(agentId, input, {
             clientId: params.id,
             force: false,
+          });
+          emit("agent", {
+            agentId,
+            name: blueprint.name,
+            role: blueprint.role,
+            status: result.error ? "error" : "done",
+            summary: describeAgentOutput(agentId, result.output as AgentOutput),
+            durationMs: result.telemetry.durationMs ?? 0,
+            cached: result.cached,
           });
         }
 

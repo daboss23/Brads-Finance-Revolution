@@ -32,7 +32,7 @@ export function IntroScreen({ firstName, onBegin }: Props) {
               Hi, {firstName}.
             </h1>
             <p className="text-[18px] font-light text-foreground/70 leading-snug mt-1.5">
-              I'm Sarah — Brad's onboarding assistant.
+              Sarah here. I handle onboarding for Brad.
             </p>
           </div>
         </div>
@@ -43,10 +43,10 @@ export function IntroScreen({ firstName, onBegin }: Props) {
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
             <div className="px-7 py-6 space-y-3.5">
               <p className="text-[14.5px] text-foreground/85 leading-relaxed">
-                I'll guide you through your <span className="text-foreground font-medium">Financial Discovery</span> — a short conversation that gives Brad everything he needs to build a plan that's genuinely right for you.
+                I will guide you through your <span className="text-foreground font-medium">Financial Discovery</span>, a short conversation that gives Brad everything he needs to shape a plan genuinely built around you.
               </p>
               <p className="text-[14.5px] text-foreground/70 leading-relaxed">
-                I'll take you through it one question at a time. Estimates are perfectly fine — we'll refine the details together during your planning meeting.
+                We go through it one question at a time. Estimates are perfectly fine — we refine the details together during your planning meeting.
               </p>
             </div>
           </div>

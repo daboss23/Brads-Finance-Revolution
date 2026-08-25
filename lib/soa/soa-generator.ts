@@ -18,7 +18,14 @@ import { LANGUAGE_TEMPLATES } from "../compliance/knowledge-base";
 import { checkCompliance } from "../compliance/compliance-checker";
 import { logAudit } from "../compliance/audit-trail";
 import { getAgentOutput } from "../data/agent-output-repository";
-import type { AtlasOutput, OrionOutput } from "../agents/types";
+import type {
+  AtlasOutput,
+  BeaconOutput,
+  GuardianOutput,
+  OrionOutput,
+  ScribeOutput,
+} from "../agents/types";
+import type { AgentContribution } from "./soa-template";
 
 import {
   STRATEGY_PATTERNS,
@@ -39,7 +46,7 @@ import { snapshotsForStrategies } from "./market-data";
 import { buildSarahDemoSections, isShowpieceClient } from "./demo-soa";
 import { saveSoa } from "./soa-store";
 
-export const SOA_GENERATOR_VERSION = "1.0.0";
+export const SOA_GENERATOR_VERSION = "1.1.0";
 export const SOA_MODEL_VERSION = "claude-sonnet-4-6";
 
 export class SoaGenerationError extends Error {
@@ -190,6 +197,12 @@ export function generateSoa(
 
   stage("fetching-market");
   const market = snapshotsForStrategies(strategyList);
+  // Every workflow agent's latest saved output for this client feeds the
+  // document: Beacon structures the fact find, Guardian screens risk,
+  // Scribe frames the meeting, Orion assembles evidence, ATLAS synthesises.
+  const beaconContext = readBeaconContext(clientId);
+  const guardianContext = readGuardianContext(clientId);
+  const scribeContext = readScribeContext(clientId);
   const orionContext = readOrionContext(clientId);
   const atlasContext = readAtlasContext(clientId);
 
@@ -201,6 +214,9 @@ export function generateSoa(
         strategies,
         customStrategies,
         client.name,
+        beaconContext,
+        guardianContext,
+        scribeContext,
         orionContext,
         atlasContext,
       );
@@ -212,6 +228,13 @@ export function generateSoa(
   const { points, assumptions } = projectSuper(factFind);
 
   stage("assembling");
+  const agentContributions = buildAgentContributions({
+    beacon: beaconContext,
+    guardian: guardianContext,
+    scribe: scribeContext,
+    orion: orionContext,
+    atlas: atlasContext,
+  });
   const doc: SoaDocument = {
     clientId,
     clientName: client.name,
@@ -224,6 +247,7 @@ export function generateSoa(
     complianceScore: compliance.complianceScore,
     complianceCertificateId: `cert-${clientId}-${Date.now()}`,
     status: "in-review",
+    agentContributions,
   };
 
   // Ensure projection paragraph reflects actual numbers for non-Sarah clients
@@ -272,6 +296,9 @@ function buildProceduralSections(
   strategies: string[],
   customStrategies: CustomStrategyMeta[],
   clientName: string,
+  beaconContext: BeaconOutput | null,
+  guardianContext: GuardianOutput | null,
+  scribeContext: ScribeOutput | null,
   orionContext: OrionOutput | null,
   atlasContext: AtlasOutput | null,
 ): SoaSectionContent[] {
@@ -293,20 +320,24 @@ function buildProceduralSections(
   const atlasPersonalisation = atlasContext?.personalizationNotes ?? [];
   const orionHighlights = orionContext?.evidencePacket.factFindHighlights ?? [];
   const orionProjectionInputs = orionContext?.evidencePacket.projectionInputs ?? [];
+  const scribePriorities = scribeContext?.likelyPriorities ?? [];
+  const hasBeaconGaps =
+    (beaconContext?.missingFields.length ?? 0) > 0 ||
+    (beaconContext?.vagueFields.length ?? 0) > 0;
 
   const bodies: Partial<Record<SectionId, string>> = {
     cover: `This Statement of Advice has been prepared for ${clientName} by Brad Lonergan, Authorised Representative of Charter Financial Planning Limited AFSL 234665, trading as Newcastle Financial Services. It is confidential and prepared for your personal use only.`,
 
     "executive-summary": `${clientAddress}, this plan covers ${strategies
       .map((s) => meta(s).label.toLowerCase())
-      .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.${atlasPersonalisation.length > 0 ? ` Adviser context used for this draft includes ${atlasPersonalisation.join(" ")}` : ""}`,
+      .join(", ")} based on the information we collected during your Financial Discovery Session. The recommendations are tailored to your situation, your income of ${incomeRaw} and your stated goals. Working through this plan should put you in a measurably stronger financial position by your annual review.${atlasPersonalisation.length > 0 ? ` Adviser context used for this draft includes ${atlasPersonalisation.join(" ")}` : ""}${scribePriorities.length > 0 ? ` The priorities Brad will focus on with you are ${scribePriorities.join(", ").toLowerCase()}.` : ""}`,
 
     "about-you": `You are ${factFind.familyAndDependants.relationshipStatus.toLowerCase() || "currently single"} living at ${factFind.personalDetails.address || "your current address"}. ${
       factFind.familyAndDependants.numberOfDependants &&
       factFind.familyAndDependants.numberOfDependants !== "0"
         ? `You have ${factFind.familyAndDependants.numberOfDependants} dependants. `
         : "You have no dependants. "
-    }You work as ${factFind.employmentAndIncome.occupation || "your current role"} at ${factFind.employmentAndIncome.employerName || "your current employer"} earning ${incomeRaw}. Your superannuation is held with ${superFund} with a balance of ${superBalance}. You told us your priorities are ${factFind.goalsAndObjectives.primaryFinancialGoals || "the goals you described in your session"}.`,
+    }You work as ${factFind.employmentAndIncome.occupation || "your current role"} at ${factFind.employmentAndIncome.employerName || "your current employer"} earning ${incomeRaw}. Your superannuation is held with ${superFund} with a balance of ${superBalance}. You told us your priorities are ${factFind.goalsAndObjectives.primaryFinancialGoals || "the goals you described in your session"}.${hasBeaconGaps ? " Where a detail was given as an estimate or is still being finalised, we have noted it and will confirm it with you before anything is implemented." : ""}`,
 
     "risk-profile": `Your recorded risk profile is ${factFind.goalsAndObjectives.investmentRiskPreference || "Moderate"}. That profile guides every investment recommendation in this plan. We have aligned the recommended asset allocation accordingly. Please confirm this still reflects your attitude to risk by signing the acknowledgement at the back of this document.${atlasThemes.length > 0 ? ` The strategy themes highlighted for your file are ${atlasThemes.map((theme) => theme.toLowerCase()).join(", ")}.` : ""}`,
 
@@ -371,6 +402,24 @@ function buildProceduralSections(
   }));
 }
 
+function readBeaconContext(clientId: string): BeaconOutput | null {
+  const stored = getAgentOutput(clientId, "beacon");
+  if (!stored || !("sectionCompletion" in stored.output)) return null;
+  return stored.output as BeaconOutput;
+}
+
+function readGuardianContext(clientId: string): GuardianOutput | null {
+  const stored = getAgentOutput(clientId, "guardian");
+  if (!stored || !("complianceScore" in stored.output)) return null;
+  return stored.output as GuardianOutput;
+}
+
+function readScribeContext(clientId: string): ScribeOutput | null {
+  const stored = getAgentOutput(clientId, "scribe");
+  if (!stored || !("meetingBrief" in stored.output)) return null;
+  return stored.output as ScribeOutput;
+}
+
 function readOrionContext(clientId: string): OrionOutput | null {
   const stored = getAgentOutput(clientId, "orion");
   if (!stored || !("soaReady" in stored.output)) return null;
@@ -381,6 +430,79 @@ function readAtlasContext(clientId: string): AtlasOutput | null {
   const stored = getAgentOutput(clientId, "atlas");
   if (!stored || !("strategyThemes" in stored.output)) return null;
   return stored.output as AtlasOutput;
+}
+
+// ── Agent provenance ────────────────────────────────────────────────────────
+
+/**
+ * Records which agents contributed to this document and how. Sarah is always
+ * listed because the fact find she captured is the foundation of every plan.
+ */
+function buildAgentContributions(contexts: {
+  beacon: BeaconOutput | null;
+  guardian: GuardianOutput | null;
+  scribe: ScribeOutput | null;
+  orion: OrionOutput | null;
+  atlas: AtlasOutput | null;
+}): AgentContribution[] {
+  const recordedAt = new Date().toISOString();
+  const list: AgentContribution[] = [
+    {
+      agentId: "sarah",
+      name: "Sarah",
+      role: "Client Discovery",
+      contribution:
+        "Captured the Financial Discovery Session and produced the raw fact find this plan is built on.",
+      recordedAt,
+    },
+  ];
+  const { beacon, guardian, scribe, orion, atlas } = contexts;
+  if (beacon) {
+    list.push({
+      agentId: "beacon",
+      name: "Beacon",
+      role: "Fact Find Structuring",
+      contribution: `Structured ${beacon.completionPercentage}% of the discovery file and flagged ${beacon.missingFields.length} data gap${beacon.missingFields.length === 1 ? "" : "s"} for adviser confirmation.`,
+      recordedAt,
+    });
+  }
+  if (guardian) {
+    list.push({
+      agentId: "guardian",
+      name: "Guardian",
+      role: "Compliance & Risk",
+      contribution: `Screened best interests duty and scored compliance ${guardian.complianceScore}/100 with ${guardian.criticalFlags.length} critical flag${guardian.criticalFlags.length === 1 ? "" : "s"}.`,
+      recordedAt,
+    });
+  }
+  if (scribe) {
+    list.push({
+      agentId: "scribe",
+      name: "Scribe",
+      role: "Meeting Intelligence",
+      contribution: `Prepared the meeting brief with ${scribe.likelyPriorities.length} likely priorities and ${scribe.questionsForBrad.length} adviser questions.`,
+      recordedAt,
+    });
+  }
+  if (orion) {
+    list.push({
+      agentId: "orion",
+      name: "Orion",
+      role: "Evidence Assembly",
+      contribution: `Assembled the evidence packet from ${orion.evidencePacket.factFindHighlights.length} verified fact highlights and projection inputs.`,
+      recordedAt,
+    });
+  }
+  if (atlas) {
+    list.push({
+      agentId: "atlas",
+      name: "ATLAS",
+      role: "Strategy & SOA Synthesis",
+      contribution: `Synthesised ${atlas.strategyThemes.length} strategy themes and ${atlas.tailoredRecommendations.length} tailored recommendations for adviser review.`,
+      recordedAt,
+    });
+  }
+  return list;
 }
 
 // ── Diagnostics ─────────────────────────────────────────────────────────────

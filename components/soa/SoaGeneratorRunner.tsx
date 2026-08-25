@@ -23,6 +23,16 @@ interface Props {
 
 type StageState = "pending" | "running" | "done" | "error";
 
+type AgentEventState = {
+  agentId: string;
+  name: string;
+  role: string;
+  status: "running" | "done" | "error";
+  summary: string;
+  durationMs: number;
+  cached: boolean;
+};
+
 export function SoaGeneratorRunner({ clientId, disabled }: Props) {
   const router = useRouter();
   const stages = getStageOrder();
@@ -35,6 +45,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blockers, setBlockers] = useState<string[]>([]);
+  const [agentEvents, setAgentEvents] = useState<AgentEventState[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   async function start() {
@@ -45,6 +56,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
       stages.map((s) => [s, "pending"]),
     ) as Record<GenerationStage, StageState>;
     setStates(fresh);
+    setAgentEvents([]);
 
     try {
       // Send Brad's approved strategies (built-in, catalogue and custom) plus
@@ -85,6 +97,17 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               ...prev,
               [stage]: status === "starting" ? "running" : "done",
             }));
+          } else if (event.name === "agent") {
+            const incoming = event.data as unknown as AgentEventState;
+            setAgentEvents((prev) => {
+              const idx = prev.findIndex((a) => a.agentId === incoming.agentId);
+              if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = incoming;
+                return next;
+              }
+              return [...prev, incoming];
+            });
           } else if (event.name === "complete") {
             // Persist the generated document so the review page shows exactly
             // what was generated, including catalogue/custom strategies.
@@ -156,6 +179,57 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
         )}
       </button>
 
+      {agentEvents.length > 0 && (
+        <div className="rounded-lg glass-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between gap-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Agent Intelligence Chain
+            </h3>
+            <span className="text-[10px] font-medium tracking-[0.14em] uppercase text-gold/80">
+              {agentEvents.filter((a) => a.status === "done").length}/{SOA_CHAIN_LENGTH} complete
+            </span>
+          </div>
+          <ul className="px-6 py-4 space-y-4">
+            {agentEvents.map((agent) => (
+              <li key={agent.agentId} className="flex items-start gap-3">
+                <StageIcon state={agent.status} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <p
+                      className={cn(
+                        "text-[13px] font-semibold",
+                        agent.status === "done"
+                          ? "text-foreground"
+                          : agent.status === "error"
+                            ? "text-red-400"
+                            : "text-warning/95",
+                      )}
+                    >
+                      {agent.name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/70">{agent.role}</p>
+                    {agent.status === "done" && (
+                      <span className="ml-auto shrink-0 rounded-full border border-white/[0.09] bg-white/[0.03] px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75 tabular-nums">
+                        {agent.cached ? "cached" : `${agent.durationMs}ms`}
+                      </span>
+                    )}
+                  </div>
+                  {agent.summary ? (
+                    <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground/85">
+                      {agent.summary}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground/55">
+                      Working…
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {(running || states["done"] === "done" || error) && (
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="px-6 py-4 border-b border-border/60 bg-black/25">
@@ -222,6 +296,8 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
     </div>
   );
 }
+
+const SOA_CHAIN_LENGTH = 5;
 
 function parseEvent(raw: string): { name: string; data: Record<string, unknown> } | null {
   const lines = raw.split("\n").filter(Boolean);

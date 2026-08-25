@@ -32,7 +32,7 @@ export default function AgentsPage() {
   const runtimeBlueprints = listRuntimeBlueprints();
   const latestByAgent = new Map(telemetry.map((event) => [event.agentId, event]));
   const autoRunnable = runtimeBlueprints.filter((agent) => agent.autoRunModes.length > 0).length;
-  const visibleAgents = AGENTS.filter((agent) => agent.id !== "cipher");
+  const visibleAgents = AGENTS;
   const nexus = visibleAgents.find((agent) => agent.id === "nexus");
   const chainAgents = visibleAgents.filter((agent) => agent.id !== "nexus");
 
@@ -42,7 +42,7 @@ export default function AgentsPage() {
         <PageHeader
           overline="Command Layer"
           title="Agent Command Centre"
-          subtitle="Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Nexus watches the wiring underneath."
+          subtitle="Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Cipher keeps every file moving and Nexus watches the wiring underneath."
         />
         <div className="glass-panel p-5">
           <p className="cmd-label text-gold/85">System intelligence</p>
