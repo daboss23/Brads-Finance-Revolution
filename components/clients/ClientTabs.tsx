@@ -22,7 +22,7 @@ export function ClientTabs({ clientId }: Props) {
   ];
 
   return (
-    <div className="flex items-center gap-1 border-b border-border/60 mb-8">
+    <div className="mb-8 flex items-center gap-1 overflow-x-auto border-b border-border/60">
       {tabs.map(({ href, label, icon: Icon }) => {
         const active =
           href === base ? pathname === base : pathname.startsWith(href);
@@ -31,7 +31,7 @@ export function ClientTabs({ clientId }: Props) {
             key={href}
             href={href}
             className={cn(
-              "relative inline-flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors",
+              "relative inline-flex shrink-0 items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors",
               active
                 ? "text-gold"
                 : "text-muted-foreground/75 hover:text-foreground"

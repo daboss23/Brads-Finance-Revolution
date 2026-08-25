@@ -116,8 +116,14 @@ Dashboard → Clients → Compliance → SOA → Fact Find → Sarah → Setting
 
 ## Current Build Phase
 
-**Phase 4 complete.** SOA generation engine shipped.
+**Phase 5 complete.** Security layer and real client lifecycle shipped:
+- AES-256-GCM encrypted persistence (Postgres via `DATABASE_URL` or local files), fails closed without `DATA_ENCRYPTION_KEY`.
+- Adviser sign-in with TOTP MFA and lockout (`SECURITY.md` §9); middleware gates all adviser pages.
+- Rate limiting, durable encrypted audit trail, APP 5 notice on onboarding.
+- Real clients: Add Client dialog creates encrypted records with private onboarding tokens; fact-find completion advances pipeline status and emails Brad (Resend).
+- Security report at `docs/BMK-CRM-Security-Report.pdf`.
 
 **Next priorities:**
-- Design polish pass on compliance and SOA pages.
+- Production activation: set env vars per SECURITY.md, then pilot one real client end to end.
+- Knowledge vault: actually store and parse uploaded PDFs into the voice engine.
 - DocuSign real integration.

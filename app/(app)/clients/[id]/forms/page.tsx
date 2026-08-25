@@ -4,21 +4,24 @@ import { ArrowLeft } from "lucide-react";
 import { CLIENTS } from "@/lib/data";
 import { getClientProfile } from "@/lib/client-profiles";
 import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { recommendStrategies } from "@/lib/strategy-recommender";
 import { ClientFormsWorkspace } from "@/components/forms/ClientFormsWorkspace";
 import { ClientTabs } from "@/components/clients/ClientTabs";
+import { findClient } from "@/lib/data/client-repository";
 
-export default function FormsPage({ params }: { params: { id: string } }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+export default async function FormsPage({ params }: { params: { id: string } }) {
+  const client = await findClient(params.id);
   if (!client) notFound();
 
+  await ensureFactFindsHydrated();
   const factFind = getFactFindOrDemo(client.id);
   const recommendations = factFind ? recommendStrategies(factFind) : [];
   const profile = getClientProfile(client.id);
   const defaultApproved = profile?.strategies ?? [];
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Back */}
       <Link

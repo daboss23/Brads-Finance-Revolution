@@ -4,7 +4,7 @@ import { KnowledgeBaseManager } from "@/components/soa/KnowledgeBaseManager";
 
 export default function KnowledgeBasePage() {
   return (
-    <div className="px-10 py-12 max-w-[1100px]">
+    <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-10">
       <Link
         href="/settings"
         className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-9 tracking-wide"

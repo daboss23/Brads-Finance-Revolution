@@ -1,10 +1,24 @@
-import { saveFactFind, getFactFind } from "@/lib/sarah-fact-find-store";
-import type { SarahFactFind } from "@/lib/sarah-fact-find-schema";
+import { getFactFind } from "@/lib/sarah-fact-find-store";
+import {
+  persistFactFind,
+  ensureFactFindsHydrated,
+} from "@/lib/secure-store/fact-find-persistence";
+import { EncryptionKeyMissingError } from "@/lib/secure-store";
+import {
+  getRealClientByToken,
+  updateRealClient,
+} from "@/lib/clients/real-client-store";
+import { getLinkByToken } from "@/lib/sarah-data";
+import { notifyAdviser } from "@/lib/notify";
+import { normalizeFactFind, type SarahFactFind } from "@/lib/sarah-fact-find-schema";
+import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const rl = rateLimit("fact-find", clientIp(req), 10, 60);
+  if (!rl.allowed) return rateLimited(rl);
   const reqId = Math.random().toString(36).slice(2, 8);
   const log = (...a: unknown[]) => console.log(`[complete-fact-find:${reqId}]`, ...a);
   const err = (...a: unknown[]) => console.error(`[complete-fact-find:${reqId}]`, ...a);
@@ -32,16 +46,53 @@ export async function POST(req: Request) {
       );
     }
 
-    saveFactFind({
-      clientId,
-      token,
-      receivedAt: new Date().toISOString(),
-      data,
-    });
+    // This route is public because clients submit from their onboarding link.
+    // Bind that bearer token to the submitted client id before accepting any
+    // financial data, otherwise a valid token could overwrite another file.
+    const realClient = await getRealClientByToken(token);
+    const demoLink = realClient ? undefined : getLinkByToken(token);
+    const tokenClientId = realClient?.id ?? demoLink?.clientId;
+    if (!tokenClientId || tokenClientId !== clientId) {
+      err("invalid client token binding");
+      return Response.json(
+        { error: "Invalid or expired onboarding link." },
+        { status: 403 },
+      );
+    }
 
-    log("Sarah fact find received for", clientId, "via token", token);
-    // Stub notification — wire to email/Slack when integrations come online.
-    console.log(`[notify] Brad: fact find ready for client ${clientId}`);
+    try {
+      await persistFactFind({
+        clientId,
+        token,
+        receivedAt: new Date().toISOString(),
+        data: normalizeFactFind(data),
+      });
+    } catch (e) {
+      if (e instanceof EncryptionKeyMissingError) {
+        err("refused unencrypted write:", e.message);
+        return Response.json(
+          { error: "Server storage is not configured securely. Data was not saved." },
+          { status: 503 },
+        );
+      }
+      throw e;
+    }
+
+    log("Sarah fact find received for", clientId);
+
+    // Move the client along the pipeline (real clients only; demo clients
+    // are static) and tell Brad the file is ready to review.
+    const completion = data.completionPercentage ?? 0;
+    await updateRealClient(clientId, {
+      status: completion >= 80 ? "ready-for-meeting" : "review-required",
+      progress: completion,
+      lastActivity: "Fact find completed",
+    }).catch((e) => err("client status update failed:", e));
+    await notifyAdviser(
+      `Fact find ready: ${clientId}`,
+      `A client has completed their Financial Discovery Session (${completion}% complete).\n\n` +
+        `Review it here: https://bmk-crm-revolution.vercel.app/clients/${clientId}/fact-find-review`,
+    );
 
     return Response.json({
       ok: true,
@@ -51,11 +102,12 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     const m = e instanceof Error ? e.message : String(e);
     err("fatal:", m);
-    return Response.json({ error: `Fatal: ${m}` }, { status: 500 });
+    return Response.json({ error: "Unable to save the fact find." }, { status: 500 });
   }
 }
 
 export async function GET(req: Request) {
+  await ensureFactFindsHydrated();
   const url = new URL(req.url);
   const clientId = url.searchParams.get("clientId");
   if (!clientId) {

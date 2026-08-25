@@ -154,11 +154,11 @@ export const LINK_STATUS_CONFIG: Record<
   },
   "in-progress": {
     label: "In Progress",
-    className: "bg-amber-500/15 text-amber-300 border-amber-500/35",
+    className: "bg-warning/[0.15] text-warning border-warning/35",
   },
   completed: {
     label: "Completed",
-    className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
+    className: "bg-success/[0.15] text-success border-success/35",
   },
 };
 

@@ -2,6 +2,9 @@
   "name": "bmk-crm",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,13 +20,17 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
+    "@sparticuz/chromium": "^149.0.0",
+    "@types/pg": "^8.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "docx": "^9.6.1",
     "lucide-react": "^1.16.0",
     "next": "14.2.35",
     "pdf-lib": "^1.17.1",
+    "pg": "^8.22.0",
     "postprocessing": "^6.39.1",
+    "puppeteer-core": "^25.3.0",
     "react": "^18",
     "react-dom": "^18",
     "sharp": "^0.34.5",

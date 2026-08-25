@@ -12,8 +12,8 @@ interface Props {
 
 const IMPACT_STYLES: Record<ImpactLevel, string> = {
   critical: "bg-red-500/10 text-red-300 border-red-500/35",
-  high: "bg-orange-500/10 text-orange-300 border-orange-500/35",
-  medium: "bg-amber-500/10 text-amber-300 border-amber-500/35",
+  high: "bg-warning/10 text-warning border-orange-500/35",
+  medium: "bg-warning/10 text-warning border-warning/35",
   low: "bg-blue-accent/10 text-blue-accent border-blue-accent/35",
 };
 
@@ -37,8 +37,8 @@ export function RegulatoryUpdatesCard({ updates, lastChecked }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-6 py-5 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+    <section className="rounded-lg glass-card overflow-hidden">
+      <div className="px-6 py-5 border-b border-border/60 bg-black/25 flex items-center justify-between">
         <div>
           <h2 className="text-[14px] font-semibold text-foreground tracking-tight">
             Regulatory Updates
@@ -50,7 +50,7 @@ export function RegulatoryUpdatesCard({ updates, lastChecked }: Props) {
         <button
           onClick={refresh}
           disabled={refreshing}
-          className="inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 btn-glass rounded px-3 py-1.5 text-[12px] font-medium text-foreground/75 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-50"
         >
           <RefreshCw className={cn("h-3 w-3", refreshing && "animate-spin")} />
           {refreshing ? "Checking…" : "Refresh"}

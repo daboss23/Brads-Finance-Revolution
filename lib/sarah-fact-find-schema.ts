@@ -152,3 +152,53 @@ export function sarahToReviewAnswers(data: SarahFactFind): ReviewAnswers {
   }
   return out;
 }
+
+// Fills in any missing sections so partial fact finds (an interrupted
+// Sarah session, a minimal API payload) never crash consumers that read
+// section fields directly.
+export function normalizeFactFind(partial: Partial<SarahFactFind>): SarahFactFind {
+  return {
+    personalDetails: {
+      fullName: "", dateOfBirth: "", address: "", timeAtAddress: "", countryOfBirth: "",
+      ...partial.personalDetails,
+    },
+    contactInformation: {
+      mobile: "", homePhone: "", email: "", preferredContact: "", bestTimeToContact: "",
+      ...partial.contactInformation,
+    },
+    familyAndDependants: {
+      relationshipStatus: "", partnerName: "", partnerDOB: "", numberOfDependants: "", agesOfDependants: "",
+      ...partial.familyAndDependants,
+    },
+    employmentAndIncome: {
+      employmentStatus: "", employerName: "", occupation: "", annualGrossIncome: "", otherIncomeSources: "",
+      ...partial.employmentAndIncome,
+    },
+    assets: {
+      ownerOccupiedPropertyValue: "", investmentPropertyValue: "", savingsAndCash: "", sharesAndInvestments: "", vehicles: "",
+      ...partial.assets,
+    },
+    liabilities: {
+      homeMortgage: "", investmentLoans: "", personalLoans: "", creditCardLimits: "", otherLiabilities: "",
+      ...partial.liabilities,
+    },
+    expenses: {
+      housingCosts: "", groceries: "", transport: "", education: "", lifestyleAndEntertainment: "",
+      ...partial.expenses,
+    },
+    superannuation: {
+      fundName: "", memberNumber: "", estimatedBalance: "", employerContributionRate: "", personalContributions: "",
+      ...partial.superannuation,
+    },
+    insurance: {
+      lifeInsuranceSumInsured: "", lifeInsuranceProvider: "", incomeProtectionMonthlyBenefit: "", tpdCover: "", healthInsuranceProvider: "",
+      ...partial.insurance,
+    },
+    goalsAndObjectives: {
+      primaryFinancialGoals: "", targetRetirementAge: "", desiredRetirementIncome: "", investmentRiskPreference: "", otherConsiderations: "",
+      ...partial.goalsAndObjectives,
+    },
+    completionPercentage: partial.completionPercentage ?? 0,
+    missingSections: partial.missingSections ?? [],
+  };
+}

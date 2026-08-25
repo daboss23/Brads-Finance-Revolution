@@ -1,47 +1,241 @@
 import Link from "next/link";
-import { Database, ArrowRight, Settings as SettingsIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Database,
+  KeyRound,
+  Mic,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  SlidersHorizontal,
+} from "lucide-react";
+import { AGENTS } from "@/lib/agents";
+import { listRuntimeBlueprints } from "@/lib/agent-system";
+import { cn } from "@/lib/utils";
+
+const usageMode = "balanced";
+
+const providerRows = [
+  {
+    group: "AI Provider",
+    icon: Bot,
+    rows: [
+      { label: "Anthropic", connected: Boolean(process.env.ANTHROPIC_API_KEY), detail: "Sarah and future agent JSON provider" },
+      { label: "OpenAI", connected: Boolean(process.env.OPENAI_API_KEY), detail: "Optional future structured JSON provider" },
+      { label: "Selected mode", connected: true, detail: "Mock-first with safe fallback" },
+    ],
+  },
+  {
+    group: "Voice Provider",
+    icon: Mic,
+    rows: [
+      { label: "ElevenLabs", connected: Boolean(process.env.ELEVENLABS_API_KEY), detail: "Current Sarah voice path" },
+      { label: "OpenAI voice", connected: Boolean(process.env.OPENAI_VOICE_API_KEY), detail: "Placeholder for future voice option" },
+    ],
+  },
+  {
+    group: "Database",
+    icon: Database,
+    rows: [
+      { label: "Current mode", connected: true, detail: "Mock/local repository interfaces" },
+      { label: "Supabase/Postgres", connected: Boolean(process.env.DATABASE_URL), detail: "Ready to replace repositories later" },
+    ],
+  },
+  {
+    group: "Integrations",
+    icon: KeyRound,
+    rows: [
+      { label: "Xplan", connected: Boolean(process.env.XPLAN_API_KEY), detail: "Future client data mapping" },
+      { label: "DocuSign", connected: Boolean(process.env.DOCUSIGN_CLIENT_ID), detail: "Future signature workflow" },
+      { label: "Email/SMS", connected: Boolean(process.env.EMAIL_PROVIDER_API_KEY), detail: "Future follow-up delivery" },
+      { label: "Knowledge Base", connected: true, detail: "Local SOA/compliance corpus active" },
+    ],
+  },
+];
 
 export default function SettingsPage() {
+  const runtimeAgents = listRuntimeBlueprints();
+  const runtimeById = new Map(runtimeAgents.map((agent) => [agent.id, agent]));
+
   return (
-    <div className="px-10 py-12 max-w-[900px]">
-      <div className="mb-10 pb-7 border-b border-border/60">
-        <div className="flex items-center gap-3 mb-3">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
+      <div className="mb-10 border-b border-gold/[0.1] pb-7">
+        <div className="mb-3 flex items-center gap-3">
           <SettingsIcon className="h-3.5 w-3.5 text-muted-foreground/85" />
-          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-foreground/85">
-            Settings
+          <p className="cmd-label text-gold/80">
+            Settings · Configuration Console
           </p>
         </div>
         <h1 className="text-[26px] font-semibold tracking-tight text-foreground">
           Platform Configuration
         </h1>
-        <p className="mt-3 text-[13px] text-muted-foreground/85 leading-relaxed max-w-[620px]">
-          Practice level configuration for Newcastle Financial Services.
+        <p className="mt-3 max-w-[720px] text-[13px] leading-relaxed text-muted-foreground/85">
+          Provider health, integration readiness and agent usage controls for
+          Newcastle Financial Services. The current agent layer is mock-first
+          and cache-first, so the platform remains usable without API keys.
         </p>
       </div>
 
+      <section className="mb-8 grid gap-4 lg:grid-cols-2">
+        {providerRows.map((section) => {
+          const Icon = section.icon;
+          return (
+            <div key={section.group} className="glass-panel p-5">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <h2 className="text-[15px] font-semibold text-foreground">{section.group}</h2>
+              </div>
+              <div className="space-y-3">
+                {section.rows.map((row) => (
+                  <StatusRow key={row.label} {...row} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      <section className="mb-8 glass-panel p-5">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
+            <SlidersHorizontal className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-[15px] font-semibold text-foreground">Agent Usage Mode</h2>
+            <p className="mt-1 text-[12px] text-muted-foreground/70">
+              Default is Balanced: Beacon and Guardian supporting modules can auto-run
+              after workflow events, while ATLAS remains a deliberate final review step
+              for Brad.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {["conservative", "balanced", "high intelligence"].map((mode) => (
+            <div
+              key={mode}
+              className={cn(
+                "glass-chip rounded-lg px-4 py-3",
+                mode === usageMode
+                  ? "glass-active text-gold"
+                  : "text-muted-foreground/75",
+              )}
+            >
+              <p className="text-[13px] font-semibold capitalize">{mode}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-8 glass-panel p-5">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
+            <ShieldCheck className="h-4 w-4" />
+          </div>
+          <h2 className="text-[15px] font-semibold text-foreground">Agent Registry</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {AGENTS.filter((agent) => agent.id !== "cipher").map((agent) => (
+            <div key={agent.id} className="rounded-lg glass-chip px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-foreground">{agent.name}</p>
+                  <p className="mt-1 text-[11.5px] text-muted-foreground/65">
+                    {agent.role}. Trigger: {runtimeById.get(agent.id)?.trigger ?? "Manual orchestration"}.
+                  </p>
+                </div>
+                <span className="rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[10px] font-bold uppercase text-success">
+                  Enabled
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-8 glass-panel p-5">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="glass-orb grid h-9 w-9 place-items-center rounded-lg border-gold/30 text-gold">
+            <Bot className="h-4 w-4" />
+          </div>
+          <h2 className="text-[15px] font-semibold text-foreground">Runtime Modules</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {runtimeAgents.filter((agent) => agent.id !== "cipher").map((agent) => (
+            <div key={agent.id} className="rounded-lg glass-chip px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-foreground">{agent.name}</p>
+                  <p className="mt-1 text-[11.5px] text-muted-foreground/65">
+                    {agent.role}. {agent.usesAI ? "AI gated" : "Deterministic"}.
+                  </p>
+                </div>
+                <span className="rounded-full border border-border/70 bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
+                  {agent.autoRunModes.length > 0 ? "Auto-run ready" : "Manual"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <Link
         href="/settings/knowledge-base"
-        className="group block rounded-lg border border-border bg-card p-6 hover:border-gold/40 transition-colors"
+        className="group block glass-panel p-6 transition-colors hover:border-gold/40"
       >
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 border border-gold/30 shrink-0">
+          <div className="glass-orb flex h-10 w-10 shrink-0 items-center justify-center border-gold/35">
             <Database className="h-4 w-4 text-gold" />
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <h2 className="text-[15px] font-semibold text-foreground">
-                Knowledge Base
-              </h2>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/55 group-hover:text-gold transition-colors" />
+              <h2 className="text-[15px] font-semibold text-foreground">Knowledge Base</h2>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/55 transition-colors group-hover:text-gold" />
             </div>
-            <p className="text-[12.5px] text-muted-foreground/85 leading-relaxed mt-1">
-              Upload completed SOA documents so the engine learns Brad&apos;s
-              voice and reasoning. Tag each document by author for weighted
-              training.
+            <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground/85">
+              Upload completed SOA documents so the engine learns Brad&apos;s voice and reasoning.
             </p>
           </div>
         </div>
       </Link>
+    </div>
+  );
+}
+
+function StatusRow({
+  label,
+  detail,
+  connected,
+}: {
+  label: string;
+  detail: string;
+  connected: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-lg glass-chip px-4 py-3">
+      <div>
+        <p className="text-[13px] font-semibold text-foreground">{label}</p>
+        <p className="mt-1 text-[11.5px] text-muted-foreground/65">{detail}</p>
+      </div>
+      <span
+        className={cn(
+          "glass-chip inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase",
+          connected
+            ? "border-success/30 text-success"
+            : "border-warning/30 text-warning",
+        )}
+      >
+        <span
+          className={cn(
+            "size-1.5 rounded-full",
+            connected
+              ? "bg-success shadow-[0_0_6px_0_hsl(var(--success)/0.8)]"
+              : "bg-warning shadow-[0_0_6px_0_hsl(var(--warning)/0.8)]",
+          )}
+        />
+        {connected ? "Connected" : "Mock mode"}
+      </span>
     </div>
   );
 }

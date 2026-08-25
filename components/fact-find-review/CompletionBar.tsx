@@ -9,7 +9,7 @@ interface Props {
 export function CompletionBar({ percentage, missingSections, source }: Props) {
   const pct = Math.max(0, Math.min(100, Math.round(percentage)));
   return (
-    <div className="mb-8 rounded-lg border border-border bg-card px-6 py-5">
+    <div className="mb-8 rounded-lg glass-card px-6 py-5">
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
@@ -25,19 +25,19 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
           {pct}%
         </span>
       </div>
-      <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
-        <div
-          className={cn(
-            "h-full rounded-full transition-all",
-            pct >= 80
-              ? "bg-emerald-500/80"
-              : pct >= 40
-                ? "bg-amber-500/80"
-                : "bg-red-500/80",
-          )}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <progress
+        value={pct}
+        max={100}
+        aria-label={`Fact find ${pct}% complete`}
+        className={cn(
+          "bmk-progress w-full",
+          pct >= 80
+            ? "bmk-progress-emerald"
+            : pct >= 40
+              ? "bmk-progress-amber"
+              : "bmk-progress-blue",
+        )}
+      />
       {missingSections && missingSections.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-muted-foreground">
@@ -46,7 +46,7 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
           {missingSections.map((s) => (
             <span
               key={s}
-              className="text-[12px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded px-2 py-0.5"
+              className="text-[12px] text-warning bg-warning/10 border border-warning/30 rounded px-2 py-0.5"
             >
               {s}
             </span>

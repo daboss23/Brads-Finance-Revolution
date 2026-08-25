@@ -27,8 +27,8 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
   const allApproved = approvedCount === doc.sections.length;
 
   const ringColor = useMemo(() => {
-    if (doc.complianceScore >= 85) return "stroke-emerald-400";
-    if (doc.complianceScore >= 60) return "stroke-amber-400";
+    if (doc.complianceScore >= 85) return "stroke-[hsl(var(--success))]";
+    if (doc.complianceScore >= 60) return "stroke-[hsl(var(--warning))]";
     return "stroke-red-400";
   }, [doc.complianceScore]);
 
@@ -60,8 +60,8 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
     <div className="space-y-5">
 
       {/* Score and certificate */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center gap-2.5">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25 flex items-center gap-2.5">
           <ShieldCheck className="h-4 w-4 text-gold" />
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Compliance
@@ -82,8 +82,8 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Flagged items */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Flagged for Brad
           </h3>
@@ -93,7 +93,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
         </div>
         <ul className="px-5 py-3 space-y-2.5 max-h-[260px] overflow-y-auto">
           {flagged.length === 0 && (
-            <li className="text-[12.5px] text-emerald-400/85 flex items-center gap-2">
+            <li className="text-[12.5px] text-success/85 flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5" />
               All flagged items have been reviewed.
             </li>
@@ -105,7 +105,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
                 className="block rounded -m-1 p-2 hover:bg-white/[0.03]"
               >
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-3 w-3 text-amber-400 mt-1 shrink-0" />
+                  <AlertTriangle className="h-3 w-3 text-warning mt-1 shrink-0" />
                   <div>
                     <p className="text-[12.5px] font-medium text-foreground">
                       §{s.number} {s.title}
@@ -124,8 +124,8 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Approval progress */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Approval Progress
           </h3>
@@ -147,8 +147,8 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Actions
           </h3>
@@ -156,7 +156,7 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
         <div className="px-5 py-5 space-y-2.5">
           <button
             onClick={downloadPdf}
-            className="w-full inline-flex items-center justify-center gap-2 rounded border border-border bg-card px-3 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 btn-glass rounded px-3 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
             Download as PDF

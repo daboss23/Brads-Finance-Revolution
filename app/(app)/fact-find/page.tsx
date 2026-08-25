@@ -45,7 +45,7 @@ export default function FactFindPage() {
   const secondRow = completionBySection.slice(4);
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Page header */}
       <div className="mb-10">
@@ -61,15 +61,15 @@ export default function FactFindPage() {
       </div>
 
       {/* KPI cards — same pattern as dashboard */}
-      <div className="grid grid-cols-3 gap-4 mb-12">
+      <div className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[
           {
             label: "Clients Fully Complete",
             value: `${fullyComplete} / ${CLIENTS.length}`,
             icon: Users,
-            color: "text-emerald-400",
-            bg: "bg-emerald-400/15",
-            accent: "from-emerald-400/50",
+            color: "text-success",
+            bg: "bg-success/15",
+            accent: "from-success/50",
           },
           {
             label: "Avg Completion",
@@ -88,7 +88,7 @@ export default function FactFindPage() {
             accent: "from-blue-accent/50",
           },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
-          <div key={label} className="rounded-lg border border-border bg-card overflow-hidden">
+          <div key={label} className="rounded-lg glass-card overflow-hidden">
             <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
             <div className="px-6 pt-6 pb-6">
               <div className="flex items-start justify-between mb-5">
@@ -108,7 +108,7 @@ export default function FactFindPage() {
       </div>
 
       {/* Section completion — first 4 */}
-      <div className="grid grid-cols-4 gap-5 mb-5">
+      <div className="mb-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {firstRow.map(({ section, complete, inProgress, pct }) => (
           <SectionCard
             key={section}
@@ -122,7 +122,7 @@ export default function FactFindPage() {
       </div>
 
       {/* Section completion — last 3 (wider) */}
-      <div className="grid grid-cols-3 gap-5 mb-14">
+      <div className="mb-14 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {secondRow.map(({ section, complete, inProgress, pct }) => (
           <SectionCard
             key={section}
@@ -151,7 +151,7 @@ export default function FactFindPage() {
       <div className="rounded-lg border border-border overflow-x-auto">
         <table className="w-full table-fixed">
           <thead>
-            <tr className="border-b border-border" style={{ background: "hsl(222 28% 7%)" }}>
+            <tr className="border-b border-border bg-card">
               <th className="px-6 pb-5 pt-5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground w-[280px]">
                 Client
               </th>
@@ -259,12 +259,12 @@ function SectionCard({
   total: number;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg glass-card overflow-hidden">
       <div
         className={cn(
           "h-px bg-gradient-to-r to-transparent",
           pct === 100
-            ? "from-emerald-500/60"
+            ? "from-success/60"
             : pct >= 50
             ? "from-gold/55"
             : inProgress > 0
@@ -281,7 +281,7 @@ function SectionCard({
             className={cn(
               "text-[28px] font-semibold leading-none tabular-nums shrink-0",
               pct === 100
-                ? "text-emerald-400"
+                ? "text-success"
                 : pct >= 60
                 ? "text-gold"
                 : "text-foreground/85"
@@ -315,7 +315,7 @@ function SectionCard({
 
 function MatrixDot({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
+    return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (status === "in-progress")
     return <Clock className="h-4 w-4 text-blue-accent/80" />;
   return <Circle className="h-4 w-4 text-muted-foreground/20" />;

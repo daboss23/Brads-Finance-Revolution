@@ -1,3 +1,5 @@
+import { mirrorToServer, pullFromServer } from "../state-sync";
+
 // Tracks uploaded SOA documents that train Brad's voice. Stored client side
 // for the Phase 4 demo; moves to object storage + vector index in Phase 5.
 
@@ -52,6 +54,17 @@ function save(state: CorpusData): void {
   } catch {
     // ignore
   }
+  // Durable encrypted copy of the knowledge vault index.
+  mirrorToServer("training-corpus", "all", state);
+}
+
+// Seed from the encrypted server copy on a fresh browser.
+if (typeof window !== "undefined" && !localStorage.getItem(STORE_KEY)) {
+  void pullFromServer<CorpusData>("training-corpus", "all").then((remote) => {
+    if (remote && !localStorage.getItem(STORE_KEY)) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(remote));
+    }
+  });
 }
 
 function makeId(): string {

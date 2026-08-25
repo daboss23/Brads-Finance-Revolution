@@ -10,6 +10,10 @@ import {
 } from "@/lib/soa/soa-generator";
 import { recordPlanGenerated } from "@/lib/soa/voice-learner";
 import { logAudit } from "@/lib/compliance/audit-trail";
+import { getApprovedStrategies } from "@/lib/client-strategy-store";
+import { getCatalogueStrategy } from "@/lib/strategy-catalogue";
+import { saveSoa } from "@/lib/soa/soa-store";
+import type { SoaDocument } from "@/lib/soa/soa-template";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -43,8 +47,19 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
     setStates(fresh);
 
     try {
+      // Send Brad's approved strategies (built-in, catalogue and custom) plus
+      // the names/descriptions for catalogue/custom ones, so the SOA reflects
+      // exactly what was approved on the Strategies tab.
+      const approved = getApprovedStrategies(clientId);
+      const customStrategies = approved
+        .map((id) => getCatalogueStrategy(id))
+        .filter((s): s is NonNullable<typeof s> => Boolean(s))
+        .map((s) => ({ id: s.id, name: s.name, description: s.description }));
+
       const res = await fetch(`/api/soa/${clientId}/generate`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ strategies: approved, customStrategies }),
       });
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`);
@@ -71,6 +86,11 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               [stage]: status === "starting" ? "running" : "done",
             }));
           } else if (event.name === "complete") {
+            // Persist the generated document so the review page shows exactly
+            // what was generated, including catalogue/custom strategies.
+            if (event.data.doc) {
+              saveSoa(event.data.doc as SoaDocument);
+            }
             recordPlanGenerated(clientId);
             logAudit(clientId, "certificate-generated", "Brad", {
               format: "SOA",
@@ -119,7 +139,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
         className={cn(
           "inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-[13px] font-semibold transition-colors",
           disabled || running
-            ? "bg-card border border-border text-muted-foreground/55 cursor-not-allowed"
+            ? "glass-card text-muted-foreground/55 cursor-not-allowed"
             : "bg-gold text-gold-foreground hover:bg-gold/90 shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_4px_14px_-4px_rgba(212,175,55,0.45)]",
         )}
       >
@@ -137,8 +157,8 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
       </button>
 
       {(running || states["done"] === "done" || error) && (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+        <div className="rounded-lg glass-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Generation Progress
             </h3>
@@ -154,8 +174,8 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
                   <StageIcon state={state} />
                   <span
                     className={cn(
-                      state === "done" && "text-emerald-400/90",
-                      state === "running" && "text-amber-300/95",
+                      state === "done" && "text-success/90",
+                      state === "running" && "text-warning/95",
                       state === "error" && "text-red-400/95",
                       state === "pending" && "text-muted-foreground/65",
                     )}
@@ -221,9 +241,9 @@ function parseEvent(raw: string): { name: string; data: Record<string, unknown> 
 
 function StageIcon({ state }: { state: StageState }) {
   if (state === "done")
-    return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
+    return <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />;
   if (state === "running")
-    return <Loader2 className="h-3.5 w-3.5 text-amber-300 shrink-0 animate-spin" />;
+    return <Loader2 className="h-3.5 w-3.5 text-warning shrink-0 animate-spin" />;
   if (state === "error")
     return <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />;
   return <Circle className="h-3.5 w-3.5 text-muted-foreground/35 shrink-0" />;

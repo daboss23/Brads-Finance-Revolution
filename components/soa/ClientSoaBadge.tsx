@@ -7,8 +7,8 @@ import { SOA_STATUS_COPY, type SoaDocument } from "@/lib/soa/soa-template";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASS: Record<string, string> = {
-  green: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  amber: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+  green: "text-success bg-success/10 border-success/30",
+  amber: "text-warning bg-warning/10 border-warning/30",
   blue: "text-blue-accent bg-blue-accent/10 border-blue-accent/30",
   neutral: "text-muted-foreground/80 bg-white/[0.04] border-border/55",
 };

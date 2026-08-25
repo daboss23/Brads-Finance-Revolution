@@ -4,6 +4,7 @@ import { CLIENTS } from "@/lib/data";
 import { checkCompliance } from "@/lib/compliance/compliance-checker";
 import { getLogoPng } from "@/lib/export-logo";
 import type { ComplianceStatus } from "@/lib/compliance/knowledge-base";
+import { findClient } from "@/lib/data/client-repository";
 
 const PW = 595;
 const PH = 842;
@@ -56,7 +57,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 

@@ -353,14 +353,14 @@ export const STATUS_CONFIG: Record<
   },
   "ready-for-meeting": {
     label: "Ready for Meeting",
-    className: "bg-amber-500/15 text-amber-300 border-amber-500/35",
+    className: "bg-warning/[0.15] text-warning border-warning/35",
   },
   "review-required": {
     label: "Review Required",
-    className: "bg-orange-500/15 text-orange-300 border-orange-500/35",
+    className: "bg-warning/[0.15] text-warning border-warning/35",
   },
   complete: {
     label: "Complete",
-    className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
+    className: "bg-success/[0.15] text-success border-success/35",
   },
 };

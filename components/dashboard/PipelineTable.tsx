@@ -42,12 +42,12 @@ function StageIndicator({ stage }: { stage: FactFindStage }) {
                 "h-1.5 w-1.5 rounded-full",
                 isActive
                   ? stage === "reviewed"
-                    ? "bg-emerald-400"
+                    ? "bg-success"
                     : stage === "complete"
                     ? "bg-gold"
                     : "bg-blue-accent"
                   : isPast
-                  ? "bg-emerald-400/55"
+                  ? "bg-success/55"
                   : "bg-border"
               )}
             />
@@ -55,7 +55,7 @@ function StageIndicator({ stage }: { stage: FactFindStage }) {
               <div
                 className={cn(
                   "h-px w-8",
-                  isPast ? "bg-emerald-400/35" : "bg-border/50"
+                  isPast ? "bg-success/35" : "bg-border/50"
                 )}
               />
             )}
@@ -66,7 +66,7 @@ function StageIndicator({ stage }: { stage: FactFindStage }) {
         className={cn(
           "ml-3 text-[11px] font-medium whitespace-nowrap tracking-tight",
           stage === "reviewed"
-            ? "text-emerald-400/95"
+            ? "text-success/95"
             : stage === "complete"
             ? "text-gold/85"
             : "text-blue-accent/85"
@@ -87,7 +87,7 @@ export function PipelineTable() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden">
+    <div className="rounded-xl glass-card overflow-hidden">
       <table className="w-full">
         <thead>
           <tr className="border-b border-border/60 bg-[hsl(222_24%_6%)]">

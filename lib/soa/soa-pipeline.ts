@@ -122,10 +122,10 @@ export function getAllPipelineRows(): ClientPipelineRow[] {
 
 export const STAGE_TONE: Record<PipelineStage, string> = {
   "fact-find": "bg-zinc-700/30 text-zinc-300 border-zinc-600/50",
-  compliance: "bg-amber-500/15 text-amber-300 border-amber-500/35",
+  compliance: "bg-warning/[0.15] text-warning border-warning/35",
   "soa-in-progress": "bg-blue-accent/15 text-blue-accent border-blue-accent/35",
-  "soa-review": "bg-amber-500/15 text-amber-300 border-amber-500/35",
-  "soa-approved": "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
+  "soa-review": "bg-warning/[0.15] text-warning border-warning/35",
+  "soa-approved": "bg-success/[0.15] text-success border-success/35",
   "soa-sent": "bg-gold/15 text-gold border-gold/35",
-  "soa-signed": "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
+  "soa-signed": "bg-success/[0.15] text-success border-success/35",
 };

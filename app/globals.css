@@ -4,40 +4,70 @@
 
 @layer base {
   :root {
-    --background: 222 28% 4%;
-    --foreground: 0 0% 96%;
+    /* ── Newcastle command system · warm black core ── */
+    --background: 220 20% 3%;          /* #050608 near black          */
+    --foreground: 44 35% 94%;          /* #F5F2EA warm ivory          */
 
-    --card: 222 24% 9%;
-    --card-foreground: 0 0% 96%;
+    --card: 218 17% 8%;                /* #10141A panel               */
+    --card-foreground: 44 35% 94%;
 
-    --popover: 222 24% 10%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 219 16% 10%;
+    --popover-foreground: 44 35% 94%;
 
-    --primary: 43 68% 54%;
-    --primary-foreground: 222 28% 4%;
+    --primary: 43 53% 54%;             /* #C9A84C champagne gold      */
+    --primary-foreground: 220 20% 4%;
 
-    --secondary: 222 18% 14%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 219 15% 13%;
+    --secondary-foreground: 44 20% 86%;
 
-    --muted: 222 20% 14%;
-    --muted-foreground: 220 12% 78%;
+    --muted: 219 15% 12%;
+    --muted-foreground: 45 5% 65%;     /* #A9A7A0 warm grey           */
 
-    --accent: 222 18% 14%;
-    --accent-foreground: 0 0% 96%;
+    --accent: 219 15% 13%;
+    --accent-foreground: 44 35% 94%;
 
-    --destructive: 0 68% 55%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 6 63% 55%;          /* #D65345 critical            */
+    --destructive-foreground: 44 35% 96%;
 
-    --border: 222 18% 22%;
-    --input: 222 20% 14%;
-    --ring: 43 68% 54%;
+    --border: 219 14% 18%;
+    --input: 219 15% 12%;
+    --ring: 43 53% 54%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --gold: 43 68% 54%;
-    --gold-dim: 43 50% 42%;
-    --blue-accent: 210 82% 66%;
-    --surface-elevated: 222 22% 12%;
+    /* Gold ramp — champagne to deep shadow */
+    --gold-bright: 43 77% 74%;         /* #F0D28A lit gold            */
+    --gold-soft: 44 62% 60%;           /* #D8B85A soft gold           */
+    --gold: 43 53% 54%;                /* #C9A84C champagne           */
+    --gold-dim: 43 45% 42%;
+    --gold-shadow: 39 55% 28%;         /* #6E5220 antique shadow      */
+
+    /* Secondary accents — telemetry, never primary semantics */
+    --teal-accent: 175 65% 53%;        /* #36D6C8 muted teal          */
+    --blue-accent: 212 100% 65%;       /* #4EA3FF soft blue           */
+    --success: 158 57% 50%;            /* #38C98B soft emerald        */
+    --warning: 36 66% 54%;             /* #D89A3D muted amber         */
+
+    --surface-elevated: 220 18% 13%;   /* #1C2028 elevated panel      */
+    --text-faint: 120 3% 45%;          /* #6F746F muted text          */
+
+    /* ── Liquid glass material system ── */
+    --cyan-accent: 187 75% 56%;        /* #3EC9DE glass-edge cyan     */
+    --purple-accent: 258 45% 62%;      /* #8A74C9 muted amethyst      */
+
+    --glass-bg: 219 17% 10% / 0.62;            /* smoked glass body            */
+    --glass-bg-strong: 219 18% 12% / 0.82;     /* elevated glass body          */
+    --glass-border: 220 18% 58% / 0.14;        /* resting glass edge           */
+    --glass-border-bright: 44 70% 84% / 0.28;  /* lit top edge                 */
+    --glass-highlight: 46 85% 93% / 0.09;      /* specular top-face catch      */
+    --glass-shadow: 0 0% 0% / 0.85;            /* deep drop under the slab     */
+    --glass-inner-shadow: 220 25% 2% / 0.55;   /* pooled dark inside base      */
+
+    --gold-glow: 43 60% 56%;
+    --cyan-glow: 187 75% 56%;
+    --purple-glow: 258 50% 64%;
+    --danger-glow: 6 63% 55%;
+    --success-glow: 158 57% 50%;
   }
 }
 
@@ -47,7 +77,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -67,10 +97,10 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.4);
+    background: hsl(var(--gold-dim) / 0.6);
   }
 
-  /* Progress bars */
+  /* Progress bars — recessed glass track, lit value rail */
   progress.bmk-progress {
     appearance: none;
     -webkit-appearance: none;
@@ -78,18 +108,23 @@
     width: 100%;
     border-radius: 3px;
     border: none;
-    background: hsl(var(--muted));
+    background: hsl(220 18% 7%);
+    box-shadow:
+      0 1px 2px 0 hsl(220 25% 2% / 0.8) inset,
+      0 1px 0 0 hsl(44 60% 90% / 0.05);
   }
 
   progress.bmk-progress::-webkit-progress-bar {
-    background: hsl(var(--muted));
+    background: hsl(220 18% 7%);
     border-radius: 3px;
+    box-shadow: 0 1px 2px 0 hsl(220 25% 2% / 0.8) inset;
   }
 
   progress.bmk-progress::-webkit-progress-value {
-    background: hsl(var(--gold));
+    background: linear-gradient(90deg, hsl(var(--gold-dim)), hsl(var(--gold)) 70%, hsl(var(--gold-bright)));
     border-radius: 3px;
     transition: width 0.4s ease;
+    box-shadow: 0 0 8px 0 hsl(var(--gold-glow) / 0.55);
   }
 
   progress.bmk-progress::-moz-progress-bar {
@@ -106,19 +141,19 @@
   }
 
   progress.bmk-progress-amber::-webkit-progress-value {
-    background: rgb(251 191 36);
+    background: hsl(var(--warning));
   }
 
   progress.bmk-progress-amber::-moz-progress-bar {
-    background: rgb(251 191 36);
+    background: hsl(var(--warning));
   }
 
   progress.bmk-progress-emerald::-webkit-progress-value {
-    background: rgb(52 211 153);
+    background: hsl(var(--success));
   }
 
   progress.bmk-progress-emerald::-moz-progress-bar {
-    background: rgb(52 211 153);
+    background: hsl(var(--success));
   }
 
   /* BMK letter glow pulse — slow, premium, breathing */
@@ -132,9 +167,9 @@
     }
     50% {
       text-shadow:
-        0 0 8px rgba(201, 168, 76, 0.7),
-        0 0 20px rgba(201, 168, 76, 0.3),
-        0 0 40px rgba(201, 168, 76, 0.1);
+        0 0 8px hsl(43 53% 54% / 0.7),
+        0 0 20px hsl(43 53% 54% / 0.3),
+        0 0 40px hsl(43 53% 54% / 0.1);
     }
   }
 
@@ -150,13 +185,13 @@
 
   /* ─── Onboarding · restrained atmospheric depth ─── */
   .onboarding-glow-gold {
-    background: radial-gradient(ellipse at center, hsl(43 68% 52% / 0.08), transparent 70%);
+    background: radial-gradient(ellipse at center, hsl(43 53% 52% / 0.09), transparent 70%);
   }
   .onboarding-glow-blue {
-    background: radial-gradient(ellipse at center, hsl(210 80% 64% / 0.055), transparent 70%);
+    background: radial-gradient(ellipse at center, hsl(175 60% 50% / 0.05), transparent 70%);
   }
   .onboarding-glow-charcoal {
-    background: radial-gradient(ellipse at center, hsl(224 26% 16% / 0.35), transparent 72%);
+    background: radial-gradient(ellipse at center, hsl(220 18% 14% / 0.4), transparent 72%);
   }
 
   @keyframes onboarding-drift-a {
@@ -190,8 +225,8 @@
   .onboarding-delay-4 { animation-delay: 0.32s; }
 
   @keyframes onboarding-mic-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(43 68% 52% / 0.5); }
-    50%      { box-shadow: 0 0 0 6px hsl(43 68% 52% / 0); }
+    0%, 100% { box-shadow: 0 0 0 0 hsl(43 53% 52% / 0.5); }
+    50%      { box-shadow: 0 0 0 6px hsl(43 53% 52% / 0); }
   }
   .onboarding-mic-live { animation: onboarding-mic-pulse 1.5s ease-in-out infinite; }
 
@@ -228,7 +263,7 @@
     background: linear-gradient(
       120deg,
       transparent 30%,
-      rgba(255, 255, 255, 0.45) 50%,
+      hsl(48 90% 90% / 0.4) 50%,
       transparent 70%
     );
     transform: translateX(-120%);
@@ -242,4 +277,676 @@
     100% { transform: translateX(120%); }
   }
 
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Newcastle command instrumentation — black & gold surfaces
+   ═══════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* Ambient page atmosphere — warm black with a single gold horizon */
+  .cmd-atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(55% 40% at 20% 0%, hsl(var(--gold) / 0.06), transparent 70%),
+      radial-gradient(45% 38% at 85% 8%, hsl(var(--cyan-accent) / 0.035), transparent 72%),
+      radial-gradient(40% 34% at 70% 92%, hsl(var(--purple-accent) / 0.03), transparent 70%),
+      radial-gradient(80% 60% at 50% 118%, hsl(var(--gold-shadow) / 0.18), transparent 72%),
+      radial-gradient(130% 100% at 50% 50%, transparent 55%, hsl(220 25% 1% / 0.5) 100%);
+  }
+
+  /* Liquid glass panel — a translucent slab floating over the dark surface.
+     Layer stack: specular top catch → diagonal reflection streak → interior
+     pooling → smoked base, then a masked gradient rim (::before) and a
+     breathing ambient glow (::after). */
+  .glass-panel {
+    position: relative;
+    background:
+      /* specular highlight — the liquid light catch across the top face */
+      linear-gradient(160deg, hsl(var(--glass-highlight)), hsl(46 80% 92% / 0.025) 16%, transparent 32%),
+      /* diagonal reflection streak — soft light sliding across the face */
+      linear-gradient(115deg, transparent 38%, hsl(46 85% 94% / 0.028) 46%, hsl(187 70% 80% / 0.02) 52%, transparent 60%),
+      /* soft interior reflection pooling bottom-right */
+      radial-gradient(120% 90% at 88% 108%, hsl(var(--gold) / 0.055), transparent 55%),
+      /* base smoked glass */
+      linear-gradient(163deg, hsl(219 17% 11% / 0.82), hsl(220 19% 5% / 0.78));
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid hsl(var(--glass-border));
+    border-radius: 1rem;
+    box-shadow:
+      /* lit inner top edge */
+      0 1px 0 0 hsl(44 70% 90% / 0.11) inset,
+      /* dark pooled base inside the slab */
+      0 -14px 34px -18px hsl(var(--glass-inner-shadow)) inset,
+      0 -1px 0 0 hsl(220 25% 2% / 0.5) inset,
+      /* hairline outer containment ring */
+      0 0 0 1px hsl(0 0% 0% / 0.32),
+      /* near contact shadow + far ambient drop */
+      0 2px 6px -2px hsl(0 0% 0% / 0.6),
+      0 28px 68px -28px hsl(var(--glass-shadow));
+  }
+
+  /* Inner rim — bright refracted top edge, gold ember at the base corner */
+  .glass-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      150deg,
+      hsl(var(--glass-border-bright)),
+      hsl(44 60% 80% / 0.05) 24%,
+      transparent 40%,
+      transparent 62%,
+      hsl(var(--gold) / 0.12) 88%,
+      hsl(var(--gold) / 0.05)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Elevated slab — stronger body, corner refraction, faint frost grain.
+     Reserve for hero modules: engine container, ATLAS synthesis, intro card. */
+  .glass-panel-elevated {
+    background:
+      linear-gradient(160deg, hsl(46 85% 93% / 0.11), hsl(46 80% 92% / 0.03) 18%, transparent 34%),
+      linear-gradient(115deg, transparent 36%, hsl(46 85% 94% / 0.04) 45%, hsl(187 70% 80% / 0.03) 52%, transparent 62%),
+      radial-gradient(90% 70% at 8% -12%, hsl(var(--gold) / 0.07), transparent 58%),
+      radial-gradient(110% 85% at 92% 112%, hsl(var(--teal-accent) / 0.05), transparent 55%),
+      linear-gradient(163deg, hsl(var(--glass-bg-strong)), hsl(220 20% 5% / 0.88));
+    border-color: hsl(220 20% 62% / 0.17);
+    box-shadow:
+      0 1px 0 0 hsl(44 75% 90% / 0.14) inset,
+      0 -16px 40px -20px hsl(var(--glass-inner-shadow)) inset,
+      0 -1px 0 0 hsl(220 25% 2% / 0.55) inset,
+      0 0 0 1px hsl(0 0% 0% / 0.36),
+      0 2px 8px -2px hsl(0 0% 0% / 0.65),
+      0 36px 90px -32px hsl(var(--glass-shadow)),
+      0 0 70px -30px hsl(var(--gold) / 0.14);
+  }
+
+  /* Compact glass card — lighter blur for dense grids and nested slabs */
+  .glass-card {
+    position: relative;
+    background:
+      linear-gradient(165deg, hsl(46 80% 92% / 0.05), transparent 26%),
+      linear-gradient(163deg, hsl(219 16% 12% / 0.68), hsl(220 19% 6% / 0.62));
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid hsl(220 18% 58% / 0.12);
+    border-radius: 0.875rem;
+    box-shadow:
+      0 1px 0 0 hsl(44 70% 90% / 0.08) inset,
+      0 -8px 22px -14px hsl(var(--glass-inner-shadow)) inset,
+      0 0 0 1px hsl(0 0% 0% / 0.26),
+      0 14px 38px -20px hsl(0 0% 0% / 0.8);
+  }
+
+  /* Tiny glass pill — severity badges, status chips, agent tiles */
+  .glass-chip {
+    position: relative;
+    background:
+      linear-gradient(170deg, hsl(46 80% 92% / 0.055), transparent 42%),
+      hsl(220 16% 14% / 0.55);
+    border: 1px solid hsl(220 18% 60% / 0.14);
+    box-shadow:
+      0 1px 0 0 hsl(44 70% 90% / 0.09) inset,
+      0 -1px 0 0 hsl(220 25% 3% / 0.5) inset,
+      0 3px 10px -4px hsl(0 0% 0% / 0.6);
+  }
+
+  /* Glass form control — inputs, selects, textareas, search fields */
+  .glass-input {
+    background:
+      linear-gradient(180deg, hsl(220 22% 4% / 0.5), hsl(219 16% 9% / 0.42) 45%),
+      hsl(220 17% 8% / 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid hsl(220 18% 58% / 0.15);
+    box-shadow:
+      0 2px 8px -2px hsl(220 25% 2% / 0.7) inset,
+      0 1px 0 0 hsl(220 25% 2% / 0.6) inset,
+      0 -1px 0 0 hsl(44 70% 90% / 0.05) inset,
+      0 1px 0 0 hsl(44 70% 90% / 0.05);
+    transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  }
+  .glass-input:focus,
+  .glass-input:focus-within {
+    outline: none;
+    border-color: hsl(var(--gold) / 0.45);
+    box-shadow:
+      0 2px 8px -2px hsl(220 25% 2% / 0.7) inset,
+      0 1px 0 0 hsl(220 25% 2% / 0.6) inset,
+      0 0 0 3px hsl(var(--gold) / 0.13),
+      0 0 24px -6px hsl(var(--gold-glow) / 0.35);
+  }
+  .glass-input-cyan:focus,
+  .glass-input-cyan:focus-within {
+    border-color: hsl(var(--cyan-accent) / 0.45);
+    box-shadow:
+      0 2px 8px -2px hsl(220 25% 2% / 0.7) inset,
+      0 1px 0 0 hsl(220 25% 2% / 0.6) inset,
+      0 0 0 3px hsl(var(--cyan-accent) / 0.13),
+      0 0 24px -6px hsl(var(--cyan-glow) / 0.3);
+  }
+
+  /* Coloured rim light — layered ring + ambient bloom, stackable on any glass */
+  .glass-rim-gold {
+    border-color: hsl(var(--gold) / 0.3);
+    box-shadow:
+      0 1px 0 0 hsl(48 85% 88% / 0.16) inset,
+      0 -12px 30px -18px hsl(var(--gold-shadow) / 0.4) inset,
+      0 0 0 1px hsl(var(--gold) / 0.14),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--gold-glow) / 0.32);
+  }
+  .glass-rim-cyan {
+    border-color: hsl(var(--cyan-accent) / 0.28);
+    box-shadow:
+      0 1px 0 0 hsl(187 80% 88% / 0.14) inset,
+      0 -12px 30px -18px hsl(200 60% 20% / 0.3) inset,
+      0 0 0 1px hsl(var(--cyan-accent) / 0.13),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--cyan-glow) / 0.28);
+  }
+  .glass-rim-purple {
+    border-color: hsl(var(--purple-accent) / 0.3);
+    box-shadow:
+      0 1px 0 0 hsl(258 60% 88% / 0.13) inset,
+      0 -12px 30px -18px hsl(258 45% 22% / 0.32) inset,
+      0 0 0 1px hsl(var(--purple-accent) / 0.14),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--purple-glow) / 0.28);
+  }
+  .glass-rim-danger {
+    border-color: hsl(var(--destructive) / 0.32);
+    box-shadow:
+      0 1px 0 0 hsl(6 70% 88% / 0.12) inset,
+      0 -12px 30px -18px hsl(6 60% 20% / 0.35) inset,
+      0 0 0 1px hsl(var(--destructive) / 0.15),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--danger-glow) / 0.3);
+  }
+  .glass-rim-emerald {
+    border-color: hsl(var(--success) / 0.3);
+    box-shadow:
+      0 1px 0 0 hsl(158 70% 88% / 0.13) inset,
+      0 -12px 30px -18px hsl(158 50% 16% / 0.32) inset,
+      0 0 0 1px hsl(var(--success) / 0.14),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--success-glow) / 0.28);
+  }
+  .glass-rim-amber {
+    border-color: hsl(var(--warning) / 0.32);
+    box-shadow:
+      0 1px 0 0 hsl(40 80% 88% / 0.13) inset,
+      0 -12px 30px -18px hsl(36 60% 18% / 0.32) inset,
+      0 0 0 1px hsl(var(--warning) / 0.15),
+      0 24px 60px -28px hsl(var(--glass-shadow)),
+      0 0 44px -14px hsl(var(--warning) / 0.3);
+  }
+
+  /* Active module — the strongest resting state, gold rim + lifted glow */
+  .glass-active {
+    border-color: hsl(var(--gold) / 0.38);
+    box-shadow:
+      0 1px 0 0 hsl(48 85% 88% / 0.2) inset,
+      0 -14px 34px -18px hsl(var(--gold-shadow) / 0.45) inset,
+      0 0 0 1px hsl(var(--gold) / 0.18),
+      0 30px 74px -30px hsl(var(--glass-shadow)),
+      0 0 56px -16px hsl(var(--gold-glow) / 0.4);
+  }
+
+  /* Hover lift — the slab rises toward the light */
+  .glass-hover-lift {
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    will-change: transform;
+  }
+  .glass-hover-lift:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--gold) / 0.26);
+    box-shadow:
+      0 1px 0 0 hsl(44 70% 90% / 0.13) inset,
+      0 -14px 34px -18px hsl(var(--glass-inner-shadow)) inset,
+      0 0 0 1px hsl(var(--gold) / 0.1),
+      0 8px 18px -6px hsl(0 0% 0% / 0.55),
+      0 40px 90px -34px hsl(var(--glass-shadow)),
+      0 0 50px -16px hsl(var(--gold-glow) / 0.22);
+  }
+
+  /* Shine — a diagonal light streak parked on the glass face that slides
+     across on hover. Panels use ::before/::after for rim and glow, so the
+     streak lives on a dedicated child: <span class="shine-layer" aria-hidden /> */
+  .glass-shine {
+    overflow: hidden;
+  }
+  .glass-shine > .shine-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      hsl(46 90% 94% / 0.06) 44%,
+      hsl(187 75% 85% / 0.045) 52%,
+      transparent 66%
+    );
+    transform: translateX(-30%);
+    transition: transform 0.6s ease;
+  }
+  .glass-shine:hover > .shine-layer {
+    transform: translateX(30%);
+  }
+
+  /* Circular glass bubble — icon buttons, agent icons, mic control */
+  .glass-orb {
+    position: relative;
+    border-radius: 9999px;
+    background:
+      radial-gradient(120% 120% at 30% 18%, hsl(46 85% 93% / 0.14), transparent 42%),
+      radial-gradient(100% 100% at 70% 95%, hsl(var(--gold) / 0.08), transparent 55%),
+      linear-gradient(165deg, hsl(219 17% 13% / 0.85), hsl(220 20% 5% / 0.8));
+    border: 1px solid hsl(220 20% 62% / 0.18);
+    box-shadow:
+      0 1px 0 0 hsl(46 85% 92% / 0.18) inset,
+      0 -4px 10px -4px hsl(220 25% 2% / 0.7) inset,
+      0 0 0 1px hsl(0 0% 0% / 0.3),
+      0 8px 22px -8px hsl(0 0% 0% / 0.75);
+  }
+
+  /* Faint frost grain — apply with a glass class on hero slabs only */
+  .glass-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
+  }
+
+  /* Depth grid — faint engineering grid fading out radially, engine backdrop */
+  .depth-grid {
+    background-image:
+      radial-gradient(75% 75% at 50% 50%, hsl(0 0% 0% / 0) 30%, hsl(220 20% 3%) 100%),
+      linear-gradient(hsl(220 15% 45% / 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(220 15% 45% / 0.055) 1px, transparent 1px);
+    background-size: 100% 100%, 34px 34px, 34px 34px;
+  }
+
+  /* Living glow layer — the panel quietly breathes */
+  .glass-panel::after,
+  .liquid-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 45% at 12% -8%, hsl(var(--gold) / 0.06), transparent 62%),
+      radial-gradient(55% 45% at 96% 110%, hsl(var(--teal-accent) / 0.045), transparent 60%);
+    opacity: 0.55;
+    animation: liquid-breathe 11s ease-in-out infinite;
+  }
+
+  .liquid-glow {
+    position: relative;
+  }
+
+  @keyframes liquid-breathe {
+    0%, 100% { opacity: 0.45; }
+    50%      { opacity: 1; }
+  }
+
+  .glass-hover {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .glass-hover:hover {
+    transform: translateY(-1px);
+    border-color: hsl(var(--gold) / 0.28);
+    box-shadow:
+      0 1px 0 0 hsl(44 60% 90% / 0.1) inset,
+      0 -14px 34px -18px hsl(var(--glass-inner-shadow)) inset,
+      0 0 0 1px hsl(var(--gold) / 0.12),
+      0 6px 14px -4px hsl(0 0% 0% / 0.55),
+      0 34px 80px -30px hsl(0 0% 0% / 0.9),
+      0 0 44px -12px hsl(var(--gold) / 0.18);
+  }
+
+  /* Accent edge glows — per agent / per metric. Ring + drop bloom + lit inner top. */
+  .edge-gold   { box-shadow: 0 1px 0 0 hsl(48 80% 88% / 0.12) inset, 0 0 0 1px hsl(var(--gold) / 0.18), 0 20px 50px -26px hsl(var(--gold) / 0.4), 0 0 34px -14px hsl(var(--gold-glow) / 0.3); }
+  .edge-blue   { box-shadow: 0 1px 0 0 hsl(212 90% 88% / 0.1) inset, 0 0 0 1px hsl(var(--blue-accent) / 0.17), 0 20px 50px -26px hsl(var(--blue-accent) / 0.34), 0 0 34px -14px hsl(var(--blue-accent) / 0.26); }
+  .edge-teal   { box-shadow: 0 1px 0 0 hsl(175 75% 88% / 0.1) inset, 0 0 0 1px hsl(var(--teal-accent) / 0.17), 0 20px 50px -26px hsl(var(--teal-accent) / 0.34), 0 0 34px -14px hsl(var(--cyan-glow) / 0.26); }
+  .edge-violet { box-shadow: 0 1px 0 0 hsl(258 60% 88% / 0.1) inset, 0 0 0 1px hsl(var(--purple-accent) / 0.16), 0 20px 50px -26px hsl(var(--purple-accent) / 0.3), 0 0 34px -14px hsl(var(--purple-glow) / 0.24); }
+  .edge-emerald{ box-shadow: 0 1px 0 0 hsl(158 70% 88% / 0.1) inset, 0 0 0 1px hsl(var(--success) / 0.18), 0 20px 50px -26px hsl(var(--success) / 0.34), 0 0 34px -14px hsl(var(--success-glow) / 0.26); }
+  .edge-orange { box-shadow: 0 1px 0 0 hsl(40 80% 88% / 0.1) inset, 0 0 0 1px hsl(var(--warning) / 0.18), 0 20px 50px -26px hsl(var(--warning) / 0.34), 0 0 34px -14px hsl(var(--warning) / 0.26); }
+
+  /* Champagne gold primary button — liquid metal under a glass dome */
+  .btn-gold {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, hsl(50 95% 96% / 0.55), hsl(50 90% 92% / 0.1) 42%, transparent 55%),
+      radial-gradient(120% 90% at 50% 118%, hsl(36 80% 55% / 0.5), transparent 60%),
+      linear-gradient(180deg, hsl(var(--gold-bright)), hsl(var(--gold)) 55%, hsl(43 50% 44%));
+    color: hsl(220 20% 6%);
+    box-shadow:
+      0 1px 0 0 hsl(48 90% 90% / 0.8) inset,
+      0 -1px 0 0 hsl(var(--gold-shadow) / 0.8) inset,
+      0 0 0 1px hsl(39 55% 24% / 0.5),
+      0 4px 10px -4px hsl(0 0% 0% / 0.5),
+      0 12px 30px -10px hsl(var(--gold) / 0.55),
+      0 0 30px -8px hsl(var(--gold-glow) / 0.3);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+  .btn-gold::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 32%, hsl(52 100% 96% / 0.55) 48%, transparent 62%);
+    transform: translateX(-130%);
+    transition: transform 0.55s ease;
+    pointer-events: none;
+  }
+  .btn-gold:hover {
+    filter: brightness(1.05);
+    box-shadow:
+      0 1px 0 0 hsl(48 90% 90% / 0.8) inset,
+      0 -1px 0 0 hsl(var(--gold-shadow) / 0.8) inset,
+      0 0 0 1px hsl(39 55% 24% / 0.5),
+      0 6px 14px -5px hsl(0 0% 0% / 0.55),
+      0 16px 40px -10px hsl(var(--gold) / 0.65),
+      0 0 40px -8px hsl(var(--gold-glow) / 0.45);
+  }
+  .btn-gold:hover::after {
+    transform: translateX(130%);
+  }
+  .btn-gold:active {
+    transform: translateY(1px) scale(0.985);
+    filter: brightness(0.96);
+    box-shadow:
+      0 1px 0 0 hsl(48 90% 88% / 0.5) inset,
+      0 2px 6px 0 hsl(var(--gold-shadow) / 0.6) inset,
+      0 0 0 1px hsl(39 55% 24% / 0.5),
+      0 6px 18px -8px hsl(var(--gold) / 0.5);
+  }
+
+  /* Dark instrument ghost button — translucent glass key */
+  .btn-glass {
+    background:
+      linear-gradient(170deg, hsl(46 80% 92% / 0.05), transparent 45%),
+      hsl(220 16% 16% / 0.5);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid hsl(220 16% 58% / 0.16);
+    box-shadow:
+      0 1px 0 0 hsl(44 60% 90% / 0.09) inset,
+      0 -1px 0 0 hsl(220 25% 3% / 0.5) inset,
+      0 4px 12px -6px hsl(0 0% 0% / 0.6);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .btn-glass:hover {
+    border-color: hsl(var(--gold) / 0.32);
+    background:
+      linear-gradient(170deg, hsl(46 80% 92% / 0.07), transparent 45%),
+      hsl(220 16% 19% / 0.62);
+    box-shadow:
+      0 1px 0 0 hsl(44 60% 90% / 0.11) inset,
+      0 -1px 0 0 hsl(220 25% 3% / 0.5) inset,
+      0 6px 16px -6px hsl(0 0% 0% / 0.65),
+      0 0 24px -10px hsl(var(--gold-glow) / 0.25);
+  }
+  .btn-glass:active {
+    transform: translateY(1px);
+    box-shadow:
+      0 2px 6px -2px hsl(220 25% 2% / 0.7) inset,
+      0 2px 8px -6px hsl(0 0% 0% / 0.5);
+  }
+
+  /* Live status dot pulse */
+  .status-live { position: relative; }
+  .status-live::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.35;
+    animation: status-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes status-ping {
+    0%   { transform: scale(0.6); opacity: 0.4; }
+    75%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Telemetry sheen sweep for hero rails */
+  @keyframes rail-flow {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  .rail-flow::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 33%;
+    background: linear-gradient(90deg, transparent, hsl(44 80% 88% / 0.5), transparent);
+    animation: rail-flow 2.8s ease-in-out infinite;
+  }
+
+  .cmd-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  /* Thin gold divider */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.35), transparent);
+  }
+
+  @keyframes dashboard-breathe-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-1px); }
+  }
+
+  .dashboard-breathe-soft {
+    animation: dashboard-breathe-soft 10s ease-in-out infinite;
+  }
+
+  @keyframes dashboard-signal {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50% { opacity: 0.62; transform: scale(1.08); }
+  }
+
+  .dashboard-signal {
+    animation: dashboard-signal 9s ease-in-out infinite;
+  }
+
+  .dashboard-activity-rail {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-activity-rail::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, hsl(44 80% 88% / 0.32), transparent);
+    animation: rail-flow 4.8s ease-in-out infinite;
+  }
+
+  .dashboard-event-glow {
+    transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
+  }
+
+  .dashboard-event-glow:hover {
+    transform: translateY(-1px);
+  }
+
+  @keyframes dashboard-engine-orbit {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .dashboard-engine-orbit {
+    animation: dashboard-engine-orbit 28s linear infinite;
+  }
+
+  @keyframes dashboard-engine-core {
+    0%, 100% {
+      filter: saturate(1);
+      opacity: 0.96;
+    }
+    50% {
+      filter: saturate(1.16);
+      opacity: 1;
+    }
+  }
+
+  .dashboard-engine-core {
+    animation: dashboard-engine-core 8s ease-in-out infinite;
+  }
+
+  .dashboard-stage-active {
+    box-shadow:
+      0 0 0 1px hsl(var(--gold) / 0.14),
+      0 18px 34px -26px hsl(0 0% 0% / 0.95),
+      0 0 34px -22px hsl(var(--gold) / 0.7);
+  }
+
+  /* ─── Sarah engine · circulating fire + frequency ─── */
+
+  /* Rotating energy band: gold fire arc opposite a teal frequency arc */
+  .engine-energy {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      hsl(var(--gold) / 0.1) 18deg,
+      hsl(var(--gold) / 0.75) 45deg,
+      hsl(32 92% 58% / 0.5) 62deg,
+      hsl(var(--gold) / 0.08) 88deg,
+      transparent 110deg,
+      transparent 176deg,
+      hsl(var(--teal-accent) / 0.08) 196deg,
+      hsl(var(--teal-accent) / 0.65) 225deg,
+      hsl(var(--blue-accent) / 0.45) 244deg,
+      hsl(var(--teal-accent) / 0.06) 268deg,
+      transparent 290deg
+    );
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    mask: radial-gradient(closest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    filter: drop-shadow(0 0 7px hsl(var(--gold) / 0.4)) drop-shadow(0 0 12px hsl(var(--teal-accent) / 0.22));
+    animation: engine-spin 13s linear infinite;
+  }
+
+  /* Wider, softer plasma haze circulating behind the band */
+  .engine-energy-haze {
+    background: conic-gradient(
+      from 90deg,
+      transparent 0deg,
+      hsl(var(--gold) / 0.16) 60deg,
+      transparent 130deg,
+      transparent 200deg,
+      hsl(var(--teal-accent) / 0.13) 250deg,
+      transparent 320deg
+    );
+    -webkit-mask: radial-gradient(closest-side, transparent 58%, #000 74%, transparent 100%);
+    mask: radial-gradient(closest-side, transparent 58%, #000 74%, transparent 100%);
+    filter: blur(10px);
+    animation: engine-spin 21s linear infinite reverse;
+  }
+
+  @keyframes engine-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* Expanding pulse waves — the engine's heartbeat */
+  .engine-wave {
+    border: 1px solid hsl(var(--gold) / 0.35);
+    animation: engine-wave 4.4s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+  }
+
+  .engine-wave-late {
+    border-color: hsl(var(--teal-accent) / 0.3);
+    animation-delay: 2.2s;
+  }
+
+  @keyframes engine-wave {
+    0%   { transform: translate(-50%, -50%) scale(0.94); opacity: 0.55; }
+    70%  { opacity: 0.12; }
+    100% { transform: translate(-50%, -50%) scale(1.65); opacity: 0; }
+  }
+
+  /* Frequency bars — Sarah's live signal */
+  .freq-bar {
+    transform-origin: bottom;
+    animation: freq-dance 1.5s ease-in-out infinite;
+  }
+
+  .freq-bar:nth-child(1) { animation-delay: 0s; }
+  .freq-bar:nth-child(2) { animation-delay: 0.18s; }
+  .freq-bar:nth-child(3) { animation-delay: 0.36s; }
+  .freq-bar:nth-child(4) { animation-delay: 0.1s; }
+  .freq-bar:nth-child(5) { animation-delay: 0.28s; }
+  .freq-bar:nth-child(6) { animation-delay: 0.45s; }
+  .freq-bar:nth-child(7) { animation-delay: 0.22s; }
+
+  @keyframes freq-dance {
+    0%, 100% { transform: scaleY(0.3); }
+    50%      { transform: scaleY(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-breathe-soft,
+    .dashboard-signal,
+    .dashboard-engine-orbit,
+    .dashboard-engine-core,
+    .dashboard-activity-rail::after,
+    .status-live::after,
+    .onboarding-cta-shine::before,
+    .rail-flow::after,
+    .glass-panel::after,
+    .liquid-glow::after,
+    .engine-energy,
+    .engine-energy-haze,
+    .engine-wave,
+    .agent-pulse,
+    .freq-bar {
+      animation: none !important;
+    }
+
+    .engine-wave {
+      opacity: 0;
+    }
+
+    .dashboard-event-glow:hover,
+    .glass-hover:hover,
+    .glass-hover-lift:hover {
+      transform: none;
+    }
+
+    .btn-gold::after,
+    .glass-shine > .shine-layer {
+      transition: none;
+      transform: none;
+      opacity: 0;
+    }
+  }
+
+  /* Active agent chip pulse — soft, slow, status only */
+  .agent-pulse {
+    animation: agent-pulse 3.2s ease-in-out infinite;
+  }
+  @keyframes agent-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--cyan-glow) / 0.0), 0 1px 0 0 hsl(44 70% 90% / 0.09) inset; }
+    50%      { box-shadow: 0 0 16px -4px hsl(var(--cyan-glow) / 0.4), 0 1px 0 0 hsl(44 70% 90% / 0.09) inset; }
+  }
 }

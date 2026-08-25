@@ -36,9 +36,9 @@ const STATUS_ICON: Record<ComplianceStatus, React.ElementType> = {
 };
 
 const STATUS_TONE: Record<ComplianceStatus, string> = {
-  passed: "text-emerald-400",
+  passed: "text-success",
   failed: "text-red-400",
-  pending: "text-amber-400",
+  pending: "text-warning",
   "not-applicable": "text-muted-foreground/55",
 };
 
@@ -52,8 +52,8 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
   const overall = COMPLIANCE_STATUS_COPY[result.overallStatus];
 
   const ringColor = useMemo(() => {
-    if (result.complianceScore >= 85) return "stroke-emerald-400";
-    if (result.complianceScore >= 60) return "stroke-amber-400";
+    if (result.complianceScore >= 85) return "stroke-[hsl(var(--success))]";
+    if (result.complianceScore >= 60) return "stroke-[hsl(var(--warning))]";
     return "stroke-red-400";
   }, [result.complianceScore]);
 
@@ -108,17 +108,17 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
     <div className="space-y-6">
 
       {/* Summary */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto] gap-6 px-7 py-6">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="grid gap-6 px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-7 sm:py-6">
           <div>
             <div className="flex items-center gap-2.5 mb-2.5">
               <OverallIcon
                 className={cn(
                   "h-4 w-4",
                   overall.tone === "passed"
-                    ? "text-emerald-400"
+                    ? "text-success"
                     : overall.tone === "warning"
-                    ? "text-amber-400"
+                    ? "text-warning"
                     : "text-red-400"
                 )}
               />
@@ -162,7 +162,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
           </button>
           <button
             onClick={downloadCertificate}
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
+            className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
           >
             <Download className="h-3 w-3" />
             Download Compliance Certificate
@@ -170,7 +170,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
           <button
             onClick={signOff}
             disabled={result.blockers.length > 0 || signedOff}
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             title={
               result.blockers.length > 0
                 ? "Resolve blockers before signing off"
@@ -189,7 +189,7 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       {(result.blockers.length > 0 ||
         result.missingInformation.length > 0 ||
         result.warnings.length > 0) && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <IssueLane
             label="Blockers"
             count={result.blockers.length}
@@ -212,8 +212,8 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       )}
 
       {/* Best Interests Duty */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Best Interests Duty
           </h3>
@@ -255,8 +255,8 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       </div>
 
       {/* Safe Harbour */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Safe Harbour · s961B(2)
           </h3>
@@ -297,8 +297,8 @@ export function ClientCompliancePanel({ clientId, clientName, initial }: Props) 
       </div>
 
       {/* AFSL obligations */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             AFSL Obligations · Charter 234665
           </h3>
@@ -403,9 +403,9 @@ function IssueLane({
   const toneClass =
     tone === "red"
       ? "border-red-500/30 bg-red-500/[0.04]"
-      : "border-amber-500/30 bg-amber-500/[0.04]";
+      : "border-warning/30 bg-warning/[0.05]";
   const headTone =
-    tone === "red" ? "text-red-300" : "text-amber-300";
+    tone === "red" ? "text-red-300" : "text-warning";
 
   return (
     <div className={cn("rounded-lg border overflow-hidden", toneClass)}>
@@ -435,7 +435,7 @@ function IssueLane({
 function StatusPill({ status }: { status: ComplianceStatus }) {
   if (status === "passed")
     return (
-      <span className="rounded px-2 py-0.5 text-[10px] font-medium text-emerald-400/85 bg-emerald-500/10 border border-emerald-500/25">
+      <span className="rounded px-2 py-0.5 text-[10px] font-medium text-success/85 bg-success/10 border border-success/25">
         Passed
       </span>
     );
@@ -447,7 +447,7 @@ function StatusPill({ status }: { status: ComplianceStatus }) {
     );
   if (status === "pending")
     return (
-      <span className="rounded px-2 py-0.5 text-[10px] font-medium text-amber-300/85 bg-amber-500/10 border border-amber-500/25">
+      <span className="rounded px-2 py-0.5 text-[10px] font-medium text-warning/85 bg-warning/10 border border-warning/25">
         Pending
       </span>
     );

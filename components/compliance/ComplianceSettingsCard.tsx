@@ -75,8 +75,8 @@ export function ComplianceSettingsCard() {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-6 py-5 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+    <section className="rounded-lg glass-card overflow-hidden">
+      <div className="px-6 py-5 border-b border-border/60 bg-black/25">
         <h2 className="text-[14px] font-semibold text-foreground tracking-tight">
           Compliance Settings
         </h2>

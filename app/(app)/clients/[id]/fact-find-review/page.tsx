@@ -10,6 +10,7 @@ import { CLIENTS, type SectionStatus } from "@/lib/data";
 import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getFactFind } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { sarahToReviewAnswers } from "@/lib/sarah-fact-find-schema";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_CONFIG } from "@/lib/data";
@@ -19,6 +20,8 @@ import { ExportButtons } from "@/components/fact-find-review/ExportButtons";
 import { EditableFactFindValue } from "@/components/fact-find-review/EditableFactFindValue";
 import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
 import { ClientTabs } from "@/components/clients/ClientTabs";
+import { AgentIntelligencePanel } from "@/components/agents/AgentIntelligencePanel";
+import { findClient } from "@/lib/data/client-repository";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
 const SECTION_MAP: Record<string, string> = {
@@ -49,15 +52,16 @@ function sectionHasSarahData(
   return Object.values(fields).some((v) => v && v.trim() !== "");
 }
 
-export default function FactFindReviewPage({
+export default async function FactFindReviewPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const sampleAnswers = getClientAnswers(client.id);
+  await ensureFactFindsHydrated();
   const sarahEntry = getFactFind(client.id);
   const sarahAnswers = sarahEntry ? sarahToReviewAnswers(sarahEntry.data) : null;
 
@@ -84,7 +88,7 @@ export default function FactFindReviewPage({
   );
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Back */}
       <Link
@@ -96,10 +100,10 @@ export default function FactFindReviewPage({
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-10 pb-9 border-b border-border/60">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-10 pb-9 border-b border-gold/[0.1]">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-muted-foreground mb-2.5">
-            Fact Find Review
+          <p className="cmd-label text-gold/75 mb-2.5">
+            Fact Find Review · Review Cockpit
           </p>
           <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
             {client.name}
@@ -131,13 +135,13 @@ export default function FactFindReviewPage({
 
       {/* Gaps summary — only when there are missing sections */}
       {missingSections.length > 0 && (
-        <div className="mb-8 rounded-lg border border-red-500/30 bg-red-500/5 overflow-hidden">
+        <div className="glass-panel glass-rim-amber mb-8 overflow-hidden">
           <div className="flex">
-            <div className="w-[3px] shrink-0 bg-gradient-to-b from-red-500/70 to-red-500/20" />
+            <div className="w-[3px] shrink-0 bg-gradient-to-b from-warning/70 to-warning/20" />
             <div className="px-6 py-4">
               <div className="flex items-center gap-2.5 mb-2.5">
-                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
-                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-red-400">
+                <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-warning">
                   Incomplete Sections — Follow Up Required
                 </p>
               </div>
@@ -145,7 +149,7 @@ export default function FactFindReviewPage({
                 {missingSections.map((s) => (
                   <span
                     key={s.id}
-                    className="rounded px-2.5 py-1 text-[11px] font-medium text-red-300 bg-red-500/10 border border-red-500/25"
+                    className="glass-chip rounded-md px-2.5 py-1 text-[11px] font-medium text-warning border-warning/30"
                   >
                     {s.title}
                   </span>
@@ -157,7 +161,7 @@ export default function FactFindReviewPage({
       )}
 
       {/* Main layout */}
-      <div className="grid grid-cols-[1fr_340px] gap-8 items-start">
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px] xl:gap-8 items-start">
 
         {/* Left — section cards */}
         <div className="space-y-5">
@@ -176,12 +180,12 @@ export default function FactFindReviewPage({
               <div
                 key={section.id}
                 className={cn(
-                  "rounded-lg border bg-card overflow-hidden",
+                  "glass-panel overflow-hidden",
                   status === "missing"
-                    ? "border-red-500/25"
+                    ? "glass-rim-amber"
                     : status === "in-progress"
-                    ? "border-amber-500/25"
-                    : "border-border"
+                    ? "glass-rim-gold"
+                    : "glass-rim-emerald"
                 )}
               >
                 {/* Section header */}
@@ -189,10 +193,10 @@ export default function FactFindReviewPage({
                   className={cn(
                     "px-6 py-4 border-b flex items-center justify-between",
                     status === "missing"
-                      ? "border-red-500/20 bg-red-500/[0.04]"
+                      ? "border-warning/20 bg-warning/[0.05]"
                       : status === "in-progress"
-                      ? "border-amber-500/20 bg-amber-500/[0.03]"
-                      : "border-border/60 bg-[hsl(224,20%,7%)]"
+                      ? "border-gold/20 bg-gold/[0.04]"
+                      : "border-white/[0.06] bg-black/25"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -208,9 +212,9 @@ export default function FactFindReviewPage({
                 <div className="px-6 py-5">
                   {status === "missing" ? (
                     <div className="flex items-start gap-3">
-                      <AlertTriangle className="h-4 w-4 text-red-400/70 shrink-0 mt-0.5" />
+                      <AlertTriangle className="h-4 w-4 text-warning/80 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-[14px] text-red-300/95 mb-2">
+                        <p className="text-[14px] text-foreground/85 mb-2">
                           This section was not completed by the client.
                         </p>
                         <p className="text-[12.5px] text-muted-foreground/85">
@@ -223,7 +227,7 @@ export default function FactFindReviewPage({
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                       {section.fields.map((field) => {
                         const value = sectionAnswers[field.id] ?? "";
                         const multiline =
@@ -244,7 +248,7 @@ export default function FactFindReviewPage({
                         );
                       })}
                       {status === "in-progress" && !hasAnyAnswer && (
-                        <p className="col-span-2 text-[13px] text-amber-300/70 italic">
+                        <p className="sm:col-span-2 text-[13px] text-gold/70 italic">
                           Partially completed — data being collected.
                         </p>
                       )}
@@ -257,7 +261,8 @@ export default function FactFindReviewPage({
         </div>
 
         {/* Right — interactive checklist, notes, actions */}
-        <div className="sticky top-8">
+        <div className="xl:sticky xl:top-8">
+          <AgentIntelligencePanel clientId={client.id} />
           <ReviewInteractive
             clientId={client.id}
             clientName={client.name}
@@ -271,27 +276,27 @@ export default function FactFindReviewPage({
 
 function SectionIcon({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />;
+    return <CheckCircle2 className="h-4 w-4 text-success shrink-0" />;
   if (status === "in-progress")
-    return <Clock className="h-4 w-4 text-amber-400 shrink-0" />;
-  return <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />;
+    return <Clock className="h-4 w-4 text-gold shrink-0" />;
+  return <AlertTriangle className="h-4 w-4 text-warning shrink-0" />;
 }
 
 function SectionStatusPill({ status }: { status: SectionStatus }) {
   if (status === "complete")
     return (
-      <span className="text-[11px] font-medium text-emerald-400/80 bg-emerald-500/10 border border-emerald-500/25 rounded px-2.5 py-0.5">
+      <span className="glass-chip text-[11px] font-medium text-success border-success/30 rounded-md px-2.5 py-0.5">
         Complete
       </span>
     );
   if (status === "in-progress")
     return (
-      <span className="text-[11px] font-medium text-amber-400/80 bg-amber-500/10 border border-amber-500/25 rounded px-2.5 py-0.5">
+      <span className="glass-chip text-[11px] font-medium text-gold border-gold/30 rounded-md px-2.5 py-0.5">
         In Progress
       </span>
     );
   return (
-    <span className="text-[11px] font-medium text-red-400/80 bg-red-500/10 border border-red-500/25 rounded px-2.5 py-0.5">
+    <span className="glass-chip text-[11px] font-medium text-warning border-warning/30 rounded-md px-2.5 py-0.5">
       Missing
     </span>
   );

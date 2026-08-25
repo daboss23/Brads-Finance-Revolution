@@ -16,7 +16,7 @@ export function ExportButtons({ clientId }: { clientId: string }) {
     <div className="flex items-center gap-3">
       <button
         onClick={() => trigger("docx")}
-        className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors"
+        className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors"
       >
         <FileText className="h-3.5 w-3.5" />
         Download Word

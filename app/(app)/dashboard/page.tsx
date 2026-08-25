@@ -1,247 +1,72 @@
-import Link from "next/link";
 import {
-  Users,
-  ClipboardList,
-  Calendar,
-  AlertCircle,
-  ArrowRight,
-  Sparkles,
-  FileSignature,
-  Clock,
-  CheckCircle2,
-  Send,
-} from "lucide-react";
-import { CLIENTS } from "@/lib/data";
-import { cn } from "@/lib/utils";
-import { PipelineTable } from "@/components/dashboard/PipelineTable";
-import { TodayLabel } from "@/components/dashboard/TodayLabel";
-import { getPipelineMetrics } from "@/lib/soa/soa-pipeline";
-
-function getMetrics() {
-  const active = CLIENTS.length;
-  const inProgress = CLIENTS.filter((c) => c.status === "in-progress").length;
-  const ready = CLIENTS.filter((c) => c.status === "ready-for-meeting").length;
-  const needsReview = CLIENTS.filter((c) => c.status === "review-required").length;
-  const notStarted = CLIENTS.filter((c) => c.status === "link-sent").length;
-  return { active, inProgress, ready, needsReview, notStarted };
-}
+  AgentActivityStrip,
+  ClientProgressEngine,
+  DashboardHeader,
+  FlowReadingCard,
+  MetricCard,
+  NextBestActions,
+  PipelineSnapshot,
+  PriorityQueue,
+  SarahBriefPanel,
+} from "@/components/dashboard/CommandCentreModules";
+import { getCommandCentreDashboard } from "@/lib/dashboard-command-centre";
 
 export default function DashboardPage() {
-  const metrics = getMetrics();
-  const soa = getPipelineMetrics();
+  const dashboard = getCommandCentreDashboard();
 
   return (
-    <div className="px-10 py-12">
+    <div className="relative isolate min-h-[100dvh] overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_12%,hsl(var(--gold)/0.09),transparent_30%),radial-gradient(circle_at_85%_6%,hsl(var(--teal-accent)/0.05),transparent_26%),radial-gradient(circle_at_50%_115%,hsl(var(--gold-shadow)/0.3),transparent_38%),linear-gradient(150deg,hsl(219_18%_9%),hsl(220_20%_3%)_58%,hsl(222_20%_5%))]" />
+      <div className="absolute inset-x-8 top-5 -z-10 h-28 rounded-full bg-gold/[0.06] blur-3xl" />
+      <div className="absolute bottom-0 right-10 -z-10 size-56 rounded-full bg-teal-accent/[0.05] blur-3xl" />
 
-      {/* Page header */}
-      <header className="flex items-end justify-between mb-12">
-        <div>
-          <p className="text-[10px] font-semibold tracking-[0.26em] uppercase text-muted-foreground/60 mb-4">
-            BMK Financial Services
-          </p>
-          <h1 className="text-[34px] font-semibold tracking-tight text-foreground leading-[1.05]">
-            Good morning, Brad.
-          </h1>
-          <p className="mt-4 text-[14px] text-muted-foreground/80 tracking-tight">
-            <TodayLabel /> &nbsp;·&nbsp; Client Fact Find Command Centre
-          </p>
-        </div>
-        <Link
-          href="/clients"
-          className="inline-flex items-center gap-2 rounded-md bg-gold px-5 py-2.5 text-[13px] font-semibold text-gold-foreground hover:bg-gold/90 transition-colors tracking-tight shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_4px_14px_-4px_rgba(212,175,55,0.45)]"
-        >
-          New Client
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </header>
+      <section className="mx-auto max-w-[1480px] overflow-hidden rounded-3xl border border-gold/[0.14] bg-[linear-gradient(135deg,hsl(219_16%_10%/0.88),hsl(220_20%_4%/0.94))] shadow-[inset_0_1px_0_hsl(44_70%_88%/0.12),0_0_0_1px_hsl(0_0%_0%/0.3),0_32px_90px_-34px_hsl(0_0%_0%/0.95),0_0_70px_-42px_hsl(var(--gold)/0.5)] backdrop-blur-2xl">
+        <DashboardHeader activeFiles={dashboard.activeFiles} />
 
-      {/* KPI cards */}
-      <section className="grid grid-cols-4 gap-5 mb-8">
-        <KpiCard
-          label="Active Clients"
-          value={metrics.active}
-          icon={Users}
-          iconColor="text-gold"
-          iconBg="bg-gold/12"
-          accentFrom="from-gold/50"
-        />
-        <KpiCard
-          label="Fact Finds In Progress"
-          value={metrics.inProgress}
-          icon={ClipboardList}
-          iconColor="text-blue-accent"
-          iconBg="bg-blue-accent/12"
-          accentFrom="from-blue-accent/50"
-        />
-        <KpiCard
-          label="Ready for Meeting"
-          value={metrics.ready}
-          icon={Calendar}
-          iconColor="text-amber-300"
-          iconBg="bg-amber-400/12"
-          accentFrom="from-amber-400/50"
-        />
-        <KpiCard
-          label="Needs Review"
-          value={metrics.needsReview}
-          icon={AlertCircle}
-          iconColor="text-orange-300"
-          iconBg="bg-orange-400/12"
-          accentFrom="from-orange-400/50"
-        />
-      </section>
+        <div className="grid gap-3 p-3 xl:gap-4 xl:p-4">
+          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            {dashboard.metrics.map((metric) => (
+              <MetricCard key={metric.id} metric={metric} />
+            ))}
+          </section>
 
-      {/* SOA pipeline KPIs */}
-      <section className="mb-14">
-        <div className="flex items-end justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <FileSignature className="h-3.5 w-3.5 text-gold" />
-            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
-              SOA Pipeline
-            </p>
-          </div>
-          <Link
-            href="/soa"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/75 hover:text-gold transition-colors tracking-tight"
-          >
-            Open SOA pipeline
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-4 gap-5">
-          <KpiCard
-            label="In Generation"
-            value={soa.inGeneration}
-            icon={Sparkles}
-            iconColor="text-blue-accent"
-            iconBg="bg-blue-accent/12"
-            accentFrom="from-blue-accent/50"
-          />
-          <KpiCard
-            label="Awaiting Brad Review"
-            value={soa.awaitingReview}
-            icon={Clock}
-            iconColor="text-amber-300"
-            iconBg="bg-amber-400/12"
-            accentFrom="from-amber-400/50"
-          />
-          <KpiCard
-            label="Approved · Ready to Send"
-            value={soa.approvedReady}
-            icon={CheckCircle2}
-            iconColor="text-emerald-300"
-            iconBg="bg-emerald-500/12"
-            accentFrom="from-emerald-500/50"
-          />
-          <KpiCard
-            label="Signed This Month"
-            value={soa.signedThisMonth}
-            icon={Send}
-            iconColor="text-gold"
-            iconBg="bg-gold/12"
-            accentFrom="from-gold/50"
-          />
-        </div>
-      </section>
-
-      {/* Sarah brief */}
-      <section className="mb-14 rounded-xl border border-border/70 bg-card overflow-hidden">
-        <div className="flex">
-          <div className="w-[2px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
-          <div className="flex-1 px-9 py-8">
-            <div className="flex items-center gap-3.5 mb-6">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/12 border border-gold/30">
-                <Sparkles className="h-[15px] w-[15px] text-gold" />
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold tracking-[0.26em] text-gold/90 uppercase leading-none">
-                  Sarah
-                </p>
-                <p className="text-[12.5px] text-muted-foreground/90 tracking-tight mt-1.5">
-                  AI Adviser Intelligence &nbsp;·&nbsp; Today's Brief
-                </p>
-              </div>
+          <section className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start 2xl:grid-cols-[340px_minmax(0,1fr)_380px]">
+            <div className="order-2 xl:order-3 xl:col-span-2 2xl:order-1 2xl:col-span-1">
+              <PriorityQueue items={dashboard.priorityQueue} />
             </div>
-            <ul className="space-y-3.5">
-              {[
-                `${metrics.notStarted} client${metrics.notStarted !== 1 ? "s have" : " has"} not started their fact find — a follow-up call is recommended.`,
-                "Sarah Mitchell is 85% complete and ready for meeting prep ahead of 28 May.",
-                "David Okafor and Angela Forsyth both require adviser review before they can progress.",
-              ].map((insight, i) => (
-                <li key={i} className="flex items-start gap-3.5">
-                  <span className="mt-[9px] h-[3px] w-[3px] shrink-0 rounded-full bg-gold/55" />
-                  <p className="text-[14px] text-foreground/82 leading-relaxed tracking-tight">
-                    {insight}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="order-1 xl:order-1 2xl:order-2">
+              <ClientProgressEngine
+                stages={dashboard.workflowStages}
+                totalFilesInFlow={dashboard.totalFilesInFlow}
+                averageTimeInFlow={dashboard.averageTimeInFlow}
+                flowVelocity={dashboard.flowVelocity}
+                conversionToMeeting={dashboard.conversionToMeeting}
+              />
+            </div>
+            <div className="order-3 xl:order-2 2xl:order-3 flex flex-col gap-3">
+              <SarahBriefPanel insights={dashboard.sarahBrief} />
+              <NextBestActions items={dashboard.nextBestActions} />
+            </div>
+          </section>
+
+          <section className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)]">
+            <PipelineSnapshot
+              items={dashboard.pipelineSnapshot}
+              totalFiles={dashboard.totalFilesInFlow}
+            />
+            <FlowReadingCard
+              insight={dashboard.flowReading.insight}
+              timestamp={dashboard.flowReading.timestamp}
+            />
+          </section>
+
+          <AgentActivityStrip
+            agents={dashboard.agentActivity}
+            systemStatus={dashboard.systemStatus}
+            mockModeActive={dashboard.mockModeActive}
+          />
         </div>
       </section>
-
-      {/* Client pipeline */}
-      <section>
-        <div className="flex items-end justify-between mb-6">
-          <div className="flex items-baseline gap-3">
-            <h2 className="text-[17px] font-semibold tracking-tight text-foreground">
-              Client Pipeline
-            </h2>
-            <span className="inline-flex items-center rounded-full bg-white/[0.04] border border-border/70 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground/80 tabular-nums">
-              {CLIENTS.length}
-            </span>
-          </div>
-          <Link
-            href="/clients"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/75 hover:text-gold transition-colors tracking-tight"
-          >
-            View all
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-
-        <PipelineTable />
-      </section>
-    </div>
-  );
-}
-
-function KpiCard({
-  label,
-  value,
-  icon: Icon,
-  iconColor,
-  iconBg,
-  accentFrom,
-}: {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  iconColor: string;
-  iconBg: string;
-  accentFrom: string;
-}) {
-  return (
-    <div className="group rounded-xl border border-border/70 bg-card overflow-hidden transition-colors hover:border-border">
-      <div className={cn("h-[2px] bg-gradient-to-r to-transparent", accentFrom)} />
-      <div className="px-7 pt-7 pb-7">
-        <div className="flex items-start justify-between mb-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70 leading-snug max-w-[140px]">
-            {label}
-          </p>
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full shrink-0 transition-transform group-hover:scale-105",
-              iconBg
-            )}
-          >
-            <Icon className={cn("h-[15px] w-[15px]", iconColor)} />
-          </div>
-        </div>
-        <p className="text-[56px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
-          {value}
-        </p>
-      </div>
     </div>
   );
 }

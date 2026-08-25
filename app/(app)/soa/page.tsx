@@ -6,6 +6,11 @@ import {
   CheckCircle2,
   Clock,
   Send,
+  RadioTower,
+  ShieldCheck,
+  PenLine,
+  Orbit,
+  ChevronRight,
 } from "lucide-react";
 import {
   getPipelineMetrics,
@@ -14,8 +19,17 @@ import {
   STAGE_TONE,
 } from "@/lib/soa/soa-pipeline";
 import { getStats as getVoiceStats } from "@/lib/soa/voice-learner";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+const SYNTHESIS_CHAIN = [
+  { name: "Beacon", role: "Fact Find Structuring", icon: RadioTower },
+  { name: "Guardian", role: "Compliance & Risk", icon: ShieldCheck },
+  { name: "Scribe", role: "Meeting Intelligence", icon: PenLine },
+  { name: "Orion", role: "Evidence Assembly", icon: Orbit },
+  { name: "ATLAS", role: "Strategy & SOA Synthesis", icon: FileSignature },
+];
 
 export default function SoaDashboardPage() {
   const metrics = getPipelineMetrics();
@@ -23,28 +37,15 @@ export default function SoaDashboardPage() {
   const voice = getVoiceStats();
 
   return (
-    <div className="px-10 py-12 max-w-[1280px]">
-
-      {/* Header */}
-      <header className="mb-12 pb-8 border-b border-border/60">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
-            <FileSignature className="h-4 w-4 text-gold" />
-          </div>
-          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
-            Statements of Advice
-          </p>
-        </div>
-        <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
-          The plan engine
-        </h1>
-        <p className="mt-3 text-[13px] text-muted-foreground/85 leading-relaxed max-w-[640px]">
-          Every SOA is generated on top of the fact find, scored by the compliance engine and reviewed by Brad before it leaves the building.
-        </p>
-      </header>
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
+      <PageHeader
+        overline="Statements of Advice"
+        title="SOA Production Engine"
+        subtitle="Every SOA is built on the fact find, screened by Guardian, evidenced by Orion and synthesised by ATLAS before Brad signs it off."
+      />
 
       {/* KPI cards */}
-      <section className="grid grid-cols-4 gap-5 mb-12">
+      <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="In Generation"
           value={metrics.inGeneration}
@@ -71,21 +72,82 @@ export default function SoaDashboardPage() {
         />
       </section>
 
+      {/* ATLAS synthesis chain */}
+      <section className="glass-panel glass-panel-elevated glass-rim-gold glass-shine mb-8 overflow-hidden">
+        <span className="shine-layer" aria-hidden />
+        <span className="pointer-events-none absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(44_75%_84%/0.4),transparent)]" aria-hidden />
+        <div className="border-b border-white/[0.06] bg-black/25 px-6 py-4">
+          <p className="cmd-label text-gold/85">ATLAS Synthesis Line</p>
+          <p className="mt-1.5 text-[12.5px] leading-5 text-muted-foreground/75 max-w-[680px]">
+            Each draft moves along the intelligence line. ATLAS is the final
+            synthesis layer — it writes the strategy in Brad&apos;s voice only
+            after every upstream agent has cleared the file.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 px-5 py-5">
+          {SYNTHESIS_CHAIN.map((agent, i) => {
+            const Icon = agent.icon;
+            const isAtlas = agent.name === "ATLAS";
+            return (
+              <div key={agent.name} className="flex min-w-0 flex-1 basis-[210px] items-center gap-2">
+                <div
+                  className={cn(
+                    "glass-chip flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3.5 py-3",
+                    isAtlas &&
+                      "border-gold/40 shadow-[inset_0_1px_0_hsl(48_85%_88%/0.2),inset_0_-8px_18px_-10px_hsl(39_55%_28%/0.5),0_6px_16px_-6px_hsl(0_0%_0%/0.7),0_0_34px_-12px_hsl(var(--gold-glow)/0.55)]",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "glass-orb grid size-9 shrink-0 place-items-center rounded-lg",
+                      isAtlas
+                        ? "border-gold/45 text-gold shadow-[0_1px_0_0_hsl(46_85%_92%/0.22)_inset,0_0_18px_-4px_hsl(var(--gold-glow)/0.6),0_8px_22px_-8px_hsl(0_0%_0%/0.75)]"
+                        : "text-teal-accent",
+                    )}
+                  >
+                    <Icon className={cn("size-4", isAtlas && "drop-shadow-[0_0_6px_currentColor]")} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className={cn("text-[12.5px] font-semibold", isAtlas ? "text-gold" : "text-foreground")}>
+                      {agent.name}
+                    </p>
+                    <p className="truncate text-[10.5px] text-muted-foreground/65">
+                      {agent.role}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-gold/40" />
+              </div>
+            );
+          })}
+          <div className="glass-chip flex min-w-0 flex-1 basis-[190px] items-center gap-3 rounded-xl border-success/35 px-3.5 py-3 shadow-[inset_0_1px_0_hsl(158_70%_88%/0.14),0_3px_10px_-4px_hsl(0_0%_0%/0.6),0_0_26px_-12px_hsl(var(--success-glow)/0.4)]">
+            <div className="glass-orb grid size-9 shrink-0 place-items-center rounded-lg border-success/40 text-success">
+              <FileSignature className="size-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[12.5px] font-semibold text-success">SOA Draft</p>
+              <p className="truncate text-[10.5px] text-muted-foreground/65">Ready for Brad</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Voice learning */}
-      <section className="mb-12 rounded-lg border border-border bg-card overflow-hidden">
+      <section className="glass-panel mb-8 overflow-hidden">
         <div className="flex">
           <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/65 via-gold/25 to-transparent" />
           <div className="flex-1 px-7 py-6">
             <div className="flex items-center gap-2.5 mb-2">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
-              <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gold/90">
-                Voice Learning
+              <p className="cmd-label text-gold/90">
+                Voice Learning · Brad Style Calibration
               </p>
             </div>
             <p className="text-[14px] text-foreground/85 leading-relaxed mb-5 max-w-[640px]">
-              Every section Brad edits trains the engine to write more like him. Voice calibrates at fifty meaningful edits.
+              Every section Brad edits trains the engine to write more like him.
+              Voice calibrates at fifty meaningful edits.
             </p>
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               <VoiceStat label="Plans generated" value={String(voice.plansGenerated)} />
               <VoiceStat label="Edits recorded" value={String(voice.editsRecorded)} />
               <VoiceStat
@@ -103,7 +165,7 @@ export default function SoaDashboardPage() {
 
       {/* Pipeline */}
       <section>
-        <div className="flex items-end justify-between mb-6">
+        <div className="flex items-end justify-between mb-5">
           <h2 className="text-[17px] font-semibold tracking-tight text-foreground">
             Client SOA Pipeline
           </h2>
@@ -111,67 +173,69 @@ export default function SoaDashboardPage() {
             {rows.length} clients
           </span>
         </div>
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground/85 bg-[hsl(224,20%,7%)]">
-                <th className="px-6 py-3 font-bold">Client</th>
-                <th className="px-6 py-3 font-bold">Stage</th>
-                <th className="px-6 py-3 font-bold">Compliance</th>
-                <th className="px-6 py-3 font-bold text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40">
-              {rows.map((row) => (
-                <tr key={row.client.id} className="hover:bg-white/[0.02]">
-                  <td className="px-6 py-3.5">
-                    <Link
-                      href={`/clients/${row.client.id}`}
-                      className="text-[13px] font-medium text-foreground hover:text-gold transition-colors"
-                    >
-                      {row.client.name}
-                    </Link>
-                    <p className="text-[11px] text-muted-foreground/70 mt-0.5">
-                      {row.client.meetingStage}
-                    </p>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <Badge className={cn(STAGE_TONE[row.stage])}>
-                      {PIPELINE_STAGE_LABELS[row.stage]}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <span className="text-[12.5px] text-foreground/80 tabular-nums">
-                      {row.soa
-                        ? `${row.soa.complianceScore} / 100`
-                        : "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3.5 text-right">
-                    {row.stage === "soa-in-progress" ||
-                    row.stage === "compliance" ||
-                    row.stage === "fact-find" ? (
-                      <Link
-                        href={`/clients/${row.client.id}/soa/generate`}
-                        className="inline-flex items-center gap-1.5 text-[12px] text-gold/85 hover:text-gold transition-colors"
-                      >
-                        Generate
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    ) : (
-                      <Link
-                        href={`/clients/${row.client.id}/soa`}
-                        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/85 hover:text-foreground transition-colors"
-                      >
-                        Open
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    )}
-                  </td>
+        <div className="glass-panel overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground/70 bg-black/30">
+                  <th className="px-6 py-3.5 font-bold">Client</th>
+                  <th className="px-6 py-3.5 font-bold">Stage</th>
+                  <th className="px-6 py-3.5 font-bold">Compliance</th>
+                  <th className="px-6 py-3.5 font-bold text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {rows.map((row) => (
+                  <tr key={row.client.id} className="hover:bg-gold/[0.04] transition-colors">
+                    <td className="px-6 py-3.5">
+                      <Link
+                        href={`/clients/${row.client.id}`}
+                        className="text-[13px] font-medium text-foreground hover:text-gold transition-colors"
+                      >
+                        {row.client.name}
+                      </Link>
+                      <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                        {row.client.meetingStage}
+                      </p>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <Badge className={cn(STAGE_TONE[row.stage])}>
+                        {PIPELINE_STAGE_LABELS[row.stage]}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <span className="text-[12.5px] text-foreground/80 tabular-nums">
+                        {row.soa
+                          ? `${row.soa.complianceScore} / 100`
+                          : "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3.5 text-right">
+                      {row.stage === "soa-in-progress" ||
+                      row.stage === "compliance" ||
+                      row.stage === "fact-find" ? (
+                        <Link
+                          href={`/clients/${row.client.id}/soa/generate`}
+                          className="inline-flex items-center gap-1.5 text-[12px] text-gold/85 hover:text-gold transition-colors"
+                        >
+                          Generate
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/clients/${row.client.id}/soa`}
+                          className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/85 hover:text-foreground transition-colors"
+                        >
+                          Open
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
@@ -188,14 +252,14 @@ const TONE_STYLES: Record<
     accent: "from-blue-accent/50",
   },
   amber: {
-    iconBg: "bg-amber-400/12",
-    iconColor: "text-amber-300",
-    accent: "from-amber-400/50",
+    iconBg: "bg-warning/[0.12]",
+    iconColor: "text-warning",
+    accent: "from-warning/50",
   },
   emerald: {
-    iconBg: "bg-emerald-500/12",
-    iconColor: "text-emerald-300",
-    accent: "from-emerald-500/50",
+    iconBg: "bg-success/[0.12]",
+    iconColor: "text-success",
+    accent: "from-success/50",
   },
   gold: {
     iconBg: "bg-gold/12",
@@ -217,23 +281,18 @@ function KpiCard({
 }) {
   const t = TONE_STYLES[tone];
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden">
+    <div className="glass-panel glass-hover overflow-hidden">
       <div className={cn("h-[2px] bg-gradient-to-r to-transparent", t.accent)} />
-      <div className="px-6 pt-6 pb-7">
-        <div className="flex items-start justify-between mb-7">
+      <div className="px-6 pt-5 pb-6">
+        <div className="flex items-start justify-between mb-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70 leading-snug max-w-[140px]">
             {label}
           </p>
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full shrink-0",
-              t.iconBg,
-            )}
-          >
-            <Icon className={cn("h-[15px] w-[15px]", t.iconColor)} />
+          <div className="glass-orb flex h-9 w-9 items-center justify-center shrink-0">
+            <Icon className={cn("h-[15px] w-[15px] drop-shadow-[0_0_6px_currentColor]", t.iconColor)} />
           </div>
         </div>
-        <p className="text-[44px] font-semibold tracking-tight text-foreground leading-none tabular-nums">
+        <p className="text-[44px] font-semibold tracking-tight text-foreground leading-none tabular-nums drop-shadow-[0_2px_10px_hsl(220_25%_2%/0.7)]">
           {value}
         </p>
       </div>

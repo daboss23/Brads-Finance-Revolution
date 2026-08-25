@@ -16,8 +16,8 @@ interface Props {
 }
 
 const STATUS_TONE: Record<string, string> = {
-  green: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
-  amber: "bg-amber-500/15 text-amber-300 border-amber-500/35",
+  green: "bg-success/15 text-success border-success/35",
+  amber: "bg-warning/[0.15] text-warning border-warning/35",
   blue: "bg-blue-accent/15 text-blue-accent border-blue-accent/35",
   neutral: "bg-zinc-700/30 text-zinc-300 border-zinc-600/50",
 };
@@ -29,10 +29,16 @@ export function SoaReviewView({ initial, strategies }: Props) {
     // Pick up any local edits on mount. If none exist, seed localStorage
     // with the server rendered initial so subsequent edits persist.
     const live = getSoa(initial.clientId);
-    if (live) {
+    // Reject legacy or corrupted cache entries stored under the wrong client
+    // key. The server-rendered document is authoritative for identity.
+    if (
+      live?.clientId === initial.clientId &&
+      live.clientName === initial.clientName
+    ) {
       setDoc(live);
     } else {
       saveSoa(initial);
+      setDoc(initial);
     }
   }, [initial]);
 
@@ -41,8 +47,8 @@ export function SoaReviewView({ initial, strategies }: Props) {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
             <FileText className="h-4 w-4 text-gold" />
           </div>
@@ -71,7 +77,7 @@ export function SoaReviewView({ initial, strategies }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_340px] gap-8 items-start">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8 xl:items-start">
         <div className="space-y-5">
           {doc.sections.map((section) => (
             <SoaSection
@@ -83,7 +89,7 @@ export function SoaReviewView({ initial, strategies }: Props) {
             />
           ))}
         </div>
-        <div className="sticky top-8">
+        <div className="xl:sticky xl:top-8">
           <SoaReviewPanel doc={doc} onChange={setDoc} />
         </div>
       </div>

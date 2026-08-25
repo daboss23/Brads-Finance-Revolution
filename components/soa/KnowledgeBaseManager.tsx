@@ -38,8 +38,8 @@ const STATUS_ICON: Record<TrainingDoc["status"], React.ElementType> = {
 
 const STATUS_TONE: Record<TrainingDoc["status"], string> = {
   queued: "text-muted-foreground/70",
-  extracting: "text-amber-300",
-  indexed: "text-emerald-400",
+  extracting: "text-warning",
+  indexed: "text-success",
   failed: "text-red-400",
 };
 
@@ -106,7 +106,7 @@ export function KnowledgeBaseManager() {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Total Documents" value={String(stats.totalDocs)} />
         <Stat
           label="Brad Authored"
@@ -124,8 +124,8 @@ export function KnowledgeBaseManager() {
       </div>
 
       {/* Author tag selector */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Tag uploads as
           </h3>
@@ -194,8 +194,8 @@ export function KnowledgeBaseManager() {
       </div>
 
       {/* Document list */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)] flex items-center justify-between">
+      <div className="rounded-lg glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border/60 bg-black/25 flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             Training Corpus
           </h3>

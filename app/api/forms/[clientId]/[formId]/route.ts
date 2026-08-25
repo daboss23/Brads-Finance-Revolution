@@ -4,8 +4,10 @@ import { CLIENTS } from "@/lib/data";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getClientProfile } from "@/lib/client-profiles";
 import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { getLogoPng } from "@/lib/export-logo";
 import { FORMS, PROVIDERS, type FormId } from "@/lib/forms";
+import { findClient } from "@/lib/data/client-repository";
 
 // ── Layout (A4) ─────────────────────────────────────────────────────────────
 const PW = 595, PH = 842;
@@ -50,8 +52,8 @@ interface FormSpec {
 }
 
 // ── Build form data from client record ───────────────────────────────────────
-function buildFormSpec(formId: FormId, clientId: string): FormSpec | null {
-  const client = CLIENTS.find((c) => c.id === clientId);
+async function buildFormSpec(formId: FormId, clientId: string): Promise<FormSpec | null> {
+  const client = await findClient(clientId);
   if (!client) return null;
 
   const definition = FORMS.find((f) => f.id === formId);
@@ -572,6 +574,7 @@ export async function GET(
   _req: Request,
   { params }: { params: { clientId: string; formId: string } }
 ) {
+  await ensureFactFindsHydrated();
   const { clientId, formId } = params;
 
   const validIds: FormId[] = FORMS.map((f) => f.id);
@@ -579,7 +582,7 @@ export async function GET(
     return new NextResponse("Invalid form ID", { status: 400 });
   }
 
-  const spec = buildFormSpec(formId as FormId, clientId);
+  const spec = await buildFormSpec(formId as FormId, clientId);
   if (!spec) {
     return new NextResponse("Client not found", { status: 404 });
   }

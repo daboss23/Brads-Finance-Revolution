@@ -1,3 +1,4 @@
+import { findClient } from "@/lib/data/client-repository";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -23,12 +24,12 @@ import {
   SoaGateClient,
 } from "@/components/compliance/SoaGateClient";
 
-export default function ClientDetailPage({
+export default async function ClientDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const client = CLIENTS.find((c) => c.id === params.id);
+  const client = await findClient(params.id);
   if (!client) notFound();
 
   const completeSections = client.factFindSections.filter(
@@ -39,7 +40,7 @@ export default function ClientDetailPage({
   const complianceResult = checkCompliance(client.id);
 
   return (
-    <div className="px-14 py-12">
+    <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* Back */}
       <Link
@@ -51,9 +52,9 @@ export default function ClientDetailPage({
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8 pb-8 border-b border-border/60">
+      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between mb-8 pb-8 border-b border-gold/[0.1]">
         <div className="flex items-center gap-5">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted border border-border text-[14px] font-bold text-muted-foreground/70 tracking-tight">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-gold/25 bg-gradient-to-b from-gold/[0.14] to-transparent text-[14px] font-bold text-gold/85 tracking-tight">
             {client.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
           </div>
           <div>
@@ -83,7 +84,7 @@ export default function ClientDetailPage({
           </div>
           <Link
             href={`/clients/${client.id}/forms`}
-            className="inline-flex items-center gap-2 rounded border border-border bg-card px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-2 btn-glass rounded px-4 py-2.5 text-[12px] font-medium text-foreground/70 hover:text-foreground hover:border-border/80 transition-colors whitespace-nowrap"
           >
             <FileText className="h-3.5 w-3.5" />
             Strategies
@@ -100,7 +101,7 @@ export default function ClientDetailPage({
 
       <ClientTabs clientId={client.id} />
 
-      <div className="grid grid-cols-[1fr_380px] gap-8">
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px] xl:gap-8">
         {/* Left */}
         <div className="space-y-6">
 
@@ -108,13 +109,13 @@ export default function ClientDetailPage({
           <SoaGateClient clientId={client.id} result={complianceResult} />
 
           {/* Contact */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="glass-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.06] bg-black/25">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Contact Information
               </h2>
             </div>
-            <div className="px-6 py-5 grid grid-cols-2 gap-5">
+            <div className="grid gap-5 px-5 py-5 sm:grid-cols-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground/75 shrink-0" />
                 <span className="text-[13px] text-foreground/80">{client.email}</span>
@@ -151,8 +152,8 @@ export default function ClientDetailPage({
 
           {/* Notes */}
           {client.notes && (
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+            <div className="glass-panel overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/[0.06] bg-black/25">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   Adviser Notes
                 </h2>
@@ -166,8 +167,8 @@ export default function ClientDetailPage({
           )}
 
           {/* Timeline */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="glass-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.06] bg-black/25">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Activity Timeline
               </h2>
@@ -217,8 +218,8 @@ export default function ClientDetailPage({
           />
 
           {/* Progress */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="glass-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.06] bg-black/25">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Fact Find Progress
               </h2>
@@ -239,8 +240,8 @@ export default function ClientDetailPage({
           </div>
 
           {/* Section breakdown */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-border/60 bg-[hsl(224,20%,7%)]">
+          <div className="glass-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.06] bg-black/25">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Section Breakdown
               </h2>
@@ -265,7 +266,7 @@ export default function ClientDetailPage({
           </div>
 
           {/* Sarah */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="glass-panel overflow-hidden">
             <div className="flex">
               <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/60 via-gold/25 to-transparent" />
               <div className="px-5 py-5">
@@ -291,7 +292,7 @@ export default function ClientDetailPage({
 
 function SectionIcon({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />;
+    return <CheckCircle2 className="h-4 w-4 text-success shrink-0" />;
   if (status === "in-progress")
     return <Clock className="h-4 w-4 text-blue-accent shrink-0" />;
   return <Circle className="h-4 w-4 text-muted-foreground/25 shrink-0" />;
@@ -299,7 +300,7 @@ function SectionIcon({ status }: { status: SectionStatus }) {
 
 function SectionStatusLabel({ status }: { status: SectionStatus }) {
   if (status === "complete")
-    return <span className="text-[12px] text-emerald-500/80 font-medium">Complete</span>;
+    return <span className="text-[12px] text-success/85 font-medium">Complete</span>;
   if (status === "in-progress")
     return <span className="text-[12px] text-blue-accent/80 font-medium">In Progress</span>;
   return <span className="text-[12px] text-muted-foreground/35">Missing</span>;
