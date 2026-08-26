@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
   Download,
+  RefreshCw,
   Send,
   ShieldCheck,
 } from "lucide-react";
@@ -154,6 +156,14 @@ export function SoaReviewPanel({ doc, onChange }: Props) {
           </h3>
         </div>
         <div className="px-5 py-5 space-y-2.5">
+          <Link
+            href={`/clients/${doc.clientId}/soa/generate`}
+            className="w-full inline-flex items-center justify-center gap-2 rounded border border-gold/35 bg-gold/[0.06] px-3 py-2 text-[12px] font-medium text-gold hover:border-gold/60 transition-colors"
+            title="Run the full agent chain again and produce a fresh draft"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Regenerate with agents
+          </Link>
           <button
             onClick={downloadPdf}
             className="w-full inline-flex items-center justify-center gap-2 btn-glass rounded px-3 py-2 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:border-border/90 transition-colors"
