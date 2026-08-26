@@ -9,6 +9,7 @@ import {
   PriorityQueue,
   SarahBriefPanel,
 } from "@/components/dashboard/CommandCentreModules";
+import { AgentChain3D } from "@/components/dashboard/agent-chain/AgentChain3D";
 import { getCommandCentreDashboard } from "@/lib/dashboard-command-centre";
 
 export default function DashboardPage() {
@@ -58,6 +59,26 @@ export default function DashboardPage() {
               insight={dashboard.flowReading.insight}
               timestamp={dashboard.flowReading.timestamp}
             />
+          </section>
+
+          <section className="relative isolate overflow-hidden rounded-3xl border border-gold/[0.14] bg-[linear-gradient(135deg,hsl(219_16%_9%/0.9),hsl(220_20%_3%/0.95))] shadow-[inset_0_1px_0_hsl(44_70%_88%/0.08)]">
+            <AgentChain3D
+              agents={dashboard.agentActivity}
+              className="pointer-events-none absolute inset-0 -z-10"
+            />
+            <div className="flex flex-col gap-1 p-4">
+              <div className="flex items-center gap-2">
+                <span className="status-live size-2 rounded-full bg-gold text-gold" />
+                <p className="text-[15px] font-semibold text-foreground">
+                  Agent Intelligence Chain
+                </p>
+              </div>
+              <p className="max-w-md text-[11.5px] text-muted-foreground/60">
+                Discovery to Statement of Advice, live. Each node burns with its agent&rsquo;s
+                current activity as energy streams down the chain.
+              </p>
+              <div className="h-40 sm:h-48 xl:h-56" aria-hidden />
+            </div>
           </section>
 
           <AgentActivityStrip
