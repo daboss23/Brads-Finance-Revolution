@@ -5,7 +5,9 @@
 // Rendering documents from real HTML/CSS is what lets the exports carry
 // full typography, colour, and layout instead of hand-drawn pdf-lib boxes.
 
-import { existsSync } from "fs";
+import { existsSync, mkdtempSync } from "fs";
+import { tmpdir } from "os";
+import path from "path";
 
 const LOCAL_CHROME_CANDIDATES = [
   process.env.LOCAL_CHROME_PATH ?? "",
@@ -24,7 +26,21 @@ async function launchBrowser() {
     return puppeteer.launch({
       executablePath: local,
       headless: true,
-      args: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader"],
+      // A dedicated throwaway profile is required: when Chrome is already
+      // open with the default profile, a new launch hands off to the running
+      // instance and exits without printing the WS endpoint, which times out
+      // puppeteer. Isolated profile + first-run flags make launches reliable.
+      userDataDir: mkdtempSync(path.join(tmpdir(), "bmk-pdf-chrome-")),
+      timeout: 60000,
+      protocolTimeout: 120000,
+      args: [
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--single-process",
+        "--no-first-run",
+        "--no-default-browser-check",
+      ],
     });
   }
 
