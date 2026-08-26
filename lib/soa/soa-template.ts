@@ -187,6 +187,14 @@ export interface SoaProjectionPoint {
   recommended: number;
 }
 
+export interface AgentContribution {
+  agentId: string;
+  name: string;
+  role: string;
+  contribution: string;
+  recordedAt: string;
+}
+
 export interface SoaDocument {
   clientId: string;
   clientName: string;
@@ -199,6 +207,8 @@ export interface SoaDocument {
   complianceScore: number;
   complianceCertificateId: string;
   status: SoaStatus;
+  /** Provenance: which agents contributed to this document and how. */
+  agentContributions?: AgentContribution[];
 }
 
 export interface MarketSnapshot {

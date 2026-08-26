@@ -704,6 +704,7 @@ export function AgentActivityStrip({
 
 function statusText(status: AgentActivityItem["status"]) {
   if (status === "Active") return "text-success";
+  if (status === "Monitoring") return "text-blue-accent";
   if (status === "Idle") return "text-gold";
   if (status === "Needs Key") return "text-warning";
   return "text-teal-accent";

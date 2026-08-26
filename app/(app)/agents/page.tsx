@@ -11,7 +11,7 @@ import { listRuntimeBlueprints } from "@/lib/agent-system";
 import { ACTIVE_WORKFLOW_AGENTS, AGENTS } from "@/lib/agents";
 import { AgentCard } from "@/components/agents/AgentCard";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { getAgentTelemetry } from "@/lib/agents/events";
+import { getAgentTelemetryHydrated } from "@/lib/agents/events";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
@@ -27,12 +27,13 @@ const CHAIN: { name: string; role: string }[] = [
   { name: "ATLAS", role: "Strategy & SOA Synthesis" },
 ];
 
-export default function AgentsPage() {
-  const telemetry = getAgentTelemetry();
+export default async function AgentsPage() {
+  // Hydrated from the encrypted store so run history survives cold starts.
+  const telemetry = await getAgentTelemetryHydrated();
   const runtimeBlueprints = listRuntimeBlueprints();
   const latestByAgent = new Map(telemetry.map((event) => [event.agentId, event]));
   const autoRunnable = runtimeBlueprints.filter((agent) => agent.autoRunModes.length > 0).length;
-  const visibleAgents = AGENTS.filter((agent) => agent.id !== "cipher");
+  const visibleAgents = AGENTS;
   const nexus = visibleAgents.find((agent) => agent.id === "nexus");
   const chainAgents = visibleAgents.filter((agent) => agent.id !== "nexus");
 
@@ -42,7 +43,7 @@ export default function AgentsPage() {
         <PageHeader
           overline="Command Layer"
           title="Agent Command Centre"
-          subtitle="Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Nexus watches the wiring underneath."
+          subtitle="Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Cipher keeps every file moving and Nexus watches the wiring underneath."
         />
         <div className="glass-panel p-5">
           <p className="cmd-label text-gold/85">System intelligence</p>

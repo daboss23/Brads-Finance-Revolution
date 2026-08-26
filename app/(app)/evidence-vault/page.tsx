@@ -15,79 +15,95 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
+import { CLIENTS } from "@/lib/data";
+import { listSoas } from "@/lib/soa/soa-store";
+import { getStats as getVoiceStats } from "@/lib/soa/voice-learner";
+import { STRATEGY_PATTERNS } from "@/lib/soa/knowledge-base";
+import { LANGUAGE_TEMPLATES } from "@/lib/compliance/knowledge-base";
+import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 
 export const metadata = {
   title: "Evidence Vault - Newcastle Command Centre",
 };
 
-const COLLECTIONS = [
-  {
-    id: "uploaded-soas",
-    name: "Uploaded SOAs",
-    detail: "Completed Statements of Advice, weighted three times when written by Brad.",
-    icon: FileText,
-    count: 24,
-    classification: "Advice records",
-  },
-  {
-    id: "completed-fact-finds",
-    name: "Completed Fact Finds",
-    detail: "Discovery outputs captured by Sarah and structured by Beacon.",
-    icon: FileCheck2,
-    count: 18,
-    classification: "Client discovery",
-  },
-  {
-    id: "brad-methodology",
-    name: "Brad Methodology",
-    detail: "Strategy reasoning patterns and advice frameworks in Brad's own words.",
-    icon: BookOpen,
-    count: 7,
-    classification: "Adviser IP",
-  },
-  {
-    id: "compliance-templates",
-    name: "Compliance Templates",
-    detail: "Approved language, BID steps, safe harbour checklists and consent wording.",
-    icon: ShieldCheck,
-    count: 13,
-    classification: "Regulatory",
-  },
-  {
-    id: "product-research",
-    name: "Product Research",
-    detail: "Provider comparisons and product analysis for MLC, AIA and AMP MyNorth.",
-    icon: Landmark,
-    count: 9,
-    classification: "Research",
-  },
-  {
-    id: "evidence-library",
-    name: "Evidence Library",
-    detail: "Best interests evidence packets assembled by Orion for each advice file.",
-    icon: FolderLock,
-    count: 11,
-    classification: "Best interests",
-  },
-  {
-    id: "strategy-patterns",
-    name: "Strategy Patterns",
-    detail: "Seven reusable strategy reasoning patterns feeding ATLAS synthesis.",
-    icon: Sparkles,
-    count: 7,
-    classification: "Strategy",
-  },
-  {
-    id: "voice-examples",
-    name: "Voice & Writing Examples",
-    detail: "Before-and-after edit pairs training the engine to write like Brad.",
-    icon: PenLine,
-    count: 32,
-    classification: "Voice learning",
-  },
-];
+export default async function EvidenceVaultPage() {
+  // Counts are derived from the live stores wherever one exists — SOAs from
+  // the SOA store, fact finds from Sarah's capture layer, voice pairs from
+  // the learner, patterns and language from the knowledge bases.
+  await ensureFactFindsHydrated();
+  const soaCount = listSoas().length;
+  const voice = getVoiceStats();
+  const factFindCount = CLIENTS.filter((client) => getFactFindOrDemo(client.id)).length;
+  const patternCount = Object.keys(STRATEGY_PATTERNS).length;
 
-export default function EvidenceVaultPage() {
+  const COLLECTIONS = [
+    {
+      id: "uploaded-soas",
+      name: "Uploaded SOAs",
+      detail: "Generated and approved Statements of Advice held in the vault.",
+      icon: FileText,
+      count: soaCount,
+      classification: "Advice records",
+    },
+    {
+      id: "completed-fact-finds",
+      name: "Completed Fact Finds",
+      detail: "Discovery outputs captured by Sarah and structured by Beacon.",
+      icon: FileCheck2,
+      count: factFindCount,
+      classification: "Client discovery",
+    },
+    {
+      id: "brad-methodology",
+      name: "Brad Methodology",
+      detail: "Strategy reasoning patterns and advice frameworks in Brad's own words.",
+      icon: BookOpen,
+      count: patternCount,
+      classification: "Adviser IP",
+    },
+    {
+      id: "compliance-templates",
+      name: "Compliance Templates",
+      detail: "Approved language, BID steps, safe harbour checklists and consent wording.",
+      icon: ShieldCheck,
+      count: LANGUAGE_TEMPLATES.length,
+      classification: "Regulatory",
+    },
+    {
+      id: "product-research",
+      name: "Product Research",
+      detail: "Provider comparisons and product analysis for MLC, AIA and AMP MyNorth.",
+      icon: Landmark,
+      count: 9,
+      classification: "Research",
+    },
+    {
+      id: "evidence-library",
+      name: "Evidence Library",
+      detail: "Best interests evidence packets assembled by Orion for each advice file.",
+      icon: FolderLock,
+      count: soaCount,
+      classification: "Best interests",
+    },
+    {
+      id: "strategy-patterns",
+      name: "Strategy Patterns",
+      detail: "Reusable strategy reasoning patterns feeding ATLAS synthesis.",
+      icon: Sparkles,
+      count: patternCount,
+      classification: "Strategy",
+    },
+    {
+      id: "voice-examples",
+      name: "Voice & Writing Examples",
+      detail: "Before-and-after edit pairs training the engine to write like Brad.",
+      icon: PenLine,
+      count: voice.editsRecorded,
+      classification: "Voice learning",
+    },
+  ];
+
   const totalItems = COLLECTIONS.reduce((sum, c) => sum + c.count, 0);
 
   return (
@@ -121,7 +137,7 @@ export default function EvidenceVaultPage() {
           </div>
           <div className="flex items-center gap-6">
             <VaultStat label="Documents" value={String(totalItems)} />
-            <VaultStat label="Brad-weighted" value="24" />
+            <VaultStat label="Brad-weighted" value={String(soaCount)} />
             <VaultStat label="Collections" value={String(COLLECTIONS.length)} />
           </div>
         </div>

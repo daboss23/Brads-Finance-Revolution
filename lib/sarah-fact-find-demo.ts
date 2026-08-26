@@ -88,8 +88,7 @@ function build(overrides: Partial<{ [K in keyof SarahFactFind]: Partial<SarahFac
     Record<string, string | number | string[]>,
   ][]) {
     if (section === "completionPercentage" || section === "missingSections") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (base as any)[section] = fields;
+      (base as unknown as Record<string, unknown>)[section] = fields;
       continue;
     }
     Object.assign(base[section] as Record<string, string>, fields);

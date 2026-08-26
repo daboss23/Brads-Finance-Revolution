@@ -174,7 +174,7 @@ export function SoaSection({ doc, section, strategies, onChange }: Props) {
             ))}
             {section.comment && (
               <p className="text-[12px] text-muted-foreground/70 italic border-l-2 border-border/60 pl-3 mt-3">
-                Brad's note: {section.comment}
+                Note from Brad: {section.comment}
               </p>
             )}
           </div>

@@ -152,7 +152,7 @@ export function ReviewInteractive({ clientId, clientName, missingSectionCount }:
 
       {reviewed && (
         <p className="text-[11px] text-success/70 text-center">
-          Pipeline updated — {clientName.split(" ")[0]}'s card shows Brad Reviewed
+          Pipeline updated — {clientName.split(" ")[0]} is now marked as Brad Reviewed
         </p>
       )}
     </div>
