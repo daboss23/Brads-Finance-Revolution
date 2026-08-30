@@ -6,9 +6,12 @@
 // from the same premium practice.
 
 import { LOGO_SVG } from "../export-logo";
+import { fontFaceCss } from "./fonts";
 
 export const BRAND_CSS = /* css */ `
   :root {
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
     --navy: #0E2444;
     --navy-deep: #081a33;
     --ink: #16202e;
@@ -28,12 +31,31 @@ export const BRAND_CSS = /* css */ `
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: var(--serif);
     color: var(--body);
-    font-size: 10pt;
-    line-height: 1.55;
+    font-size: 10.5pt;
+    line-height: 1.62;
     background: var(--paper);
+    /* Advice documents are read start to finish, so set them like a book:
+       old-style figures in running prose, real ligatures, hyphenation to keep
+       the justified-feeling ragged edge tight. */
+    font-variant-numeric: oldstyle-num proportional-nums;
+    font-kerning: normal;
+    -webkit-hyphens: auto; hyphens: auto;
+    text-rendering: optimizeLegibility;
   }
+  /* Anything structural or numeric stays on the brand sans, with lining
+     figures so columns align. */
+  .cover .brand, .cover .doctype, .cover .meta .k, .rhead, .eyebrow,
+  .pill, .field .fl, .stat .sk, th, .callout .ct, .sec-num {
+    font-family: var(--sans);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  td.num, th.num, .stat .sv, .field .fv {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  /* Widows and orphans ruin a premium document more than any colour choice. */
+  p { orphans: 3; widows: 3; }
   .page { padding: 20mm 18mm 16mm; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
@@ -61,6 +83,7 @@ export const BRAND_CSS = /* css */ `
     color: var(--gold-bright); margin-bottom: 5mm;
   }
   .cover h1 {
+    font-family: var(--sans);
     font-size: 30pt; font-weight: 600; line-height: 1.12;
     color: #ffffff; max-width: 150mm; letter-spacing: -0.01em;
   }
@@ -87,14 +110,14 @@ export const BRAND_CSS = /* css */ `
   .sec-head { display: flex; align-items: baseline; gap: 4mm; margin-bottom: 4mm; }
   .sec-num { font-size: 9pt; font-weight: 700; color: var(--gold);
     font-variant-numeric: tabular-nums; min-width: 8mm; }
-  .sec-title { font-size: 14pt; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+  .sec-title { font-family: var(--sans); font-size: 13.5pt; font-weight: 600; color: var(--ink); letter-spacing: -0.015em; }
   .sec-rule { height: 1px; background: var(--line); margin: 3mm 0 4mm; }
   .sec p { margin-bottom: 2.5mm; }
   .sec p:last-child { margin-bottom: 0; }
 
   .eyebrow { font-size: 7.5pt; letter-spacing: 0.26em; text-transform: uppercase;
     color: var(--gold); margin-bottom: 3mm; }
-  h2.block { font-size: 16pt; font-weight: 600; color: var(--ink); margin-bottom: 5mm; letter-spacing: -0.01em; }
+  h2.block { font-family: var(--sans); font-size: 16pt; font-weight: 600; color: var(--ink); margin-bottom: 5mm; letter-spacing: -0.01em; }
 
   /* Data grid — fact find fields */
   .fieldgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 3mm; overflow: hidden; }
@@ -150,5 +173,5 @@ export function esc(s: unknown): string {
 export function docShell(title: string, bodyHtml: string): string {
   return `<!DOCTYPE html><html lang="en-AU"><head><meta charset="utf-8"><title>${esc(
     title,
-  )}</title><style>${BRAND_CSS}</style></head><body>${bodyHtml}</body></html>`;
+  )}</title><style>${fontFaceCss()}${BRAND_CSS}</style></head><body>${bodyHtml}</body></html>`;
 }

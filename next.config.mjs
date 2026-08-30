@@ -31,10 +31,10 @@ const nextConfig = {
     // still working locally, where a system Chromium is found instead. It
     // graduates to the top level in Next 15.
     outputFileTracingIncludes: {
-      "/api/soa/[id]/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
-      "/api/export/[id]/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
-      "/api/compliance/[id]/certificate": ["./node_modules/@sparticuz/chromium/bin/**"],
-      "/api/forms/[clientId]/[formId]": ["./node_modules/@sparticuz/chromium/bin/**"],
+      "/api/soa/[id]/pdf": ["./node_modules/@sparticuz/chromium/bin/**", "./lib/pdf/fonts/**"],
+      "/api/export/[id]/pdf": ["./node_modules/@sparticuz/chromium/bin/**", "./lib/pdf/fonts/**"],
+      "/api/compliance/[id]/certificate": ["./node_modules/@sparticuz/chromium/bin/**", "./lib/pdf/fonts/**"],
+      "/api/forms/[clientId]/[formId]": ["./node_modules/@sparticuz/chromium/bin/**", "./lib/pdf/fonts/**"],
     },
   },
 };
