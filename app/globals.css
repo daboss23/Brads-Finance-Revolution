@@ -219,6 +219,14 @@
   }
   .onboarding-rise { animation: onboarding-rise 0.45s ease-out both; }
 
+  /* Discovery transcript: soft fade at the top edge so scrolled-away
+     messages dissolve rather than clip. */
+  .onboarding-transcript {
+    overscroll-behavior: contain;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 28px);
+    mask-image: linear-gradient(to bottom, transparent 0, black 28px);
+  }
+
   .onboarding-delay-1 { animation-delay: 0.08s; }
   .onboarding-delay-2 { animation-delay: 0.16s; }
   .onboarding-delay-3 { animation-delay: 0.24s; }

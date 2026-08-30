@@ -50,6 +50,8 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -353,11 +355,41 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     return currentSubtitle.split(/\s+/).slice(0, visibleWordCount).join(" ");
   }, [currentSubtitle, visibleWordCount]);
 
-  const pastUserAnswers = messages
-    .map((m, i) => ({ m, i }))
-    .filter(({ m }) => m.role === "user" && m.content !== "[START]");
+  const transcript = useMemo(
+    () =>
+      messages
+        .map((m, i) => ({ m, i }))
+        .filter(({ m }) => m.content !== "[START]")
+        .map(({ m, i }) => ({
+          index: i,
+          role: m.role,
+          text: m.role === "assistant" ? stripFactFindTag(m.content) : m.content,
+        }))
+        .filter((entry) => entry.text.length > 0),
+    [messages],
+  );
 
-  const recentAnswers = pastUserAnswers.slice(-1);
+  const lastUserIndex = useMemo(() => {
+    for (let i = transcript.length - 1; i >= 0; i -= 1) {
+      if (transcript[i].role === "user") return transcript[i].index;
+    }
+    return -1;
+  }, [transcript]);
+
+  function handleTranscriptScroll() {
+    const el = transcriptRef.current;
+    if (!el) return;
+    stickToBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+  }
+
+  // Follow the conversation as it grows, unless the client has scrolled back
+  // to re-read something earlier.
+  useEffect(() => {
+    const el = transcriptRef.current;
+    if (!el || !stickToBottomRef.current) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [transcript]);
 
   const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
 
@@ -494,27 +526,58 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
           </div>
         </div>
 
-        {recentAnswers.length > 0 && (
-          <div className="mt-6 w-full max-w-[500px] mx-auto flex flex-col items-end gap-2">
-            {recentAnswers.map(({ m, i }) => (
-              <div key={i} className="flex flex-col items-end max-w-full">
-                <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-[inset_0_1px_0_hsl(44_75%_85%/0.08)]">
-                  <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
-                    {m.content}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleEditAnswer(i)}
-                  disabled={isStreaming}
-                  className="mt-1 text-[11px] text-gold/80 hover:text-gold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  Edit answer
-                </button>
-              </div>
-            ))}
+        {transcript.length > 0 && (
+          <div className="mt-6 w-full max-w-[720px] mx-auto">
+            <div
+              ref={transcriptRef}
+              onScroll={handleTranscriptScroll}
+              role="log"
+              aria-live="polite"
+              aria-label="Conversation transcript"
+              className="onboarding-transcript flex max-h-[300px] flex-col gap-3 overflow-y-auto scroll-smooth px-1 py-1"
+            >
+              {transcript.map((entry) =>
+                entry.role === "user" ? (
+                  <div
+                    key={entry.index}
+                    className="flex flex-col items-end self-end max-w-[85%]"
+                  >
+                    <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-[inset_0_1px_0_hsl(44_75%_85%/0.08)]">
+                      <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
+                        {entry.text}
+                      </p>
+                    </div>
+                    {entry.index === lastUserIndex && (
+                      <button
+                        type="button"
+                        onClick={() => handleEditAnswer(entry.index)}
+                        disabled={isStreaming}
+                        className="mt-1 text-[11px] text-gold/80 hover:text-gold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Edit answer
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    key={entry.index}
+                    className="flex flex-col items-start self-start max-w-[85%]"
+                  >
+                    <div className="glass-chip rounded-2xl rounded-tl-sm border-foreground/10 px-4 py-2.5">
+                      <p className="text-[14px] text-foreground/75 leading-relaxed whitespace-pre-wrap">
+                        {entry.text}
+                      </p>
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground/50">
+              Scroll to review anything you have already said.
+            </p>
           </div>
         )}
+
       </main>
 
       {/* Input bar — close below subtitle/answer, fixed-height to prevent shake */}
