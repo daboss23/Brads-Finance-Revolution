@@ -265,7 +265,7 @@ export default async function ClientDetailPage({
             </div>
           </div>
 
-          {/* Sarah */}
+          {/* Athena */}
           <div className="glass-panel overflow-hidden">
             <div className="flex">
               <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/60 via-gold/25 to-transparent" />
@@ -275,11 +275,11 @@ export default async function ClientDetailPage({
                     <Sparkles className="h-3 w-3 text-gold" />
                   </div>
                   <p className="text-[10px] font-bold tracking-[0.2em] text-gold uppercase">
-                    Sarah
+                    Athena
                   </p>
                 </div>
                 <p className="text-[13px] text-muted-foreground/65 leading-relaxed">
-                  {getSarahInsight(client.progress, client.status, client.name)}
+                  {getAthenaInsight(client.progress, client.status, client.name)}
                 </p>
               </div>
             </div>
@@ -306,7 +306,7 @@ function SectionStatusLabel({ status }: { status: SectionStatus }) {
   return <span className="text-[12px] text-muted-foreground/35">Missing</span>;
 }
 
-function getSarahInsight(progress: number, status: string, name: string): string {
+function getAthenaInsight(progress: number, status: string, name: string): string {
   const first = name.split(" ")[0];
   if (status === "complete")
     return `${first}'s fact find is complete. All sections accounted for — ready to generate the financial plan.`;

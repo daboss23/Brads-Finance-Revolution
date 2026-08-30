@@ -1,7 +1,7 @@
-// Sarah's structured fact-find output schema and helpers to map it onto the
+// Athena's structured fact-find output schema and helpers to map it onto the
 // existing FACT_FIND_SECTIONS field IDs used by the review screen.
 
-export interface SarahFactFind {
+export interface AthenaFactFind {
   personalDetails: {
     fullName: string;
     dateOfBirth: string;
@@ -76,8 +76,8 @@ export interface SarahFactFind {
   missingSections: string[];
 }
 
-// Maps Sarah's section + field → existing review-page section + field IDs.
-export const SARAH_TO_REVIEW: Record<string, { section: string; field: string }> = {
+// Maps Athena's section + field to existing review-page section + field IDs.
+export const ATHENA_TO_REVIEW: Record<string, { section: string; field: string }> = {
   "personalDetails.fullName": { section: "personal-details", field: "full-name" },
   "personalDetails.dateOfBirth": { section: "personal-details", field: "dob" },
   "personalDetails.address": { section: "personal-details", field: "address" },
@@ -141,10 +141,10 @@ export const SARAH_TO_REVIEW: Record<string, { section: string; field: string }>
 
 export type ReviewAnswers = Record<string, Record<string, string>>;
 
-export function sarahToReviewAnswers(data: SarahFactFind): ReviewAnswers {
+export function athenaToReviewAnswers(data: AthenaFactFind): ReviewAnswers {
   const out: ReviewAnswers = {};
-  for (const [key, target] of Object.entries(SARAH_TO_REVIEW)) {
-    const [sec, field] = key.split(".") as [keyof SarahFactFind, string];
+  for (const [key, target] of Object.entries(ATHENA_TO_REVIEW)) {
+    const [sec, field] = key.split(".") as [keyof AthenaFactFind, string];
     const sectionData = data[sec] as Record<string, string> | undefined;
     const value = sectionData?.[field] ?? "";
     if (!out[target.section]) out[target.section] = {};
@@ -154,9 +154,9 @@ export function sarahToReviewAnswers(data: SarahFactFind): ReviewAnswers {
 }
 
 // Fills in any missing sections so partial fact finds (an interrupted
-// Sarah session, a minimal API payload) never crash consumers that read
+// Athena session, a minimal API payload) never crash consumers that read
 // section fields directly.
-export function normalizeFactFind(partial: Partial<SarahFactFind>): SarahFactFind {
+export function normalizeFactFind(partial: Partial<AthenaFactFind>): AthenaFactFind {
   return {
     personalDetails: {
       fullName: "", dateOfBirth: "", address: "", timeAtAddress: "", countryOfBirth: "",

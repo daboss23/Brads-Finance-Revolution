@@ -1,5 +1,5 @@
 export type AgentId =
-  | "sarah"
+  | "athena"
   | "beacon"
   | "guardian"
   | "scribe"

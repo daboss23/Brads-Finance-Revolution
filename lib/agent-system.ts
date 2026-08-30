@@ -29,7 +29,7 @@ export type RuntimeAgentBlueprint = {
 };
 
 export const RUNTIME_AGENT_ORDER: AgentId[] = [
-  "sarah",
+  "athena",
   "beacon",
   "guardian",
   "scribe",
@@ -48,9 +48,9 @@ export const ACTIVE_WORKFLOW_AGENT_ORDER: AgentId[] = [
 ];
 
 export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = {
-  sarah: {
-    id: "sarah",
-    name: "Sarah",
+  athena: {
+    id: "athena",
+    name: "Athena",
     role: "Client Discovery Agent",
     description:
       "Runs the live client discovery session and produces the raw structured fact-find payload.",
@@ -68,8 +68,8 @@ export const RUNTIME_AGENT_BLUEPRINTS: Record<AgentId, RuntimeAgentBlueprint> = 
     name: "Beacon",
     role: "Fact Find Structuring Agent",
     description:
-      "Normalises Sarah and manual fact-find data into adviser-ready sections.",
-    trigger: "After Sarah completes or fact-find data changes",
+      "Normalises Athena and manual fact-find data into adviser-ready sections.",
+    trigger: "After Athena completes or fact-find data changes",
     usesAI: true,
     cacheTTL: null,
     costLevel: "low",

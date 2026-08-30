@@ -43,7 +43,7 @@ type AgentState = Omit<
 >;
 
 const AGENT_STATE: Record<AgentId, AgentState> = {
-  sarah: {
+  athena: {
     status: "ready",
     workload: 42,
     activeTask: "Waiting for the next discovery session to begin",
@@ -150,7 +150,7 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
 };
 
 const AGENT_TONES: Record<AgentId, AgentTone> = {
-  sarah: "violet",
+  athena: "violet",
   beacon: "blue",
   guardian: "orange",
   scribe: "gold",
@@ -161,7 +161,7 @@ const AGENT_TONES: Record<AgentId, AgentTone> = {
 };
 
 const AGENT_CALLSIGNS: Record<AgentId, string> = {
-  sarah: "Opens the conversation and gathers the story cleanly",
+  athena: "Opens the conversation and gathers the story cleanly",
   beacon: "Turns raw discovery into a file Brad can actually work with",
   guardian: "Nothing reaches advice without clearing the gate",
   scribe: "Packages the meeting so Brad walks in prepared",
@@ -306,7 +306,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-5",
-    agentId: "sarah",
+    agentId: "athena",
     label: "Follow up missing client information for Michael and Kate Reynolds",
     clientId: "michael-kate-reynolds",
     priority: "medium",

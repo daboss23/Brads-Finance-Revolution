@@ -1,7 +1,7 @@
 // Strategy + form catalogue for BMK FS.
 //
-// Each form lists the fact-find field paths it needs (in SarahFactFind dot
-// notation) so the PDF generator can pre-fill from Sarah's collected data
+// Each form lists the fact-find field paths it needs (in AthenaFactFind dot
+// notation) so the PDF generator can pre-fill from Athena's collected data
 // and the UI can flag which fields are missing.
 
 export type StrategyKey =
@@ -99,7 +99,7 @@ export interface FormDefinition {
   provider: ProviderKey;
   description: string;
   strategies: StrategyKey[];
-  requiredFields: string[]; // SarahFactFind dot-path notation
+  requiredFields: string[]; // AthenaFactFind dot-path notation
 }
 
 const CORE_PERSONAL = [

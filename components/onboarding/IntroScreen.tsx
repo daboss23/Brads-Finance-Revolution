@@ -19,25 +19,25 @@ export function IntroScreen({ firstName, onBegin }: Props) {
           <NewcastleLogoFull size={64} />
         </div>
 
-        {/* Sarah greeting */}
+        {/* Athena greeting */}
         <div className="flex items-start gap-4">
           <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 border border-gold/30 mt-1">
             <Sparkles className="h-4 w-4 text-gold" />
           </div>
           <div>
             <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-gold mb-2.5">
-              Sarah · Onboarding Guide
+              Athena · Onboarding Guide
             </p>
             <h1 className="text-[36px] font-semibold tracking-tight text-foreground leading-tight">
               Hi, {firstName}.
             </h1>
             <p className="text-[18px] font-light text-foreground/70 leading-snug mt-1.5">
-              Sarah here. I handle onboarding for Brad.
+              Athena here. I handle onboarding for Brad.
             </p>
           </div>
         </div>
 
-        {/* Sarah intro card — BMK pattern */}
+        {/* Athena intro card — BMK pattern */}
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />

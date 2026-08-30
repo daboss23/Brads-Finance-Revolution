@@ -1,3 +1,5 @@
+
+
 // HTML → PDF rendering through headless Chromium.
 //
 // On Vercel this uses @sparticuz/chromium (a lambda-sized Chromium build);

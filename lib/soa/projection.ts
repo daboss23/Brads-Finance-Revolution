@@ -1,7 +1,7 @@
 // Retirement projection calculator. Conservative inputs, deterministic output.
 // The SOA always discloses the assumptions used.
 
-import type { SarahFactFind } from "../sarah-fact-find-schema";
+import type { AthenaFactFind } from "../athena-fact-find-schema";
 import type { SoaProjectionPoint } from "./soa-template";
 
 export interface ProjectionAssumptions {
@@ -39,7 +39,7 @@ function parseAge(dob: string): number | null {
 }
 
 export function projectSuper(
-  factFind: SarahFactFind,
+  factFind: AthenaFactFind,
   overrides: Partial<ProjectionAssumptions> = {},
 ): { points: SoaProjectionPoint[]; assumptions: ProjectionAssumptions } {
   const a = { ...DEFAULT_ASSUMPTIONS, ...overrides };

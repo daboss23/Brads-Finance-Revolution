@@ -62,10 +62,10 @@ The app already has:
 - Compliance
 - SOA
 - Fact Find
-- Sarah
+- Athena
 - Settings
 
-The app already has a client pipeline, SOA pipeline, compliance checks, Sarah onboarding, and fact find data.
+The app already has a client pipeline, SOA pipeline, compliance checks, Athena onboarding, and fact find data.
 
 The next build should improve the product experience and add a clear agent layer without rebuilding the entire architecture.
 
@@ -216,7 +216,7 @@ Suggested nav order:
 - Compliance
 - SOA
 - Fact Find
-- Sarah
+- Athena
 - Agents
 - Settings
 

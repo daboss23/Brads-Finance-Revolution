@@ -9,7 +9,7 @@
 // SoaGenerationError describing exactly what is blocking the run.
 
 import { CLIENTS } from "../data";
-import { getFactFindOrDemo } from "../sarah-fact-find-store";
+import { getFactFindOrDemo } from "../athena-fact-find-store";
 import { getClientProfile } from "../client-profiles";
 import { recommendStrategies } from "../strategy-recommender";
 import { STRATEGY_LABELS, type StrategyKey } from "../forms";
@@ -166,7 +166,7 @@ export function generateSoa(
   const factFind = getFactFindOrDemo(clientId);
   if (!factFind) {
     throw new SoaGenerationError("Fact find missing", [
-      "Sarah has not yet collected a fact find for this client.",
+      "Athena has not yet collected a fact find for this client.",
     ]);
   }
   const profile = getClientProfile(clientId);
@@ -288,7 +288,7 @@ export function generateSoa(
 // For clients other than the demo showpiece, generate plausible content from
 // the fact find and the strategy reasoning patterns. This is a structural
 // stand-in until the Claude API integration is wired in (the streaming
-// pattern lives in app/api/sarah/route.ts and will be repurposed in Phase 4
+// pattern lives in app/api/athena/route.ts and will be repurposed in Phase 4
 // for the real generation calls).
 
 function buildProceduralSections(
@@ -435,7 +435,7 @@ function readAtlasContext(clientId: string): AtlasOutput | null {
 // ── Agent provenance ────────────────────────────────────────────────────────
 
 /**
- * Records which agents contributed to this document and how. Sarah is always
+ * Records which agents contributed to this document and how. Athena is always
  * listed because the fact find she captured is the foundation of every plan.
  */
 function buildAgentContributions(contexts: {
@@ -448,8 +448,8 @@ function buildAgentContributions(contexts: {
   const recordedAt = new Date().toISOString();
   const list: AgentContribution[] = [
     {
-      agentId: "sarah",
-      name: "Sarah",
+      agentId: "athena",
+      name: "Athena",
       role: "Client Discovery",
       contribution:
         "Captured the Financial Discovery Session and produced the raw fact find this plan is built on.",
@@ -524,7 +524,7 @@ export function getGenerationReadiness(clientId: string): GenerationReadiness {
   const warnings: string[] = [];
 
   if (!factFind) {
-    blockers.push("Fact find has not been collected by Sarah.");
+    blockers.push("Fact find has not been collected by Athena.");
   } else if (factFind.completionPercentage < 70) {
     warnings.push(
       `Fact find is only ${factFind.completionPercentage}% complete. Some sections may be generated with limited information.`,

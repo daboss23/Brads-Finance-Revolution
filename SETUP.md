@@ -9,8 +9,8 @@ to keep a safe demo flow for showing clients.
 
 | You want to… | Set these |
 |---|---|
-| **Demo only** (browse, show Sarah, show demo clients) | *Nothing required.* Optionally `DATA_ENCRYPTION_KEY` so you can also create real clients live. |
-| **Sarah actually talks** in the demo | `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` |
+| **Demo only** (browse, show Athena, show demo clients) | *Nothing required.* Optionally `DATA_ENCRYPTION_KEY` so you can also create real clients live. |
+| **Athena actually talks** in the demo | `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` |
 | **Run real clients** (store real data) | Above + `DATA_ENCRYPTION_KEY`, `DATABASE_URL`, `AUTH_SESSION_SECRET`, `ADVISER_EMAIL`, `ADVISER_PASSWORD_HASH` |
 | **Two-factor sign-in** | + `ADVISER_TOTP_SECRET` |
 | **Email Brad when a fact find lands** | + `RESEND_API_KEY`, `NOTIFY_EMAIL` |
@@ -20,15 +20,15 @@ then redeploy. Nothing is committed to the repo.
 
 ---
 
-## 1. AI services (Sarah's brain and voice)
+## 1. AI services (Athena's brain and voice)
 
 | Variable | What it powers | Where to get it |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Sarah's conversation (Claude) | console.anthropic.com → API Keys |
-| `ELEVENLABS_API_KEY` | Sarah's spoken voice + speech-to-text (Scribe v1) | elevenlabs.io → Profile → API Key |
-| `ELEVENLABS_VOICE_ID` | Which voice Sarah uses | Already chosen: `qkVB3KAXPWsBoebSnOpJ` |
+| `ANTHROPIC_API_KEY` | Athena's conversation (Claude) | console.anthropic.com → API Keys |
+| `ELEVENLABS_API_KEY` | Athena's spoken voice + speech-to-text (Scribe v1) | elevenlabs.io → Profile → API Key |
+| `ELEVENLABS_VOICE_ID` | Which voice Athena uses | Already chosen: `qkVB3KAXPWsBoebSnOpJ` |
 
-Without these, Sarah runs in **mock mode** — the interface, orb, and flow all
+Without these, Athena runs in **mock mode** — the interface, orb, and flow all
 work for a demo, she just won't hold a live AI conversation or speak.
 
 ## 2. Encryption (required before storing any real client data)
@@ -109,16 +109,16 @@ server console instead of emailed — nothing breaks.
 
 These are not in conflict — the platform is built for exactly this:
 
-- **Pure visual demo (no keys):** everything renders. Demo clients (Sarah
+- **Pure visual demo (no keys):** everything renders. Demo clients (Athena
   Mitchell, the Carrs, etc.) have full fact finds, compliance, and SOAs you
   can walk through. Creating a *new* real client is disabled (fails closed).
-- **Live demo with Sarah talking:** add the three AI keys (§1). Sarah holds a
+- **Live demo with Athena talking:** add the three AI keys (§1). Athena holds a
   real conversation and speaks. Still no client data stored unless you add §2.
 - **Real pilot:** add §2–§4. Now "Add Client" works, data is encrypted and
   durable, and the adviser pages require sign-in. The demo clients still sit
   alongside real ones, so you can keep demoing with them any time.
 
-Recommended for a client showcase: set §1 (Sarah lives) **and**
+Recommended for a client showcase: set §1 (Athena lives) **and**
 `DATA_ENCRYPTION_KEY` (so you can add a client live in the meeting), and leave
 sign-in off until after the showcase so you don't fumble a 2FA code on stage.
 Turn on §4 sign-in before real client data goes in.

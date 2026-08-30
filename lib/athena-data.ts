@@ -1,3 +1,4 @@
+// Discovery links managed by Athena's client onboarding flow.
 export type LinkStatus = "not-sent" | "sent" | "opened" | "in-progress" | "completed";
 
 export interface FactFindLink {

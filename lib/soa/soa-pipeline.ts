@@ -3,7 +3,7 @@
 
 import { CLIENTS, type Client } from "../data";
 import { getClientProfile } from "../client-profiles";
-import { getFactFindOrDemo } from "../sarah-fact-find-store";
+import { getFactFindOrDemo } from "../athena-fact-find-store";
 import { checkCompliance } from "../compliance/compliance-checker";
 import { getSoa } from "./soa-store";
 import { generateSoa, SoaGenerationError } from "./soa-generator";

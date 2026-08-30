@@ -9,6 +9,25 @@ const SPEECH_RMS_THRESHOLD = 0.025;
 const MIN_RECORDING_BEFORE_AUTOSTOP_MS = 1200;
 const TRANSCRIPT_REVEAL_DELAY_MS = 350;
 
+function pickMimeType(): string {
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+    "audio/ogg;codecs=opus",
+    "audio/ogg",
+  ];
+  for (const type of candidates) {
+    if (
+      typeof MediaRecorder !== "undefined" &&
+      MediaRecorder.isTypeSupported(type)
+    ) {
+      return type;
+    }
+  }
+  return "";
+}
+
 export function useAudioRecorder(onTranscript: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -22,6 +41,7 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
+  const audioLevelRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -48,22 +68,7 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
       audioCtxRef.current.close().catch(() => {});
       audioCtxRef.current = null;
     }
-  }
-
-  function pickMimeType(): string {
-    const candidates = [
-      "audio/webm;codecs=opus",
-      "audio/webm",
-      "audio/mp4",
-      "audio/ogg;codecs=opus",
-      "audio/ogg",
-    ];
-    for (const t of candidates) {
-      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)) {
-        return t;
-      }
-    }
-    return "";
+    audioLevelRef.current = 0;
   }
 
   function attachSilenceDetector(stream: MediaStream, startedAt: number) {
@@ -93,6 +98,13 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
           sumSq += v * v;
         }
         const rms = Math.sqrt(sumSq / buf.length);
+        const normalisedLevel = Math.min(
+          1,
+          Math.max(0, (rms - SILENCE_RMS_THRESHOLD) / 0.12),
+        );
+        audioLevelRef.current +=
+          (normalisedLevel - audioLevelRef.current) *
+          (normalisedLevel > audioLevelRef.current ? 0.38 : 0.12);
         const now = performance.now();
 
         if (rms > SPEECH_RMS_THRESHOLD) {
@@ -163,11 +175,22 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
           console.log("[recorder] posting blob to /api/transcribe…");
           const res = await fetch("/api/transcribe", { method: "POST", body: fd });
           console.log("[recorder] /api/transcribe status:", res.status);
+          if (!res.ok) {
+            const errorData = (await res.json().catch(() => null)) as
+              | { error?: string }
+              | null;
+            const msg = errorData?.error ?? `Transcription failed (${res.status})`;
+            console.error("[transcribe] error:", msg, errorData);
+            setError(msg);
+            setIsTranscribing(false);
+            setIsRecording(false);
+            return;
+          }
           const data = (await res.json().catch(() => null)) as
             | { text?: string; error?: string }
             | null;
           console.log("[recorder] transcribe response:", data);
-          if (!res.ok || !data || data.error) {
+          if (!data || data.error) {
             const msg = data?.error ?? `Transcription failed (${res.status})`;
             console.error("[transcribe] error:", msg, data);
             setError(msg);
@@ -237,5 +260,13 @@ export function useAudioRecorder(onTranscript: (text: string) => void) {
     else void start();
   }
 
-  return { isRecording, isTranscribing, error, start, stop, toggle };
+  return {
+    isRecording,
+    isTranscribing,
+    error,
+    audioLevelRef,
+    start,
+    stop,
+    toggle,
+  };
 }

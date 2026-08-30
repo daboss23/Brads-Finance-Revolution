@@ -20,7 +20,7 @@ const providerRows = [
     group: "AI Provider",
     icon: Bot,
     rows: [
-      { label: "Anthropic", connected: Boolean(process.env.ANTHROPIC_API_KEY), detail: "Sarah and future agent JSON provider" },
+      { label: "Anthropic", connected: Boolean(process.env.ANTHROPIC_API_KEY), detail: "Athena and future agent JSON provider" },
       { label: "OpenAI", connected: Boolean(process.env.OPENAI_API_KEY), detail: "Optional future structured JSON provider" },
       { label: "Selected mode", connected: true, detail: "Mock-first with safe fallback" },
     ],
@@ -29,7 +29,7 @@ const providerRows = [
     group: "Voice Provider",
     icon: Mic,
     rows: [
-      { label: "ElevenLabs", connected: Boolean(process.env.ELEVENLABS_API_KEY), detail: "Current Sarah voice path" },
+      { label: "ElevenLabs", connected: Boolean(process.env.ELEVENLABS_API_KEY), detail: "Current Athena voice path" },
       { label: "OpenAI voice", connected: Boolean(process.env.OPENAI_VOICE_API_KEY), detail: "Placeholder for future voice option" },
     ],
   },

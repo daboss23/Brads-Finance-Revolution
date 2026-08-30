@@ -1,11 +1,11 @@
 // Fact Find Summary — branded HTML for PDF rendering.
 
-import type { SarahFactFind } from "../sarah-fact-find-schema";
+import type { AthenaFactFind } from "../athena-fact-find-schema";
 import { docShell, esc, logoDataAttr } from "./doc-theme";
 
 interface FactFindDocInput {
   clientName: string;
-  data: SarahFactFind;
+  data: AthenaFactFind;
   preparedFor?: string;
 }
 
@@ -63,7 +63,7 @@ export function buildFactFindHtml(input: FactFindDocInput): string {
         <div><div class="k">Prepared for</div><div class="v">${esc(input.preparedFor ?? "Brad Lonergan")}</div></div>
         <div><div class="k">Date prepared</div><div class="v">${today}</div></div>
         <div><div class="k">Discovery completion</div><div class="v">${pct}%</div></div>
-        <div><div class="k">Source</div><div class="v">Sarah — Financial Discovery Session</div></div>
+        <div><div class="k">Source</div><div class="v">Athena — Financial Discovery Session</div></div>
       </div>
     </section>`;
 

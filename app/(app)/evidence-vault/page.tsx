@@ -20,7 +20,7 @@ import { listSoas } from "@/lib/soa/soa-store";
 import { getStats as getVoiceStats } from "@/lib/soa/voice-learner";
 import { STRATEGY_PATTERNS } from "@/lib/soa/knowledge-base";
 import { LANGUAGE_TEMPLATES } from "@/lib/compliance/knowledge-base";
-import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { getFactFindOrDemo } from "@/lib/athena-fact-find-store";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 
 export const metadata = {
@@ -29,7 +29,7 @@ export const metadata = {
 
 export default async function EvidenceVaultPage() {
   // Counts are derived from the live stores wherever one exists — SOAs from
-  // the SOA store, fact finds from Sarah's capture layer, voice pairs from
+  // the SOA store, fact finds from Athena's capture layer, voice pairs from
   // the learner, patterns and language from the knowledge bases.
   await ensureFactFindsHydrated();
   const soaCount = listSoas().length;
@@ -49,7 +49,7 @@ export default async function EvidenceVaultPage() {
     {
       id: "completed-fact-finds",
       name: "Completed Fact Finds",
-      detail: "Discovery outputs captured by Sarah and structured by Beacon.",
+      detail: "Discovery outputs captured by Athena and structured by Beacon.",
       icon: FileCheck2,
       count: factFindCount,
       classification: "Client discovery",

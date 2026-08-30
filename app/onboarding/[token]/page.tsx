@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SarahChat } from "@/components/onboarding/SarahChat";
-import { getLinkByToken } from "@/lib/sarah-data";
+import { AthenaChat } from "@/components/onboarding/AthenaChat";
+import { getLinkByToken } from "@/lib/athena-data";
 import { markFactFindCompleted } from "@/lib/review-store";
 
 interface TokenCheck {
@@ -67,7 +67,7 @@ export default function OnboardingPage({
   }
 
   return (
-    <SarahChat
+    <AthenaChat
       clientName={check.clientName ?? "there"}
       clientId={check.clientId}
       token={params.token}

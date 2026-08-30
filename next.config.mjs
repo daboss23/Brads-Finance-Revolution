@@ -1,5 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/sarah",
+        destination: "/athena",
+        permanent: true,
+      },
+      {
+        source: "/api/sarah",
+        destination: "/api/athena",
+        permanent: false,
+      },
+      {
+        source: "/api/sarah/voice",
+        destination: "/api/athena/voice",
+        permanent: false,
+      },
+    ];
+  },
   experimental: {
     serverComponentsExternalPackages: ["pg", "puppeteer-core", "@sparticuz/chromium"],
   },

@@ -125,7 +125,7 @@
   <div class="brand">BMK Financial Services · Client Data Protection</div>
   <div class="rule"></div>
   <h1>Security &amp; Data Protection Report</h1>
-  <p class="subtitle">How the BMK CRM platform protects client financial information — from the first word a client says to Sarah, to the signed Statement of Advice.</p>
+  <p class="subtitle">How the BMK CRM platform protects client financial information — from the first word a client says to Athena, to the signed Statement of Advice.</p>
   <div class="meta">
     <div><div class="k">Prepared for</div><div class="v">Brad Lonergan, BMK Financial Services</div></div>
     <div><div class="k">Date</div><div class="v">July 2026</div></div>
@@ -177,7 +177,7 @@
   </table>
 
   <h3>The client's journey, protected end to end</h3>
-  <p>A client opens their private onboarding link and — before a single question is asked — sees a privacy collection notice covering purpose, disclosure, and their access and complaint rights under the Privacy Act. Their conversation with Sarah travels over TLS. The completed fact find is encrypted the moment it arrives and stored as ciphertext. When Brad reviews it the next morning, he signs in with his password and authenticator code; the platform decrypts the record for his session, and the compliance check he runs is written into the permanent audit trail. At no point does readable client data sit on a disk, in a backup, or in a database console.</p>
+  <p>A client opens their private onboarding link and — before a single question is asked — sees a privacy collection notice covering purpose, disclosure, and their access and complaint rights under the Privacy Act. Their conversation with Athena travels over TLS. The completed fact find is encrypted the moment it arrives and stored as ciphertext. When Brad reviews it the next morning, he signs in with his password and authenticator code; the platform decrypts the record for his session, and the compliance check he runs is written into the permanent audit trail. At no point does readable client data sit on a disk, in a backup, or in a database console.</p>
 </section>
 
 <!-- ═══ CONTROLS DETAIL ═══ -->
@@ -219,10 +219,10 @@
   <div class="verified"><span class="tag">Verified in testing</span>The full flow was exercised live: unauthenticated visits redirect to sign-in; API calls without a session receive 401; wrong passwords and wrong authenticator codes are rejected; the sixth failed attempt triggers the lockout; a correct password plus a correct code issues a working session.</div>
 
   <h3>Clients never need passwords</h3>
-  <p>Client onboarding runs on private per-session links, so clients face no account creation and no password to lose. The endpoints Sarah needs stay public and rate limited; everything that <em>reads</em> client data back requires an adviser session.</p>
+  <p>Client onboarding runs on private per-session links, so clients face no account creation and no password to lose. The endpoints Athena needs stay public and rate limited; everything that <em>reads</em> client data back requires an adviser session.</p>
 
   <h3>Rate limiting on every public surface</h3>
-  <p>Sign-in attempts, fact-find submissions, Sarah conversation turns, voice transcription, and audit writes are each throttled per source address. This blunts brute-force attacks and protects against abuse of the platform's paid AI services.</p>
+  <p>Sign-in attempts, fact-find submissions, Athena conversation turns, voice transcription, and audit writes are each throttled per source address. This blunts brute-force attacks and protects against abuse of the platform's paid AI services.</p>
 
   <h3>A permanent, encrypted audit trail</h3>
   <p>Two event streams are appended to encrypted, append-only storage: <strong>compliance events</strong> (checks run, blockers resolved, certificates generated, adviser sign-offs — each stamped with the compliance-rules version in force) and <strong>security events</strong> (sign-ins, failures, lockouts, sign-outs, with source address and timestamp). Records can be added but not rewritten — the property a regulator looks for in an audit trail.</p>

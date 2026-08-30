@@ -3,7 +3,7 @@
 // screen can greet the client. Rate limited against token guessing.
 
 import { getRealClientByToken } from "@/lib/clients/real-client-store";
-import { getLinkByToken } from "@/lib/sarah-data";
+import { getLinkByToken } from "@/lib/athena-data";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";

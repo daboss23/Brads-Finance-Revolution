@@ -7,7 +7,7 @@ import {
   NextBestActions,
   PipelineSnapshot,
   PriorityQueue,
-  SarahBriefPanel,
+  AthenaBriefPanel,
 } from "@/components/dashboard/CommandCentreModules";
 import { getCommandCentreDashboard } from "@/lib/dashboard-command-centre";
 
@@ -44,7 +44,7 @@ export default function DashboardPage() {
               />
             </div>
             <div className="order-3 xl:order-2 2xl:order-3 flex flex-col gap-3">
-              <SarahBriefPanel insights={dashboard.sarahBrief} />
+              <AthenaBriefPanel insights={dashboard.athenaBrief} />
               <NextBestActions items={dashboard.nextBestActions} />
             </div>
           </section>

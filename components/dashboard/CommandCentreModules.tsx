@@ -35,7 +35,7 @@ import type {
   PipelineSnapshotItem,
   PriorityLevel,
   PriorityQueueItem,
-  SarahBriefInsight,
+  AthenaBriefInsight,
   WorkflowStage,
 } from "@/lib/dashboard-command-centre";
 
@@ -52,7 +52,7 @@ const metricIcons: Record<string, IconComponent> = {
 const stageIcons: Record<string, IconComponent> = {
   "link-sent": Mail,
   discovery: ClipboardList,
-  "sarah-complete": CheckCircle2,
+  "athena-complete": CheckCircle2,
   "beacon-structured": RadioTower,
   "guardian-check": ShieldCheck,
   "scribe-prep": PenLine,
@@ -61,7 +61,7 @@ const stageIcons: Record<string, IconComponent> = {
 };
 
 const agentIcons: Record<AgentActivityItem["name"], IconComponent> = {
-  Sarah: Sparkles,
+  Athena: Sparkles,
   Beacon: RadioTower,
   Guardian: ShieldCheck,
   Scribe: PenLine,
@@ -327,8 +327,8 @@ export function ClientProgressEngine({
 
   // Five clear stages: the whole journey in one readable line.
   const pipeline = [
-    { name: "Sarah", label: "Discovery", count: countFor("link-sent", "discovery"), detail: "Clients completing their Financial Discovery session" },
-    { name: "Beacon", label: "Structuring", count: countFor("beacon-structured", "sarah-complete"), detail: "Fact finds structured for adviser review" },
+    { name: "Athena", label: "Discovery", count: countFor("link-sent", "discovery"), detail: "Clients completing their Financial Discovery session" },
+    { name: "Beacon", label: "Structuring", count: countFor("beacon-structured", "athena-complete"), detail: "Fact finds structured for adviser review" },
     { name: "Guardian", label: "Compliance", count: countFor("guardian-check"), detail: "Best interests and risk screening" },
     { name: "Scribe + Orion", label: "Evidence", count: countFor("scribe-prep", "orion-evidence"), detail: "Meeting briefs and evidence packs assembled" },
     { name: "ATLAS", label: "SOA", count: countFor("atlas-soa"), detail: "Strategy synthesis and Statement of Advice drafting" },
@@ -401,7 +401,7 @@ export function ClientProgressEngine({
         <EngineStat label="Flow velocity" value={flowVelocity} tone="emerald" />
         <EngineStat label="Conversion to meeting" value={conversionToMeeting} tone="gold" />
         <Link
-          href="/sarah"
+          href="/athena"
           className="inline-flex min-h-10 items-center justify-between gap-3 rounded-xl glass-chip px-3 text-[12px] font-medium text-muted-foreground/78 transition hover:border-gold/30 hover:text-gold"
         >
           View engine analytics
@@ -481,14 +481,14 @@ export function PriorityQueue({ items }: { items: PriorityQueueItem[] }) {
   );
 }
 
-export function SarahBriefPanel({
+export function AthenaBriefPanel({
   insights,
 }: {
-  insights: SarahBriefInsight[];
+  insights: AthenaBriefInsight[];
 }) {
   return (
     <GlowPanel
-      eyebrow="Sarah"
+      eyebrow="Athena"
       title="Live Brief"
       action={<StatusPill icon={Sparkles} label="Active" value={`${insights.length} signals`} tone="gold" />}
     >
@@ -510,10 +510,10 @@ export function SarahBriefPanel({
         ))}
       </div>
       <Link
-        href="/sarah"
+        href="/athena"
         className="mt-4 inline-flex h-11 w-full items-center justify-between rounded-xl glass-chip px-3 text-[12px] font-medium text-foreground/82 transition hover:border-gold/30 hover:text-gold"
       >
-        Open full Sarah Brief
+        Open full Athena Brief
         <ArrowRight className="size-3.5" />
       </Link>
     </GlowPanel>
@@ -580,9 +580,9 @@ export function FlowReadingCard({
           <span className="size-1.5 rounded-full bg-gold/70" />
           {timestamp}
         </div>
-        <Link href="/sarah" className="text-muted-foreground/48 transition hover:text-gold">
+        <Link href="/athena" className="text-muted-foreground/48 transition hover:text-gold">
           <ArrowRight className="size-3.5" />
-          <span className="sr-only">Open Sarah flow reading</span>
+          <span className="sr-only">Open Athena flow reading</span>
         </Link>
       </div>
     </GlowPanel>

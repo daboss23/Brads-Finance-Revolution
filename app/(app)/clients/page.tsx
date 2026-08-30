@@ -118,7 +118,7 @@ export default function ClientsPage() {
       {
         label: "Discovery Active",
         value: clients.filter((c) => c.status === "in-progress").length,
-        detail: "Completing Financial Discovery with Sarah",
+        detail: "Completing Financial Discovery with Athena",
         icon: Activity,
         tone: "text-teal-accent",
       },

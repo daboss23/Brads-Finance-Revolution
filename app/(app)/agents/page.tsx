@@ -19,7 +19,7 @@ export const metadata = {
 };
 
 const CHAIN: { name: string; role: string }[] = [
-  { name: "Sarah", role: "Client Discovery" },
+  { name: "Athena", role: "Client Discovery" },
   { name: "Beacon", role: "Fact Find Structuring" },
   { name: "Guardian", role: "Compliance & Risk" },
   { name: "Scribe", role: "Meeting Intelligence" },
@@ -43,7 +43,7 @@ export default async function AgentsPage() {
         <PageHeader
           overline="Command Layer"
           title="Agent Command Centre"
-          subtitle="Sarah opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Cipher keeps every file moving and Nexus watches the wiring underneath."
+          subtitle="Athena opens discovery, then Beacon, Guardian, Scribe, Orion and ATLAS carry each file through structuring, compliance, meeting prep, evidence and final SOA synthesis. Cipher keeps every file moving and Nexus watches the wiring underneath."
         />
         <div className="glass-panel p-5">
           <p className="cmd-label text-gold/85">System intelligence</p>
@@ -155,7 +155,7 @@ export default async function AgentsPage() {
                     </p>
                   </div>
                   <span className="rounded-full border border-white/[0.09] bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground">
-                    {agent.id === "sarah"
+                    {agent.id === "athena"
                       ? "Session"
                       : agent.id === "nexus"
                         ? "Deterministic"
@@ -175,7 +175,7 @@ export default async function AgentsPage() {
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <SupportModuleCard
-            name="Sarah"
+            name="Athena"
             role="Client discovery intake"
             detail="Collects the fact find and feeds the rest of the system."
           />

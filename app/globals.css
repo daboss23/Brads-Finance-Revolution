@@ -71,6 +71,195 @@
   }
 }
 
+@layer components {
+  /* Athena · liquid-metal intelligence entity */
+  .athena-entity {
+    position: relative;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+    overflow: hidden;
+    contain: layout paint;
+  }
+
+  .athena-entity::before {
+    position: absolute;
+    inset: 8%;
+    z-index: -3;
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle at 42% 38%, hsl(var(--gold-bright) / 0.16), transparent 34%),
+      radial-gradient(circle at 60% 58%, hsl(var(--cyan-glow) / 0.12), transparent 46%),
+      radial-gradient(circle, hsl(var(--gold-shadow) / 0.12), transparent 70%);
+    content: "";
+    filter: blur(24px);
+  }
+
+  .athena-entity__glow {
+    position: absolute;
+    inset: 20%;
+    z-index: -2;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      hsl(var(--gold-bright) / 0.3),
+      hsl(var(--gold-glow) / 0.13) 40%,
+      transparent 72%
+    );
+    filter: blur(22px);
+    opacity: 0.4;
+    will-change: transform, opacity;
+  }
+
+  .athena-entity__field {
+    position: absolute;
+    z-index: -1;
+    border-radius: 9999px;
+    opacity: 0.25;
+    will-change: transform, opacity;
+  }
+
+  .athena-entity__field::before,
+  .athena-entity__field::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    content: "";
+  }
+
+  .athena-entity__field::before {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      conic-gradient(
+        from 35deg,
+        transparent,
+        hsl(var(--gold-bright) / 0.78),
+        transparent 28%,
+        hsl(var(--cyan-accent) / 0.6),
+        transparent 66%,
+        hsl(var(--purple-accent) / 0.42),
+        transparent
+      ) border-box;
+    mask-image: radial-gradient(circle, transparent 61%, black 63%);
+  }
+
+  .athena-entity__field::after {
+    border-top: 1px solid hsl(var(--gold-bright) / 0.26);
+    border-right: 1px solid transparent;
+    filter: drop-shadow(0 0 10px hsl(var(--gold-glow) / 0.26));
+  }
+
+  .athena-entity__field-a {
+    inset: 14%;
+    transform: rotate(12deg) scaleY(0.78);
+  }
+
+  .athena-entity__field-b {
+    inset: 9%;
+    transform: rotate(-18deg) scaleY(0.9);
+  }
+
+  .athena-entity__field-c {
+    inset: 20%;
+    transform: rotate(48deg) scaleY(0.68);
+  }
+
+  .athena-entity__body {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 9999px;
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  .athena-entity__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: saturate(1.14) contrast(1.08) brightness(0.96);
+    transition: filter 420ms ease-in-out, opacity 240ms ease-out;
+  }
+
+  .athena-entity__video::-webkit-media-controls {
+    display: none;
+  }
+
+  .athena-entity__sheen {
+    position: absolute;
+    inset: 11%;
+    border-radius: 9999px;
+    background:
+      linear-gradient(125deg, hsl(var(--glass-highlight)) 2%, transparent 34%),
+      radial-gradient(circle at 38% 28%, hsl(var(--foreground) / 0.11), transparent 22%);
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  .athena-entity__fallback {
+    position: absolute;
+    inset: 25%;
+    border-radius: 45% 55% 62% 38% / 55% 42% 58% 45%;
+    background:
+      radial-gradient(circle at 32% 28%, hsl(var(--foreground) / 0.9), transparent 12%),
+      conic-gradient(
+        from 210deg,
+        hsl(var(--blue-accent)),
+        hsl(var(--cyan-accent)),
+        hsl(var(--gold-bright)),
+        hsl(var(--warning)),
+        hsl(var(--purple-accent)),
+        hsl(var(--blue-accent))
+      );
+    box-shadow:
+      0 0 36px hsl(var(--gold-glow) / 0.26),
+      0 0 72px hsl(var(--cyan-glow) / 0.14);
+    filter: saturate(1.3) contrast(1.1);
+  }
+
+  .athena-entity[data-state="listening"] .athena-entity__video {
+    filter: hue-rotate(14deg) saturate(1.3) contrast(1.08) brightness(1.04);
+  }
+
+  .athena-entity[data-state="listening"] .athena-entity__glow {
+    background: radial-gradient(circle, hsl(var(--cyan-accent) / 0.34), transparent 70%);
+  }
+
+  .athena-entity[data-state="thinking"] .athena-entity__video {
+    filter: hue-rotate(34deg) saturate(1.24) contrast(1.12) brightness(0.94);
+  }
+
+  .athena-entity[data-state="thinking"] .athena-entity__glow {
+    background: radial-gradient(circle, hsl(var(--purple-accent) / 0.3), transparent 70%);
+  }
+
+  .athena-entity[data-state="speaking"] .athena-entity__video {
+    filter: saturate(1.5) contrast(1.08) brightness(1.1);
+  }
+
+  .athena-entity[data-state="speaking"] .athena-entity__glow {
+    background:
+      radial-gradient(circle at 42% 38%, hsl(var(--foreground) / 0.3), transparent 26%),
+      radial-gradient(circle, hsl(var(--gold-bright) / 0.42), transparent 70%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .athena-entity__video {
+      transition: none;
+    }
+
+    .athena-entity__body,
+    .athena-entity__field,
+    .athena-entity__glow {
+      will-change: auto;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -821,7 +1010,7 @@
       0 0 34px -22px hsl(var(--gold) / 0.7);
   }
 
-  /* ─── Sarah engine · circulating fire + frequency ─── */
+  /* ─── Athena engine · circulating fire + frequency ─── */
 
   /* Rotating energy band: gold fire arc opposite a teal frequency arc */
   .engine-energy {
@@ -885,7 +1074,7 @@
     100% { transform: translate(-50%, -50%) scale(1.65); opacity: 0; }
   }
 
-  /* Frequency bars — Sarah's live signal */
+  /* Frequency bars — Athena's live signal */
   .freq-bar {
     transform-origin: bottom;
     animation: freq-dance 1.5s ease-in-out infinite;

@@ -2,7 +2,7 @@
 
 ## 1. Atmosphere & Identity
 
-The platform is a black and gold luxury financial command system: private banking software crossed with a high-end instrument cluster. Surfaces are warm near-black machined panels with champagne-gold rim light; gold marks intent, readiness, and decision moments. Muted teal and soft blue are quiet telemetry accents. The one moment a visitor remembers: the gold-ringed Intelligence Flow engine breathing at the centre of the Command Centre, with Sarah's core glowing inside it. Quiet wealth, precision, control, trust — an elite adviser cockpit, never a generic SaaS dashboard.
+The platform is a black and gold luxury financial command system: private banking software crossed with a high-end instrument cluster. Surfaces are warm near-black machined panels with champagne-gold rim light; gold marks intent, readiness, and decision moments. Muted teal and soft blue are quiet telemetry accents. The one moment a visitor remembers: Athena, a living liquid-metal intelligence, breathing inside the gold-ringed Command Centre engine. Quiet wealth, precision, control, trust — an elite adviser cockpit, never a generic SaaS dashboard.
 
 ## 2. Color
 
@@ -20,7 +20,7 @@ The platform is a black and gold luxury financial command system: private bankin
 | Faint text | `--text-faint` | `120 3% 45%` (#6F746F) | Tertiary labels only |
 | Border | `--border` | `219 14% 18%` | Dividers and panel outlines |
 | Gold ramp | `--gold-bright` → `--gold` → `--gold-dim` → `--gold-shadow` | #F0D28A → #C9A84C → dim → #6E5220 | CTAs, readiness, focus, rim light |
-| Teal accent | `--teal-accent` | `175 65% 53%` (#36D6C8) | Telemetry, Sarah energy |
+| Teal accent | `--teal-accent` | `175 65% 53%` (#36D6C8) | Telemetry, Athena listening energy |
 | Cyan accent | `--cyan-accent` | `187 75% 56%` (#3EC9DE) | Glass edge light, focus glow |
 | Amethyst | `--purple-accent` | `258 45% 62%` (#8A74C9) | Scribe rim light, decorative glass edges only |
 | Soft blue | `--blue-accent` | `212 100% 65%` (#4EA3FF) | Progress and system activity |
@@ -37,7 +37,7 @@ The platform is a black and gold luxury financial command system: private bankin
 - Red only for critical blockers. Amber for pressure and review states.
 - No white backgrounds anywhere; no rainbow gradients.
 - New UI work must use existing HSL tokens or document additions here first.
-- Sarah Fusion Core (WebGL orb): fixed dual-plasma palette — molten orange `#c2410c→#ffb45e` vs electric blue `#1d4ed8→#7fd4ff`, white-hot fusion seam, gold rim `#ffe9c4`. States (idle/listening/thinking/speaking) modulate energy (intensity, seam heat, frequency-ring amplitude, axis motion), never hue. These plasma values live in `components/orb/` only and are not general UI tokens.
+- Athena Living Entity: the supplied liquid-metal film is the source material, with spectral gold, cyan, blue, amethyst, and white refraction against true black. State treatment uses existing accent tokens: idle is warm gold, listening opens toward cyan, thinking tightens toward amethyst, and speaking restores the full spectral range with a white-hot pulse. Client and Athena speech energy controls scale, field amplitude, playback rate, and glow continuously. The film remains recognisable in every state and reduced motion holds a calm idle frame.
 
 ## 3. Typography
 
@@ -65,7 +65,7 @@ The platform is a black and gold luxury financial command system: private bankin
 
 ### Liquid Glass Slab (`.glass-panel` + `.glass-hover` / `<GlassPanel>`)
 - Core surface. Layer stack: specular top catch → diagonal reflection streak → interior gold pooling → smoked translucent base; masked gradient rim (`::before`, bright top edge / gold ember base), breathing ambient glow (`::after`), lit inner top edge, pooled inner base shadow, hairline containment ring, near contact + far ambient drop shadows.
-- `.glass-panel-elevated` — hero slabs (engine, ATLAS, Sarah intro): stronger body, corner refraction, wider bloom. Pair with `.glass-grain` frost noise on hero slabs only.
+- `.glass-panel-elevated` — hero slabs (engine, ATLAS, Athena intro): stronger body, corner refraction, wider bloom. Pair with `.glass-grain` frost noise on hero slabs only.
 - Rim variants: `.glass-rim-gold` `-cyan` `-purple` `-danger` `-emerald` `-amber`; `.glass-active` is the strongest resting state.
 - `.glass-card` — lighter-blur nested slab for dense grids; `.glass-chip` — tiny glass pill for rows, badges, agent tiles; `.glass-orb` — circular glass bubble for icons/mic; `.glass-input` — recessed glass field with gold (or `-cyan`) focus bloom.
 - Motion: `.glass-hover-lift` (2px rise + glow), `.glass-shine` + `<span class="shine-layer"/>` (hover light sweep).
@@ -86,13 +86,19 @@ The platform is a black and gold luxury financial command system: private bankin
 - Compact bordered chip; text always explicit, never color-only. Live states get `.status-live` ping.
 
 ### CircularEngine (Intelligence Flow)
-- Dominant dashboard module: Sarah core centre, rotating gold ring, 8 stage nodes with counts and live dots, gold connective arc. Slow orbit (28s), breathing core, disabled under reduced motion.
+- Dominant dashboard module: Athena entity at centre, rotating gold ring, 8 stage nodes with counts and live dots, gold connective arc. Slow orbit (28s), breathing core, disabled under reduced motion.
+
+### Athena Living Entity (`<OrbCanvas>`)
+- Reusable film-backed intelligence presence for onboarding and the Command Centre. The MP4 is the dimensional source layer; CSS field rings, refraction bloom, and GSAP transforms form its live nervous system.
+- States: `idle`, `listening`, `thinking`, `speaking`. Each state must remain explicitly exposed through an accessible status label and a `data-state` attribute.
+- Input energy is live and continuous. Client microphone RMS drives listening expansion; Athena voice RMS drives speaking pulse. Pointer proximity adds a restrained parallax response on fine pointers only.
+- Loading: quiet radial glow with an explicit `Athena is preparing` accessible label. Error: CSS spectral core with the same state contract. Reduced motion: video paused, rings static, no pointer response.
 
 ### Priority Queue Row / Client Row
 - Severity badge, title, agent + client metadata, forward chevron. Full row clickable, hover elevation only.
 
 ### Agent Node / AgentActivityStrip
-- Name, role, written-out status, tone dot. Chain order: Sarah → Beacon → Guardian → Scribe → Orion → ATLAS, with Nexus as system health. Retired names (Oracle, Forge, Cipher, Nova, Vanta) must not appear.
+- Name, role, written-out status, tone dot. Chain order: Athena → Beacon → Guardian → Scribe → Orion → ATLAS, with Nexus as system health. Retired names (Oracle, Forge, Cipher, Nova, Vanta) must not appear.
 
 ### Gold Rule (`.gold-rule`)
 - 1px divider fading from transparent through gold — section separation inside dark panels.

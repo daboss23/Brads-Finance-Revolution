@@ -18,7 +18,7 @@ import {
   FACT_FIND_LINKS,
   LINK_STATUS_CONFIG,
   type LinkStatus,
-} from "@/lib/sarah-data";
+} from "@/lib/athena-data";
 import { CLIENTS } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -69,7 +69,7 @@ function getMetrics() {
   return { sent, opened, inProgress, completed, notStarted, avg };
 }
 
-export default function SarahPage() {
+export default function AthenaPage() {
   const metrics = getMetrics();
   const dropOff = getDropOffData();
   const [copied, setCopied] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export default function SarahPage() {
             AI Fact Find Intelligence
           </p>
           <h1 className="text-[32px] font-semibold tracking-tight text-foreground leading-none flex items-center gap-3">
-            Sarah
+            Athena
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
             </span>
@@ -142,10 +142,10 @@ export default function SarahPage() {
         ))}
       </div>
 
-      {/* Two-column: Sarah intelligence + Drop-off */}
+      {/* Two-column: Athena intelligence + Drop-off */}
       <div className="mb-12 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
 
-        {/* Sarah intelligence panel */}
+        {/* Athena intelligence panel */}
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
             <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" />
@@ -156,7 +156,7 @@ export default function SarahPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold tracking-[0.22em] text-gold uppercase leading-none">
-                    Sarah
+                    Athena
                   </p>
                   <p className="text-[10px] text-muted-foreground tracking-wide mt-0.5">
                     AI Adviser Intelligence · Current Recommendations
@@ -181,8 +181,8 @@ export default function SarahPage() {
                     text: "Tony Nguyen's fact find is 100% complete. Financial plan generation can begin.",
                     priority: "action",
                   },
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
+                ].map((item) => (
+                  <li key={item.text} className="flex items-start gap-3">
                     <span
                       className={cn(
                         "mt-[7px] h-[4px] w-[4px] shrink-0 rounded-full",
@@ -327,7 +327,7 @@ export default function SarahPage() {
                         onClick={() => copyLink(link.token)}
                         title="Copy fact find link"
                         className={cn(
-                          "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-all duration-150",
+                          "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-colors duration-150",
                           copied === link.token
                             ? "border-success/30 bg-success/[0.08] text-success"
                             : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
@@ -362,7 +362,7 @@ export default function SarahPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Open client fact find experience"
-                        className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/[0.07] px-2.5 py-1.5 text-[11px] font-medium text-gold/80 hover:bg-gold/[0.12] hover:text-gold transition-all duration-150"
+                        className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/[0.07] px-2.5 py-1.5 text-[11px] font-medium text-gold/80 hover:bg-gold/[0.12] hover:text-gold transition-colors duration-150"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Open
@@ -381,7 +381,7 @@ export default function SarahPage() {
           <p className="text-[11px] text-muted-foreground/35">
             Links follow the format:{" "}
             <span className="font-mono text-muted-foreground/50">
-              {typeof window !== "undefined" ? window.location.origin : "https://bmkcrm.com.au"}/onboarding/[token]
+              /onboarding/[token]
             </span>
           </p>
         </div>
