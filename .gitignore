@@ -37,3 +37,6 @@ next-env.d.ts
 
 # encrypted local secure store
 /.data/
+
+# Local voice audition output
+voice-samples/
