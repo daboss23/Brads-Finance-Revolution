@@ -6,7 +6,7 @@ import { secureSet, secureList } from "./index";
 import {
   saveFactFind,
   type StoredFactFind,
-} from "../sarah-fact-find-store";
+} from "../athena-fact-find-store";
 
 const NAMESPACE = "fact-finds";
 

@@ -5,7 +5,7 @@ type Props = {
   compact?: boolean;
 };
 
-export function SarahPresence({ message, compact }: Props) {
+export function AthenaPresence({ message, compact }: Props) {
   return (
     <div className={cn("flex items-start gap-3", compact ? "mb-6" : "mb-10")}>
       <div className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
@@ -13,7 +13,7 @@ export function SarahPresence({ message, compact }: Props) {
       </div>
       <div className="flex flex-col gap-1 pt-0.5">
         <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-gold/60">
-          Sarah · BMK Onboarding
+          Athena · BMK Onboarding
         </p>
         <p
           className={cn(

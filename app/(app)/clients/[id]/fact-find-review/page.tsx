@@ -9,9 +9,9 @@ import {
 import { CLIENTS, type SectionStatus } from "@/lib/data";
 import { FACT_FIND_SECTIONS } from "@/lib/fact-find-flow";
 import { getClientAnswers } from "@/lib/fact-find-answers";
-import { getFactFind } from "@/lib/sarah-fact-find-store";
+import { getFactFind } from "@/lib/athena-fact-find-store";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
-import { sarahToReviewAnswers } from "@/lib/sarah-fact-find-schema";
+import { athenaToReviewAnswers } from "@/lib/athena-fact-find-schema";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_CONFIG } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -42,12 +42,12 @@ function getSectionStatus(client: (typeof CLIENTS)[0], sectionId: string): Secti
   return client.factFindSections.find((s) => s.name === name)?.status ?? "missing";
 }
 
-function sectionHasSarahData(
-  sarahAnswers: Record<string, Record<string, string>> | null,
+function sectionHasAthenaData(
+  athenaAnswers: Record<string, Record<string, string>> | null,
   sectionId: string,
 ): boolean {
-  if (!sarahAnswers) return false;
-  const fields = sarahAnswers[sectionId];
+  if (!athenaAnswers) return false;
+  const fields = athenaAnswers[sectionId];
   if (!fields) return false;
   return Object.values(fields).some((v) => v && v.trim() !== "");
 }
@@ -62,13 +62,13 @@ export default async function FactFindReviewPage({
 
   const sampleAnswers = getClientAnswers(client.id);
   await ensureFactFindsHydrated();
-  const sarahEntry = getFactFind(client.id);
-  const sarahAnswers = sarahEntry ? sarahToReviewAnswers(sarahEntry.data) : null;
+  const athenaEntry = getFactFind(client.id);
+  const athenaAnswers = athenaEntry ? athenaToReviewAnswers(athenaEntry.data) : null;
 
-  // Sarah's collected answers take precedence over sample data when present.
+  // Athena's collected answers take precedence over sample data when present.
   const answers: Record<string, Record<string, string>> = { ...sampleAnswers };
-  if (sarahAnswers) {
-    for (const [sec, fields] of Object.entries(sarahAnswers)) {
+  if (athenaAnswers) {
+    for (const [sec, fields] of Object.entries(athenaAnswers)) {
       const merged = { ...(answers[sec] ?? {}) };
       for (const [k, v] of Object.entries(fields)) {
         if (v && v.trim()) merged[k] = v;
@@ -126,11 +126,11 @@ export default async function FactFindReviewPage({
 
       <ClientTabs clientId={client.id} />
 
-      {/* Completion bar — Sarah's collected progress */}
+      {/* Completion bar — Athena's collected progress */}
       <CompletionBar
-        percentage={sarahEntry?.data.completionPercentage ?? client.progress}
-        missingSections={sarahEntry?.data.missingSections}
-        source={sarahEntry ? "sarah" : "manual"}
+        percentage={athenaEntry?.data.completionPercentage ?? client.progress}
+        missingSections={athenaEntry?.data.missingSections}
+        source={athenaEntry ? "athena" : "manual"}
       />
 
       {/* Gaps summary — only when there are missing sections */}
@@ -167,10 +167,10 @@ export default async function FactFindReviewPage({
         <div className="space-y-5">
           {FACT_FIND_SECTIONS.map((section) => {
             const baseStatus = getSectionStatus(client, section.id);
-            // If Sarah collected data for this section, escalate from "missing"
+            // If Athena collected data for this section, escalate from "missing"
             // so Brad still sees the fields (and can edit them).
             const status: SectionStatus =
-              baseStatus === "missing" && sectionHasSarahData(sarahAnswers, section.id)
+              baseStatus === "missing" && sectionHasAthenaData(athenaAnswers, section.id)
                 ? "in-progress"
                 : baseStatus;
             const sectionAnswers = answers[section.id] ?? {};

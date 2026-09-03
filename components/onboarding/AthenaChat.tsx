@@ -38,7 +38,7 @@ function stripFactFindTag(text: string): string {
   return text.replace(/<fact-find-complete>[\s\S]*?<\/fact-find-complete>/, "").trim();
 }
 
-export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
+export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
@@ -72,7 +72,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
   useEffect(() => {
     if (!hasStarted) return;
-    sendToSarah([{ role: "user", content: "[START]" }]);
+    sendToAthena([{ role: "user", content: "[START]" }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasStarted]);
 
@@ -105,14 +105,14 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     setIsPlayingAudio(false);
   }
 
-  async function playSarahVoice(text: string, showSubtitle: boolean) {
+  async function playAthenaVoice(text: string, showSubtitle: boolean) {
     const cleaned = text.trim();
     if (!cleaned) return;
     stopAudioPlayback();
 
     setIsLoadingVoice(true);
     try {
-      const res = await fetch("/api/sarah/voice", {
+      const res = await fetch("/api/athena/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: cleaned }),
@@ -120,7 +120,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
-        console.error("[SarahChat] voice route failed", res.status, errBody);
+        console.error("[AthenaChat] voice route failed", res.status, errBody);
         if (showSubtitle) {
           setCurrentSubtitle(cleaned);
           setVisibleWordCount(cleaned.split(/\s+/).length);
@@ -130,7 +130,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
       const blob = await res.blob();
       if (blob.size === 0) {
-        console.error("[SarahChat] voice route returned empty audio");
+        console.error("[AthenaChat] voice route returned empty audio");
         if (showSubtitle) {
           setCurrentSubtitle(cleaned);
           setVisibleWordCount(cleaned.split(/\s+/).length);
@@ -183,7 +183,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         }
       };
       audio.onerror = (e) => {
-        console.error("[SarahChat] audio playback error:", e, audio.error);
+        console.error("[AthenaChat] audio playback error:", e, audio.error);
         setIsPlayingAudio(false);
         if (showSubtitle) setVisibleWordCount(words.length);
       };
@@ -191,12 +191,12 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       try {
         await audio.play();
       } catch (e) {
-        console.warn("[SarahChat] autoplay blocked, falling back to text-only:", e);
+        console.warn("[AthenaChat] autoplay blocked, falling back to text-only:", e);
         if (showSubtitle) setVisibleWordCount(words.length);
         setIsPlayingAudio(false);
       }
     } catch (e) {
-      console.error("[SarahChat] playSarahVoice fatal:", e);
+      console.error("[AthenaChat] playAthenaVoice fatal:", e);
       if (showSubtitle) {
         setCurrentSubtitle(cleaned);
         setVisibleWordCount(cleaned.split(/\s+/).length);
@@ -206,7 +206,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     }
   }
 
-  async function sendToSarah(apiMessages: Message[]) {
+  async function sendToAthena(apiMessages: Message[]) {
     setIsStreaming(true);
     setErrorMsg(null);
     setCurrentSubtitle("");
@@ -215,7 +215,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
     let full = "";
     try {
-      const res = await fetch("/api/sarah", {
+      const res = await fetch("/api/athena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages, clientName }),
@@ -245,13 +245,13 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             const parsed = JSON.parse(data);
             if (parsed.error) {
               streamError = parsed.error;
-              console.error("[Sarah API error]", parsed);
+              console.error("[Athena API error]", parsed);
             }
             if (parsed.text) {
               full += parsed.text;
             }
           } catch (e) {
-            console.warn("[Sarah] parse skip:", data, e);
+            console.warn("[Athena] parse skip:", data, e);
           }
         }
       }
@@ -261,20 +261,20 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
       }
 
       const factFindData = parseFactFindData(full);
-      const sarahMessage: Message = { role: "assistant", content: full };
-      setMessages([...apiMessages, sarahMessage]);
+      const athenaMessage: Message = { role: "assistant", content: full };
+      setMessages([...apiMessages, athenaMessage]);
 
       setIsStreaming(false);
 
       const spoken = stripFactFindTag(full);
       if (spoken) {
-        // Sarah turn number = number of prior assistant messages + 1.
+        // Athena turn number = number of prior assistant messages + 1.
         // 1 = audio check (show subtitle), 2 = full greeting (NO subtitle),
         // 3+ = normal (show subtitle).
-        const sarahTurnNumber =
+        const athenaTurnNumber =
           apiMessages.filter((m) => m.role === "assistant").length + 1;
-        const showSubtitle = sarahTurnNumber !== 2;
-        await playSarahVoice(spoken, showSubtitle);
+        const showSubtitle = athenaTurnNumber !== 2;
+        await playAthenaVoice(spoken, showSubtitle);
       }
 
       if (factFindData) {
@@ -286,18 +286,18 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             body: JSON.stringify({ clientId, token, data: factFindData }),
           })
             .then((r) => r.json())
-            .then((j) => console.log("[SarahChat] fact find webhook:", j))
+            .then((j) => console.log("[AthenaChat] fact find webhook:", j))
             .catch((e) =>
-              console.error("[SarahChat] fact find webhook failed:", e),
+              console.error("[AthenaChat] fact find webhook failed:", e),
             );
         } else {
-          console.warn("[SarahChat] skipping webhook, missing clientId/token");
+          console.warn("[AthenaChat] skipping webhook, missing clientId/token");
         }
         setTimeout(() => onComplete(factFindData), 1800);
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error("[Sarah] request failed:", e);
+      console.error("[Athena] request failed:", e);
       setErrorMsg(msg);
       setCurrentSubtitle("Sorry, I ran into a problem. Please try again.");
       setVisibleWordCount(8);
@@ -316,7 +316,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
 
     setInput("");
     setMessages(updatedMessages);
-    sendToSarah(updatedMessages);
+    sendToAthena(updatedMessages);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -336,9 +336,9 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
     setMessages(trimmed);
     setInput(target.content === "[START]" ? "" : target.content);
 
-    const lastSarah = [...trimmed].reverse().find((m) => m.role === "assistant");
-    if (lastSarah) {
-      const text = stripFactFindTag(lastSarah.content);
+    const lastAthena = [...trimmed].reverse().find((m) => m.role === "assistant");
+    if (lastAthena) {
+      const text = stripFactFindTag(lastAthena.content);
       setCurrentSubtitle(text);
       setVisibleWordCount(text.split(/\s+/).length);
     } else {
@@ -378,7 +378,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
             Financial Discovery Session
           </h1>
           <p className="text-lg text-foreground/70 max-w-[520px] leading-relaxed">
-            A relaxed conversation with Sarah, your discovery assistant, so
+            A relaxed conversation with Athena, your discovery assistant, so
             Brad can prepare properly for your meeting.
           </p>
 
@@ -461,7 +461,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
         <div className="mt-2 flex items-center gap-2">
           <span className="status-live h-2.5 w-2.5 rounded-full bg-success text-success shadow-[0_0_8px_hsl(var(--success)/0.7)]" />
           <span className="text-[13px] text-foreground/55 tracking-wide">
-            Sarah is online
+            Athena is online
           </span>
         </div>
       </header>
@@ -480,7 +480,7 @@ export function SarahChat({ clientName, clientId, token, onComplete }: Props) {
           <div className="mt-6 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
             {errorMsg ? (
               <p className="text-[14px] text-destructive/85 max-w-[680px] text-center">
-                Sarah had a moment of trouble connecting. Please try again in a
+                Athena had a moment of trouble connecting. Please try again in a
                 few seconds.
               </p>
             ) : (

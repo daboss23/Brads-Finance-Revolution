@@ -10,7 +10,7 @@ See `CLAUDE.md` for full architecture, feature map, and conventions. Key rules t
 - No inline styles. Use Tailwind utility classes and existing CSS variable tokens.
 - Use shadcn/ui components — don't build UI primitives from scratch.
 - Keep components small and focused.
-- Sarah's voice output: plain punctuation only — no dashes, em dashes, asterisks, markdown, bullets, or headers.
+- Athena's voice output: plain punctuation only — no dashes, em dashes, asterisks, markdown, bullets, or headers.
 
 ## Skills library
 
@@ -43,4 +43,4 @@ Each skill is a folder with a `SKILL.md`; some include `references/`, `scripts/`
 | `.claude/skills/swiftui/SKILL.md` | Idiomatic Apple-native SwiftUI. |
 
 For this project's stack, the most-used skills are `shadcn`, `frontend-ui-ux`, `ui-ux-pro-max`,
-and the `gsap-*` set (relevant to Sarah's animated plasma orb).
+and the `gsap-*` set (relevant to Athena's animated plasma orb).

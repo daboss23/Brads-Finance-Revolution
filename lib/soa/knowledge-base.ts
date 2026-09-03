@@ -26,7 +26,7 @@ export const BRAD_VOICE: VoiceProfile = {
     "Use dollar figures and concrete numbers over percentages where helpful.",
   ],
   doExamples: [
-    "Sarah, you told us that buying your first home in the next three to four years matters most. Here is how we get you there.",
+    "Athena, you told us that buying your first home in the next three to four years matters most. Here is how we get you there.",
     "Right now your super is with AustralianSuper sitting at $142,000. That is a solid base. Here is how we make it work harder.",
     "You mentioned you would like to feel more confident about insurance. Let us look at what cover sized to your situation actually looks like.",
   ],

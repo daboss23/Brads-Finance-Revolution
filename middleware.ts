@@ -8,14 +8,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth/session";
 
-// Public paths: client onboarding + the endpoints Sarah's session needs.
+// Public paths: client onboarding + the endpoints Athena's session needs.
 // /api/cron/ is exempt from the session gate because Vercel Cron authenticates
 // with CRON_SECRET at the route level instead of an adviser cookie.
 const PUBLIC_PREFIXES = [
   "/login",
   "/api/auth/",
   "/onboarding/",
-  "/api/sarah",
+  "/api/athena",
   "/api/transcribe",
   "/api/onboarding/",
   "/api/cron/",
@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Sarah's client session submits the completed fact find here (POST is
+  // Athena's client session submits the completed fact find here (POST is
   // public); reading fact finds back (GET) requires the adviser session.
   if (pathname === "/api/complete-fact-find" && req.method === "POST") {
     return NextResponse.next();

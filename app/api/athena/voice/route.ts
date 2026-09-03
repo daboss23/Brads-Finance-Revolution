@@ -9,12 +9,12 @@ const ELEVEN_TTS_URL = (voiceId: string) =>
 const MODEL_ID = "eleven_turbo_v2_5";
 
 export async function POST(req: Request) {
-  const rl = rateLimit("sarah-voice", clientIp(req), 30, 60);
+  const rl = rateLimit("athena-voice", clientIp(req), 30, 60);
   if (!rl.allowed) return rateLimited(rl);
 
   const reqId = Math.random().toString(36).slice(2, 8);
-  const log = (...a: unknown[]) => console.log(`[sarah-voice:${reqId}]`, ...a);
-  const err = (...a: unknown[]) => console.error(`[sarah-voice:${reqId}]`, ...a);
+  const log = (...a: unknown[]) => console.log(`[athena-voice:${reqId}]`, ...a);
+  const err = (...a: unknown[]) => console.error(`[athena-voice:${reqId}]`, ...a);
 
   try {
     const apiKey = process.env.ELEVENLABS_API_KEY;

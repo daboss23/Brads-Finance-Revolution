@@ -24,7 +24,7 @@ export interface Field {
 export interface FactFindSection {
   id: string;
   title: string;
-  sarahIntro: string;
+  athenaIntro: string;
   fields: Field[];
 }
 
@@ -32,7 +32,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "personal-details",
     title: "Personal Details",
-    sarahIntro:
+    athenaIntro:
       "Let's start with the basics — your personal details. This helps us confirm your identity and ensures your financial plan is built specifically for you from the very beginning.",
     fields: [
       {
@@ -80,7 +80,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "contact-information",
     title: "Contact Information",
-    sarahIntro:
+    athenaIntro:
       "Next, your contact details. This ensures Brad and the BMK team can reach you easily — and that your plan and any important updates are always sent to the right place.",
     fields: [
       {
@@ -123,7 +123,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "family-dependants",
     title: "Family & Dependants",
-    sarahIntro:
+    athenaIntro:
       "Understanding your family situation shapes how we approach protection, estate planning, and your long-term financial goals. Take your time with this section.",
     fields: [
       {
@@ -167,7 +167,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "employment-income",
     title: "Employment & Income",
-    sarahIntro:
+    athenaIntro:
       "Your income is central to understanding what's achievable in your financial plan. Don't worry about being exact — we can refine the details together.",
     fields: [
       {
@@ -221,7 +221,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "assets",
     title: "Assets",
-    sarahIntro:
+    athenaIntro:
       "Let's map out what you own. Estimates are perfectly fine here — we're building a picture of your overall position, not an audit. We can refine these figures together.",
     fields: [
       {
@@ -270,7 +270,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "liabilities",
     title: "Liabilities",
-    sarahIntro:
+    athenaIntro:
       "Now the other side of the ledger — what you owe. Understanding your liabilities alongside your assets gives us a clear picture of your net position and helps us build the right strategy.",
     fields: [
       {
@@ -317,7 +317,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "expenses",
     title: "Expenses",
-    sarahIntro:
+    athenaIntro:
       "A clear picture of your regular expenses helps us understand your lifestyle and identify realistic opportunities within your plan — without suggesting changes that don't fit how you live.",
     fields: [
       {
@@ -368,7 +368,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "superannuation",
     title: "Superannuation",
-    sarahIntro:
+    athenaIntro:
       "Superannuation is often one of the most valuable assets Australians hold — and also one of the most overlooked. Let's make sure we have your super details captured accurately so nothing is left on the table.",
     fields: [
       {
@@ -415,7 +415,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "insurance",
     title: "Insurance",
-    sarahIntro:
+    athenaIntro:
       "Your existing insurance tells us what protection you already have — and helps us identify any gaps in your cover. Even rough figures are helpful here.",
     fields: [
       {
@@ -461,7 +461,7 @@ export const FACT_FIND_SECTIONS: FactFindSection[] = [
   {
     id: "goals-objectives",
     title: "Goals & Objectives",
-    sarahIntro:
+    athenaIntro:
       "This is the heart of your financial plan. Take a moment to think about what truly matters to you — short, medium, and long term. Your answers here shape everything that follows. There are no wrong answers.",
     fields: [
       {

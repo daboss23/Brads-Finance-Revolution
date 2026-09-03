@@ -1,4 +1,4 @@
-// In-memory store of completed Sarah fact finds, keyed by clientId.
+// In-memory store of completed Athena fact finds, keyed by clientId.
 //
 // This module stays dependency-free so it can be imported from client
 // components (the compliance checker runs in the browser against the demo
@@ -6,17 +6,17 @@
 // lib/secure-store/fact-find-persistence.ts, which is server-only and
 // writes through this map.
 
-import { normalizeFactFind, type SarahFactFind } from "./sarah-fact-find-schema";
-import { getDemoFactFind } from "./sarah-fact-find-demo";
+import { normalizeFactFind, type AthenaFactFind } from "./athena-fact-find-schema";
+import { getDemoFactFind } from "./athena-fact-find-demo";
 
 export interface StoredFactFind {
   clientId: string;
   token: string;
   receivedAt: string;
-  data: SarahFactFind;
+  data: AthenaFactFind;
 }
 
-const STORE_KEY = "__bmk_sarah_fact_find_store__";
+const STORE_KEY = "__bmk_athena_fact_find_store__";
 
 type GlobalStore = { map: Map<string, StoredFactFind> };
 
@@ -47,7 +47,7 @@ export function getFactFind(clientId: string): StoredFactFind | undefined {
 
 // Returns the live fact find when present, otherwise the demo payload so
 // the recommender and form pre-fill have something to work with.
-export function getFactFindOrDemo(clientId: string): SarahFactFind | undefined {
+export function getFactFindOrDemo(clientId: string): AthenaFactFind | undefined {
   const live = getStore().map.get(clientId);
   // Normalize on the way out so records saved by older builds (or
   // interrupted sessions) always have every section present.

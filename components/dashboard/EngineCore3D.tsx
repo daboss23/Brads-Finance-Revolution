@@ -1,7 +1,7 @@
 "use client";
 
 // The dashboard's Intelligence Flow core: the same 3D Fusion Core that
-// powers Sarah's discovery session, idling at the heart of the engine.
+// powers Athena's discovery session, idling at the heart of the engine.
 
 import dynamic from "next/dynamic";
 

@@ -261,7 +261,7 @@ function generateTendril(cfg: StateConfig): Tendril {
   };
 }
 
-export function SarahOrb({ state = "idle", size = 500, className }: Props) {
+export function AthenaOrb({ state = "idle", size = 500, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const targetStateRef = useRef<OrbState>(state);
   const prevStateRef = useRef<OrbState>(state);

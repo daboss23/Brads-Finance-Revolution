@@ -63,7 +63,7 @@ export function QuestionCard({
 
   return (
     <div className="onboarding-fade-in space-y-6">
-      {/* Section intro — BMK Sarah card pattern */}
+      {/* Section intro — BMK Athena card pattern */}
       {sectionIntro && (
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
@@ -73,7 +73,7 @@ export function QuestionCard({
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/10 border border-gold/30">
                   <Sparkles className="h-3.5 w-3.5 text-gold" />
                 </div>
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold">Sarah</p>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold">Athena</p>
               </div>
               <p className="text-[14px] text-foreground/80 leading-relaxed">{sectionIntro}</p>
             </div>

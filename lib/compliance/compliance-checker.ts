@@ -3,9 +3,9 @@
 // knowledge base. Produces a structured result the UI can render and the
 // audit trail can log.
 
-import type { SarahFactFind } from "../sarah-fact-find-schema";
+import type { AthenaFactFind } from "../athena-fact-find-schema";
 import type { StrategyKey } from "../forms";
-import { getFactFindOrDemo } from "../sarah-fact-find-store";
+import { getFactFindOrDemo } from "../athena-fact-find-store";
 import { getClientProfile } from "../client-profiles";
 import {
   BEST_INTERESTS_DUTY,
@@ -46,7 +46,7 @@ function hasValue(value: string | undefined | null): boolean {
 }
 
 function evaluateBestInterests(
-  factFind: SarahFactFind | undefined,
+  factFind: AthenaFactFind | undefined,
   strategies: StrategyKey[],
 ): BestInterestsStep[] {
   return BEST_INTERESTS_DUTY.map((step) => {
@@ -129,7 +129,7 @@ function evaluateBestInterests(
 }
 
 function evaluateSafeHarbour(
-  factFind: SarahFactFind | undefined,
+  factFind: AthenaFactFind | undefined,
   strategies: StrategyKey[],
 ): SafeHarbourStep[] {
   return SAFE_HARBOUR_STEPS.map((step) => {
@@ -206,7 +206,7 @@ function evaluateSafeHarbour(
 }
 
 function evaluateAfsl(
-  factFind: SarahFactFind | undefined,
+  factFind: AthenaFactFind | undefined,
   strategies: StrategyKey[],
 ): AfslObligation[] {
   return AFSL_OBLIGATIONS.map((obligation) => {
@@ -239,7 +239,7 @@ function evaluateAfsl(
 }
 
 function collectMissingInformation(
-  factFind: SarahFactFind | undefined,
+  factFind: AthenaFactFind | undefined,
 ): ComplianceIssue[] {
   const issues: ComplianceIssue[] = [];
   if (!factFind) {
@@ -329,7 +329,7 @@ interface DemoComplianceProfile {
 }
 
 const DEMO_OVERRIDES: Record<string, DemoComplianceProfile> = {
-  "sarah-mitchell": {
+  "athena-mitchell": {
     passedSteps: 6,
     missing: [
       {

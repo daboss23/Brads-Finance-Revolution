@@ -1,11 +1,11 @@
 import { getClientAnswers } from "@/lib/fact-find-answers";
-import { sarahToReviewAnswers } from "@/lib/sarah-fact-find-schema";
-import { getFactFind } from "@/lib/sarah-fact-find-store";
+import { athenaToReviewAnswers } from "@/lib/athena-fact-find-schema";
+import { getFactFind } from "@/lib/athena-fact-find-store";
 
 export type FactFindSnapshot = {
   clientId: string;
   answers: Record<string, Record<string, string>>;
-  source: "sarah" | "sample" | "empty";
+  source: "athena" | "sample" | "empty";
   completionPercentage?: number;
   missingSections?: string[];
 };
@@ -17,8 +17,8 @@ export type FactFindRepository = {
 export const mockFactFindRepository: FactFindRepository = {
   getFactFindSnapshot(clientId) {
     const sampleAnswers = getClientAnswers(clientId);
-    const sarahEntry = getFactFind(clientId);
-    if (!sarahEntry) {
+    const athenaEntry = getFactFind(clientId);
+    if (!athenaEntry) {
       return {
         clientId,
         answers: sampleAnswers,
@@ -26,18 +26,18 @@ export const mockFactFindRepository: FactFindRepository = {
       };
     }
 
-    const sarahAnswers = sarahToReviewAnswers(sarahEntry.data);
+    const athenaAnswers = athenaToReviewAnswers(athenaEntry.data);
     const merged: Record<string, Record<string, string>> = { ...sampleAnswers };
-    for (const [section, fields] of Object.entries(sarahAnswers)) {
+    for (const [section, fields] of Object.entries(athenaAnswers)) {
       merged[section] = { ...(merged[section] ?? {}), ...fields };
     }
 
     return {
       clientId,
       answers: merged,
-      source: "sarah",
-      completionPercentage: sarahEntry.data.completionPercentage,
-      missingSections: sarahEntry.data.missingSections,
+      source: "athena",
+      completionPercentage: athenaEntry.data.completionPercentage,
+      missingSections: athenaEntry.data.missingSections,
     };
   },
 };

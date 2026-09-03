@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFIm
 import { CLIENTS } from "@/lib/data";
 import { getClientAnswers } from "@/lib/fact-find-answers";
 import { getClientProfile } from "@/lib/client-profiles";
-import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { getFactFindOrDemo } from "@/lib/athena-fact-find-store";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { getLogoPng } from "@/lib/export-logo";
 import { FORMS, PROVIDERS, type FormId } from "@/lib/forms";
@@ -59,49 +59,49 @@ async function buildFormSpec(formId: FormId, clientId: string): Promise<FormSpec
   const definition = FORMS.find((f) => f.id === formId);
   if (!definition) return null;
 
-  // Prefer Sarah's collected fact find (or demo fallback), with the older
+  // Prefer Athena's collected fact find (or demo fallback), with the older
   // sample answers and client-profile data as final back-stops.
-  const sarah    = getFactFindOrDemo(clientId);
+  const athena    = getFactFindOrDemo(clientId);
   const answers  = getClientAnswers(clientId);
   const profile  = getClientProfile(clientId);
 
-  const fullName     = sarah?.personalDetails.fullName ||
+  const fullName     = athena?.personalDetails.fullName ||
                        answers["personal-details"]?.["full-name"] ||
                        client.name;
-  const dob          = sarah?.personalDetails.dateOfBirth ||
+  const dob          = athena?.personalDetails.dateOfBirth ||
                        answers["personal-details"]?.["dob"] || "";
-  const address      = sarah?.personalDetails.address ||
+  const address      = athena?.personalDetails.address ||
                        answers["contact-information"]?.["address"] ||
                        answers["contact-information"]?.["street-address"] || "";
-  const email        = sarah?.contactInformation.email ||
+  const email        = athena?.contactInformation.email ||
                        answers["contact-information"]?.["email"] || "";
-  const mobile       = sarah?.contactInformation.mobile ||
+  const mobile       = athena?.contactInformation.mobile ||
                        answers["contact-information"]?.["mobile"] || "";
-  const occupation   = sarah?.employmentAndIncome.occupation ||
+  const occupation   = athena?.employmentAndIncome.occupation ||
                        answers["employment-income"]?.["occupation"] ||
                        profile?.occupation || "";
-  const employer     = sarah?.employmentAndIncome.employerName ||
+  const employer     = athena?.employmentAndIncome.employerName ||
                        answers["employment-income"]?.["employer"] ||
                        profile?.employer || "";
-  const incomeStr    = sarah?.employmentAndIncome.annualGrossIncome ||
+  const incomeStr    = athena?.employmentAndIncome.annualGrossIncome ||
                        answers["employment-income"]?.["annual-income"] ||
                        (profile?.annualIncome ? `$${profile.annualIncome.toLocaleString()}` : "");
-  const superFund    = sarah?.superannuation.fundName ||
+  const superFund    = athena?.superannuation.fundName ||
                        answers["superannuation"]?.["fund-name"] ||
                        profile?.superFund || "";
-  const memberNo     = sarah?.superannuation.memberNumber ||
+  const memberNo     = athena?.superannuation.memberNumber ||
                        answers["superannuation"]?.["member-number"] ||
                        profile?.superMemberNumber || "";
-  const superBal     = sarah?.superannuation.estimatedBalance ||
+  const superBal     = athena?.superannuation.estimatedBalance ||
                        answers["superannuation"]?.["balance"] ||
                        (profile?.superBalance ? `$${profile.superBalance.toLocaleString()}` : "");
-  const dependants   = sarah?.familyAndDependants.numberOfDependants || "";
-  const partnerName  = sarah?.familyAndDependants.partnerName || "";
-  const relationship = sarah?.familyAndDependants.relationshipStatus || "";
-  const homeValue    = sarah?.assets.ownerOccupiedPropertyValue || "";
-  const savings      = sarah?.assets.savingsAndCash || "";
-  const shares       = sarah?.assets.sharesAndInvestments || "";
-  const riskPref     = sarah?.goalsAndObjectives.investmentRiskPreference || "Balanced";
+  const dependants   = athena?.familyAndDependants.numberOfDependants || "";
+  const partnerName  = athena?.familyAndDependants.partnerName || "";
+  const relationship = athena?.familyAndDependants.relationshipStatus || "";
+  const homeValue    = athena?.assets.ownerOccupiedPropertyValue || "";
+  const savings      = athena?.assets.savingsAndCash || "";
+  const shares       = athena?.assets.sharesAndInvestments || "";
+  const riskPref     = athena?.goalsAndObjectives.investmentRiskPreference || "Balanced";
   const tfn          = profile?.tfn || "";
   const today        = new Date().toLocaleDateString("en-AU", {
     day: "numeric", month: "long", year: "numeric",

@@ -337,10 +337,10 @@ export const mockProvider: AgentJsonProvider = {
         return runCipher();
       case "nexus":
         return runNexus();
-      case "sarah":
+      case "athena":
       default:
         return {
-          transcriptSummary: "Sarah session output is captured by the existing onboarding flow.",
+          transcriptSummary: "Athena session output is captured by the existing onboarding flow.",
           safeFallback: true,
         };
     }

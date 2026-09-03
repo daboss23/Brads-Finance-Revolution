@@ -17,7 +17,7 @@ export type DashboardTone =
 export type PriorityLevel = "critical" | "high" | "medium" | "low";
 
 export type RuntimeAgentName =
-  | "Sarah"
+  | "Athena"
   | "Beacon"
   | "Guardian"
   | "Scribe"
@@ -60,7 +60,7 @@ export type PriorityQueueItem = {
   href: string;
 };
 
-export type SarahBriefInsight = {
+export type AthenaBriefInsight = {
   id: string;
   section: "What changed" | "Where clients are stuck" | "What needs follow-up";
   insight: string;
@@ -98,7 +98,7 @@ export type CommandCentreDashboard = {
   flowVelocity: string;
   conversionToMeeting: string;
   priorityQueue: PriorityQueueItem[];
-  sarahBrief: SarahBriefInsight[];
+  athenaBrief: AthenaBriefInsight[];
   pipelineSnapshot: PipelineSnapshotItem[];
   flowReading: {
     insight: string;
@@ -127,12 +127,12 @@ type DashboardBaseState = {
 
 export function getCommandCentreDashboard(): CommandCentreDashboard {
   const state = getDashboardBaseState();
-  // Sarah runs live once her Claude key is configured. The workflow agents
+  // Athena runs live once her Claude key is configured. The workflow agents
   // stay deterministic by design until live provider execution is switched
   // on, so the dashboard reflects exactly what each layer is doing.
-  const sarahLive = Boolean(process.env.ANTHROPIC_API_KEY);
-  const mockModeActive = !sarahLive;
-  const sarahComplete = CLIENTS.filter(
+  const athenaLive = Boolean(process.env.ANTHROPIC_API_KEY);
+  const mockModeActive = !athenaLive;
+  const athenaComplete = CLIENTS.filter(
     (client) =>
       client.status === "complete" ||
       client.status === "ready-for-meeting" ||
@@ -165,12 +165,12 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
         state: state.factFindsInProgress > 0 ? "active" : "waiting",
       },
       {
-        id: "sarah-complete",
-        label: "Sarah Complete",
+        id: "athena-complete",
+        label: "Athena Complete",
         description: "Discovery captured, handing to Beacon",
-        count: sarahComplete,
+        count: athenaComplete,
         tone: "emerald",
-        state: sarahComplete > 0 ? "complete" : "waiting",
+        state: athenaComplete > 0 ? "complete" : "waiting",
       },
       {
         id: "beacon-structured",
@@ -221,8 +221,8 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
     flowVelocity: "+18%",
     conversionToMeeting: `${meetingConversion}%`,
     priorityQueue: buildPriorityQueue(),
-    sarahBrief: buildSarahBrief(state),
-    pipelineSnapshot: buildPipelineSnapshot(state, sarahComplete),
+    athenaBrief: buildAthenaBrief(state),
+    pipelineSnapshot: buildPipelineSnapshot(state, athenaComplete),
     flowReading: {
       insight: buildFlowReading(state),
       timestamp: "Insight generated 2m ago",
@@ -389,12 +389,12 @@ function buildPriorityQueue(): PriorityQueueItem[] {
       href: "/clients/robert-sue-tanner/soa",
     },
     {
-      id: "scribe-sarah-meeting",
+      id: "scribe-athena-meeting",
       priority: "high",
       agent: "Scribe",
-      title: "Review meeting brief for Sarah Mitchell before 28 May meeting",
-      clientName: clientName("sarah-mitchell"),
-      href: "/clients/sarah-mitchell/fact-find-review",
+      title: "Review meeting brief for Athena Mitchell before 28 May meeting",
+      clientName: clientName("athena-mitchell"),
+      href: "/clients/athena-mitchell/fact-find-review",
     },
     {
       id: "guardian-angela-evidence",
@@ -405,9 +405,9 @@ function buildPriorityQueue(): PriorityQueueItem[] {
       href: "/clients/angela-forsyth/compliance",
     },
     {
-      id: "sarah-reynolds-info",
+      id: "athena-reynolds-info",
       priority: "low",
-      agent: "Sarah",
+      agent: "Athena",
       title: "Follow up missing client information for Michael and Kate Reynolds",
       clientName: clientName("michael-kate-reynolds"),
       href: "/clients/michael-kate-reynolds",
@@ -415,13 +415,13 @@ function buildPriorityQueue(): PriorityQueueItem[] {
   ];
 }
 
-function buildSarahBrief(state: DashboardBaseState): SarahBriefInsight[] {
+function buildAthenaBrief(state: DashboardBaseState): AthenaBriefInsight[] {
   return [
     {
-      id: "sarah-mitchell-ready",
+      id: "athena-mitchell-ready",
       section: "What changed",
       insight:
-        "Sarah Mitchell is now ready for her 28 May 2026 meeting. Financial Discovery is complete enough for Brad review.",
+        "Athena Mitchell is now ready for her 28 May 2026 meeting. Financial Discovery is complete enough for Brad review.",
       timestamp: "2m ago",
       tone: "cyan",
     },
@@ -444,7 +444,7 @@ function buildSarahBrief(state: DashboardBaseState): SarahBriefInsight[] {
 
 function buildPipelineSnapshot(
   state: DashboardBaseState,
-  sarahComplete: number,
+  athenaComplete: number,
 ): PipelineSnapshotItem[] {
   return [
     {
@@ -460,9 +460,9 @@ function buildPipelineSnapshot(
       tone: "cyan",
     },
     {
-      id: "sarah-complete",
-      label: "Sarah Complete",
-      value: sarahComplete,
+      id: "athena-complete",
+      label: "Athena Complete",
+      value: athenaComplete,
       tone: "emerald",
     },
     {
@@ -490,20 +490,20 @@ function buildFlowReading(state: DashboardBaseState): string {
   const reviewPressure = state.reviewRequiredClients.length + state.readyForSoA;
 
   if (reviewPressure > 0) {
-    return `${numberWord(reviewPressure)} files are sitting between Sarah Complete and Ready For Meeting. Prioritising adviser reviews will unlock the next wave fastest.`;
+    return `${numberWord(reviewPressure)} files are sitting between Athena Complete and Ready For Meeting. Prioritising adviser reviews will unlock the next wave fastest.`;
   }
 
   if (state.linkSentClients.length > 0) {
     return `${numberWord(state.linkSentClients.length)} files still need a nudge after link sent. Clearing that entry point will lift discovery velocity.`;
   }
 
-  return "The flow is balanced right now. Keep monitoring Sarah completions and SOA draft reviews for the next pressure point.";
+  return "The flow is balanced right now. Keep monitoring Athena completions and SOA draft reviews for the next pressure point.";
 }
 
 function buildAgentActivity(mockModeActive: boolean): AgentActivityItem[] {
   return [
     {
-      name: "Sarah",
+      name: "Athena",
       status: mockModeActive ? "Mock" : "Active",
       tone: "cyan",
       detail: mockModeActive ? "voice key pending" : "discovery online",

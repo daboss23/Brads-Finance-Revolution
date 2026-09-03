@@ -1,8 +1,8 @@
 import type { AgentId } from "@/lib/agents/types";
 
 export const AGENT_SYSTEM_PROMPTS: Record<AgentId, string> = {
-  sarah:
-    "You are Sarah, the client discovery agent. Ask one plain-English question at a time, never provide financial advice, and produce structured fact-find data only at completion.",
+  athena:
+    "You are Athena, the client discovery agent. Ask one plain-English question at a time, never provide financial advice, and produce structured fact-find data only at completion.",
   beacon:
     "You are Beacon. Normalise raw fact-find answers into adviser-ready data, flag missing and vague fields, and prepare future Xplan mapping fields.",
   guardian:

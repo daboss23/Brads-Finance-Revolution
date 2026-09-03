@@ -4,9 +4,9 @@
 export type FieldAnswers = Record<string, string>;       // fieldId → value
 export type ClientAnswers = Record<string, FieldAnswers>; // sectionId → fields
 
-const SARAH: ClientAnswers = {
+const ATHENA: ClientAnswers = {
   "personal-details": {
-    "full-name": "Sarah Jane Mitchell",
+    "full-name": "Athena Jane Mitchell",
     "dob": "14 March 1987",
     "address": "42 Hunter Street, Newcastle NSW 2300",
     "years-at-address": "2–5 years",
@@ -15,7 +15,7 @@ const SARAH: ClientAnswers = {
   "contact-information": {
     "mobile": "0412 345 678",
     "home-phone": "—",
-    "email": "sarah.mitchell@email.com",
+    "email": "athena.mitchell@email.com",
     "preferred-contact": "Email",
     "best-time": "Morning (8am–12pm)",
   },
@@ -206,7 +206,7 @@ const DAVID: ClientAnswers = {
 };
 
 const CLIENT_ANSWERS: Record<string, ClientAnswers> = {
-  "sarah-mitchell": SARAH,
+  "athena-mitchell": ATHENA,
   "tony-nguyen": TONY,
   "james-fiona-carr": JAMES,
   "david-okafor": DAVID,

@@ -1,8 +1,8 @@
 "use client";
 
-// Sarah's Fusion Core: dual-plasma reactor with a frequency ring.
+// Athena's Fusion Core: dual-plasma reactor with a frequency ring.
 // Orange fire and electric blue energy collide at a rotating white-hot
-// seam; a spectrum ring around the equator dances with Sarah's state.
+// seam; a spectrum ring around the equator dances with Athena's state.
 
 import { useMemo, useRef } from "react";
 import * as THREE from "three";

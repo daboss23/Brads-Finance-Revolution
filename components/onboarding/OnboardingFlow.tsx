@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getLinkByToken } from "@/lib/sarah-data";
+import { getLinkByToken } from "@/lib/athena-data";
 import { markFactFindCompleted } from "@/lib/review-store";
 import { FACT_FIND_SECTIONS, type Field } from "@/lib/fact-find-flow";
 import { Sparkles } from "lucide-react";
@@ -48,7 +48,7 @@ function getFirstName(fullName: string): string {
   return fullName.split(" ")[0];
 }
 
-function getSarahMessage(pct: number): string {
+function getAthenaMessage(pct: number): string {
   if (pct === 0) return "Take your time — I'll guide you through each question clearly.";
   if (pct < 15) return "Good start. Keep going — this builds quickly.";
   if (pct < 30) return "You're making real progress. Most clients finish in under 20 minutes.";
@@ -78,11 +78,11 @@ export function OnboardingFlow({ token }: Props) {
 
   const current = FLAT_QUESTIONS[qIndex];
   const overallPct = Math.round((qIndex / TOTAL_QUESTIONS) * 100);
-  const sarahMessage = getSarahMessage(overallPct);
+  const athenaMessage = getAthenaMessage(overallPct);
 
   const sectionIntro = useMemo(() => {
     if (!current?.isFirstInSection) return null;
-    return FACT_FIND_SECTIONS[current.sectionIndex]?.sarahIntro ?? null;
+    return FACT_FIND_SECTIONS[current.sectionIndex]?.athenaIntro ?? null;
   }, [current?.sectionIndex, current?.isFirstInSection]);
 
   function handleBegin() {
@@ -194,17 +194,17 @@ export function OnboardingFlow({ token }: Props) {
 
           <div className="flex-1 flex items-center justify-center px-6 pt-24 pb-12">
             <div className="w-full max-w-lg">
-              {/* Sarah message */}
+              {/* Athena message */}
               <div className="flex items-start gap-3 mb-8">
                 <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gold/10 border border-gold/30 mt-0.5">
                   <Sparkles className="h-4 w-4 text-gold" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
-                    Sarah · BMK Onboarding
+                    Athena · BMK Onboarding
                   </p>
                   <p className="text-[14px] text-foreground/75 leading-relaxed">
-                    {sarahMessage}
+                    {athenaMessage}
                   </p>
                 </div>
               </div>

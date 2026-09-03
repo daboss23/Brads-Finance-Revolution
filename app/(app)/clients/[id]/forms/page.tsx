@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { CLIENTS } from "@/lib/data";
 import { getClientProfile } from "@/lib/client-profiles";
-import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { getFactFindOrDemo } from "@/lib/athena-fact-find-store";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { recommendStrategies } from "@/lib/strategy-recommender";
 import { ClientFormsWorkspace } from "@/components/forms/ClientFormsWorkspace";
@@ -42,7 +42,7 @@ export default async function FormsPage({ params }: { params: { id: string } }) 
             {client.name}
           </h1>
           <p className="mt-3 text-[14.5px] text-muted-foreground/90 max-w-[620px] leading-relaxed">
-            Sarah suggests strategies based on the fact find. Brad approves
+            Athena suggests strategies based on the fact find. Brad approves
             what is relevant and the matching provider forms appear ready to
             generate and send.
           </p>

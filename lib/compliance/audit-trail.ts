@@ -111,10 +111,10 @@ export const ACTION_LABELS: Record<AuditActionType, string> = {
 // ── Seed audit trail for demo clients ───────────────────────────────────────
 
 const SEED_AUDIT: Record<string, AuditEntry[]> = {
-  "sarah-mitchell": [
+  "athena-mitchell": [
     {
       id: "seed-sm-1",
-      clientId: "sarah-mitchell",
+      clientId: "athena-mitchell",
       action: "check-run",
       actor: "Brad",
       timestamp: "2026-05-26T09:14:00.000Z",
@@ -123,7 +123,7 @@ const SEED_AUDIT: Record<string, AuditEntry[]> = {
     },
     {
       id: "seed-sm-2",
-      clientId: "sarah-mitchell",
+      clientId: "athena-mitchell",
       action: "warning-acknowledged",
       actor: "Brad",
       timestamp: "2026-05-26T09:22:00.000Z",
@@ -135,7 +135,7 @@ const SEED_AUDIT: Record<string, AuditEntry[]> = {
     },
     {
       id: "seed-sm-3",
-      clientId: "sarah-mitchell",
+      clientId: "athena-mitchell",
       action: "sign-off-given",
       actor: "Brad",
       timestamp: "2026-05-26T09:35:00.000Z",

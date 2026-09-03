@@ -2,11 +2,11 @@
 // a voice discovery session.
 //
 // The fact find must never travel through the transcript. In the text build the
-// model emitted a <fact-find-complete> block that SarahChat regex-stripped, but
+// model emitted a <fact-find-complete> block that AthenaChat regex-stripped, but
 // in a voice session anything in the transcript gets spoken aloud to the client.
 // So Athena hands the data over as a tool argument instead, which is silent.
 
-import { normalizeFactFind, type SarahFactFind } from "@/lib/sarah-fact-find-schema";
+import { normalizeFactFind, type AthenaFactFind } from "@/lib/athena-fact-find-schema";
 
 /** Name the agent knows this tool by. Must match the ElevenLabs agent config. */
 export const SUBMIT_FACT_FIND_TOOL = "submit_fact_find";
@@ -19,7 +19,7 @@ export type SubmitFactFindParams = {
 };
 
 export type ParseResult =
-  | { ok: true; data: SarahFactFind }
+  | { ok: true; data: AthenaFactFind }
   | { ok: false; reason: string };
 
 /**
@@ -51,5 +51,5 @@ export function parseSubmittedFactFind(params: SubmitFactFindParams): ParseResul
     return { ok: false, reason: `${FACT_FIND_PARAM} must be a JSON object.` };
   }
 
-  return { ok: true, data: normalizeFactFind(decoded as Partial<SarahFactFind>) };
+  return { ok: true, data: normalizeFactFind(decoded as Partial<AthenaFactFind>) };
 }

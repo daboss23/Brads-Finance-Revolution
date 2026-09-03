@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { CLIENTS, STATUS_CONFIG } from "@/lib/data";
 import { getClientProfile } from "@/lib/client-profiles";
-import { getFactFindOrDemo } from "@/lib/sarah-fact-find-store";
+import { getFactFindOrDemo } from "@/lib/athena-fact-find-store";
 import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistence";
 import { STRATEGY_LABELS } from "@/lib/forms";
 import { checkCompliance } from "@/lib/compliance/compliance-checker";
@@ -88,7 +88,7 @@ export default async function GenerateSoaPage({
                       ? ` · missing: ${factFind.missingSections.join(", ")}`
                       : ""
                   }`
-                : "Not yet collected by Sarah."
+                : "Not yet collected by Athena."
             }
           />
 

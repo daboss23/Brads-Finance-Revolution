@@ -38,8 +38,8 @@ system learns.
 
 | Variable | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` | Powers Sarah via Claude Sonnet; also flips dashboard to "All systems operational" |
-| `ELEVENLABS_API_KEY` | Powers Sarah's voice and transcription |
+| `ANTHROPIC_API_KEY` | Powers Athena via Claude Sonnet; also flips dashboard to "All systems operational" |
+| `ELEVENLABS_API_KEY` | Powers Athena's voice and transcription |
 | `ELEVENLABS_VOICE_ID` | `qkVB3KAXPWsBoebSnOpJ` |
 | `DATABASE_URL` | Switches secure-store from encrypted files to Postgres (run `db/schema.sql` once) |
 | `ADVISER_EMAIL` / `ADVISER_PASSWORD_HASH` | Adviser sign-in (see `scripts/hash-password.ts`) |
@@ -56,7 +56,7 @@ Defined in `lib/agent-system.ts`, executed through `lib/agents/run-agent.ts`
 
 | Agent | Role | Flow step |
 |---|---|---|
-| Sarah | Client Discovery — live Claude session producing the fact find | 0 |
+| Athena | Client Discovery — live Claude session producing the fact find | 0 |
 | Beacon | Fact Find Structuring — normalises discovery into adviser-ready data | 1 |
 | Guardian | Compliance & Risk — consent, gaps, SOA blockers | 2 |
 | Scribe | Meeting Intelligence — briefs and adviser questions | 3 |
@@ -66,7 +66,7 @@ Defined in `lib/agent-system.ts`, executed through `lib/agents/run-agent.ts`
 | Nexus | Integration health — deterministic, never uses AI | — |
 
 **Every workflow agent output feeds the generated SOA** (`lib/soa/soa-generator.ts` reads all five),
-and each document embeds an `agentContributions` provenance record (Sarah → ATLAS).
+and each document embeds an `agentContributions` provenance record (Athena → ATLAS).
 
 ### Generation flow
 
@@ -79,7 +79,7 @@ manual runs are available at `/api/agents/run`.
 ## What Is Built
 
 ### Dashboard — `/dashboard`
-Premium command centre: intelligence engine core, five-stage flow, priority queue, Sarah live brief,
+Premium command centre: intelligence engine core, five-stage flow, priority queue, Athena live brief,
 pipeline snapshot, flow reading, agent activity strip. Agent statuses derive from real environment
 state (keys configured or not).
 
@@ -91,9 +91,9 @@ encrypted store and hydrated on cold start (`getAgentTelemetryHydrated`).
 Pipeline matrix, shared ClientTabs across Overview, Fact Find, Strategies, Compliance, SOA pages.
 
 ### Fact Find Review — `/clients/[id]/fact-find-review`
-Ten-section fact find, Sarah answers auto-populate, completion bar, editable fields, export to Word/PDF.
+Ten-section fact find, Athena answers auto-populate, completion bar, editable fields, export to Word/PDF.
 
-### Sarah AI — `/onboarding/[token]`
+### Athena AI — `/onboarding/[token]`
 Client-facing Financial Discovery Session: plasma orb, ElevenLabs voice + Scribe transcription,
 ten-section conversational fact find feeding straight into review. Plain punctuation only — no dashes,
 no markdown, ever.
@@ -113,7 +113,7 @@ knowledge bases.
 
 ### Auth — `/login` + `middleware.ts`
 Session gate with demo-mode fallback, rate limiting, lockout, optional TOTP MFA. Public paths:
-onboarding, Sarah endpoints, cron.
+onboarding, Athena endpoints, cron.
 
 ### Automation — `/api/cron/cipher`
 Vercel Cron (21:00 UTC daily = 7am Sydney) runs Cipher's stalled-client scan. Protected by `CRON_SECRET`.
@@ -133,14 +133,14 @@ Browser state mirrors to `/api/state` via `lib/state-sync.ts` (localStorage inst
 
 ## Sidebar Order
 
-Dashboard → Clients → Sarah → Fact Find → SOA → Compliance → Agents → Evidence Vault → Settings
+Dashboard → Clients → Athena → Fact Find → SOA → Compliance → Agents → Evidence Vault → Settings
 
 ---
 
-## Sarah Voice Rules
+## Athena Voice Rules
 
 - Never uses dashes, em dashes, asterisks, markdown formatting, bullet points or headers.
-- Plain punctuation only in all Sarah responses.
+- Plain punctuation only in all Athena responses.
 
 ---
 

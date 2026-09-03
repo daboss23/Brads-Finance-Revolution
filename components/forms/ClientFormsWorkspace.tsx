@@ -125,14 +125,14 @@ export function ClientFormsWorkspace({
   return (
     <div className="space-y-12">
 
-      {/* Section 1 — Sarah Recommends */}
+      {/* Section 1 — Athena Recommends */}
       <section>
         <SectionHeader
           icon={<Sparkles className="h-3.5 w-3.5 text-gold" />}
-          title="Sarah Recommends"
+          title="Athena Recommends"
           subtitle={
             recommendations.length === 0
-              ? "No recommendations yet — once Sarah completes the fact find, suggested strategies appear here."
+              ? "No recommendations yet — once Athena completes the fact find, suggested strategies appear here."
               : `Auto-suggested for ${clientName} based on the fact find. Approve to add to the workspace.`
           }
         />

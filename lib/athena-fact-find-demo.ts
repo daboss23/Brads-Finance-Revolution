@@ -1,10 +1,10 @@
 // Demo fact find payloads for the listed clients. Used as a fallback when
 // the in-memory store has no live data — drives the strategy recommender
-// and form pre-fill before a real Sarah session has completed.
+// and form pre-fill before a real Athena session has completed.
 
-import type { SarahFactFind } from "./sarah-fact-find-schema";
+import type { AthenaFactFind } from "./athena-fact-find-schema";
 
-function blank(): SarahFactFind {
+function blank(): AthenaFactFind {
   return {
     personalDetails: {
       fullName: "",
@@ -81,10 +81,10 @@ function blank(): SarahFactFind {
   };
 }
 
-function build(overrides: Partial<{ [K in keyof SarahFactFind]: Partial<SarahFactFind[K]> }>): SarahFactFind {
+function build(overrides: Partial<{ [K in keyof AthenaFactFind]: Partial<AthenaFactFind[K]> }>): AthenaFactFind {
   const base = blank();
   for (const [section, fields] of Object.entries(overrides) as [
-    keyof SarahFactFind,
+    keyof AthenaFactFind,
     Record<string, string | number | string[]>,
   ][]) {
     if (section === "completionPercentage" || section === "missingSections") {
@@ -96,16 +96,16 @@ function build(overrides: Partial<{ [K in keyof SarahFactFind]: Partial<SarahFac
   return base;
 }
 
-export const DEMO_FACT_FINDS: Record<string, SarahFactFind> = {
-  "sarah-mitchell": build({
+export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
+  "athena-mitchell": build({
     personalDetails: {
-      fullName: "Sarah Jane Mitchell",
+      fullName: "Athena Jane Mitchell",
       dateOfBirth: "14 March 1987",
       address: "42 Hunter Street, Newcastle NSW 2300",
     },
     contactInformation: {
       mobile: "0412 345 678",
-      email: "sarah.mitchell@email.com",
+      email: "athena.mitchell@email.com",
     },
     familyAndDependants: {
       relationshipStatus: "Single",
@@ -333,6 +333,6 @@ export const DEMO_FACT_FINDS: Record<string, SarahFactFind> = {
   }),
 };
 
-export function getDemoFactFind(clientId: string): SarahFactFind | undefined {
+export function getDemoFactFind(clientId: string): AthenaFactFind | undefined {
   return DEMO_FACT_FINDS[clientId];
 }

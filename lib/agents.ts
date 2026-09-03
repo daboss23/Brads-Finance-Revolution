@@ -43,12 +43,12 @@ type AgentState = Omit<
 >;
 
 const AGENT_STATE: Record<AgentId, AgentState> = {
-  sarah: {
+  athena: {
     status: "ready",
     workload: 42,
     activeTask: "Waiting for the next discovery session to begin",
     blockedItem: null,
-    linkedClientId: "sarah-mitchell",
+    linkedClientId: "athena-mitchell",
     priority: "medium",
     nextAction: "Collect the next client fact find cleanly and hand off to Beacon",
     queueDepth: 1,
@@ -59,9 +59,9 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
   beacon: {
     status: "active",
     workload: 68,
-    activeTask: "Structuring Sarah Mitchell's discovery file for adviser review",
+    activeTask: "Structuring Athena Mitchell's discovery file for adviser review",
     blockedItem: null,
-    linkedClientId: "sarah-mitchell",
+    linkedClientId: "athena-mitchell",
     priority: "high",
     nextAction: "Surface insurance and goals priorities before 28 May meeting",
     queueDepth: 3,
@@ -85,9 +85,9 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
   scribe: {
     status: "active",
     workload: 54,
-    activeTask: "Preparing meeting brief for Sarah Mitchell",
+    activeTask: "Preparing meeting brief for Athena Mitchell",
     blockedItem: null,
-    linkedClientId: "sarah-mitchell",
+    linkedClientId: "athena-mitchell",
     priority: "high",
     nextAction: "Finish adviser briefing and surface meeting questions",
     queueDepth: 2,
@@ -150,7 +150,7 @@ const AGENT_STATE: Record<AgentId, AgentState> = {
 };
 
 const AGENT_TONES: Record<AgentId, AgentTone> = {
-  sarah: "violet",
+  athena: "violet",
   beacon: "blue",
   guardian: "orange",
   scribe: "gold",
@@ -161,7 +161,7 @@ const AGENT_TONES: Record<AgentId, AgentTone> = {
 };
 
 const AGENT_CALLSIGNS: Record<AgentId, string> = {
-  sarah: "Opens the conversation and gathers the story cleanly",
+  athena: "Opens the conversation and gathers the story cleanly",
   beacon: "Turns raw discovery into a file Brad can actually work with",
   guardian: "Nothing reaches advice without clearing the gate",
   scribe: "Packages the meeting so Brad walks in prepared",
@@ -291,10 +291,10 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   {
     id: "aq-3",
     agentId: "scribe",
-    label: "Review Scribe client brief for Sarah Mitchell before the 28 May meeting",
-    clientId: "sarah-mitchell",
+    label: "Review Scribe client brief for Athena Mitchell before the 28 May meeting",
+    clientId: "athena-mitchell",
     priority: "high",
-    href: "/clients/sarah-mitchell/fact-find-review",
+    href: "/clients/athena-mitchell/fact-find-review",
   },
   {
     id: "aq-4",
@@ -306,7 +306,7 @@ export const ACTION_QUEUE: ActionQueueItem[] = [
   },
   {
     id: "aq-5",
-    agentId: "sarah",
+    agentId: "athena",
     label: "Follow up missing client information for Michael and Kate Reynolds",
     clientId: "michael-kate-reynolds",
     priority: "medium",

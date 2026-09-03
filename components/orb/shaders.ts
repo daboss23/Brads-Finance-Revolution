@@ -1,8 +1,8 @@
-// GLSL for Sarah's Fusion Core.
+// GLSL for Athena's Fusion Core.
 //
 // Two plasma poles — molten orange fire and electric blue energy — collide
 // inside one sphere at a rotating white-hot fusion seam. A frequency ring
-// of spectrum bands circles the equator and reacts to Sarah's state.
+// of spectrum bands circles the equator and reacts to Athena's state.
 // Everything runs on the GPU; the CPU only eases uniforms between states.
 
 export const NOISE_GLSL = /* glsl */ `

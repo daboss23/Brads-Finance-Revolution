@@ -1,7 +1,7 @@
-// Rules engine that reads Sarah's collected fact find and returns
+// Rules engine that reads Athena's collected fact find and returns
 // recommended strategies with a short rationale and a confidence band.
 
-import type { SarahFactFind } from "./sarah-fact-find-schema";
+import type { AthenaFactFind } from "./athena-fact-find-schema";
 import type { StrategyKey } from "./forms";
 import { STRATEGY_LABELS } from "./forms";
 
@@ -75,7 +75,7 @@ function rec(
 
 // ── rules ─────────────────────────────────────────────────────────────────
 
-export function recommendStrategies(data: SarahFactFind): Recommendation[] {
+export function recommendStrategies(data: AthenaFactFind): Recommendation[] {
   const out: Recommendation[] = [];
 
   const age = pickEarliestAge(data.personalDetails.dateOfBirth);

@@ -821,7 +821,7 @@
       0 0 34px -22px hsl(var(--gold) / 0.7);
   }
 
-  /* ─── Sarah engine · circulating fire + frequency ─── */
+  /* ─── Athena engine · circulating fire + frequency ─── */
 
   /* Rotating energy band: gold fire arc opposite a teal frequency arc */
   .engine-energy {
@@ -885,7 +885,7 @@
     100% { transform: translate(-50%, -50%) scale(1.65); opacity: 0; }
   }
 
-  /* Frequency bars — Sarah's live signal */
+  /* Frequency bars — Athena's live signal */
   .freq-bar {
     transform-origin: bottom;
     animation: freq-dance 1.5s ease-in-out infinite;

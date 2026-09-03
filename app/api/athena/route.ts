@@ -10,10 +10,10 @@ function firstNameOf(name: string): string {
   return name.split(" ")[0];
 }
 
-const SARAH_SYSTEM_PROMPT = (clientName: string) => {
+const ATHENA_SYSTEM_PROMPT = (clientName: string) => {
   const firstName = firstNameOf(clientName);
   return `
-You are Sarah, the AI onboarding assistant for Newcastle Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
+You are Athena, the AI onboarding assistant for Newcastle Financial Services (Brad Lonergan, Newcastle NSW, AFSL 234665).
 
 ## Writing style rules (absolute, no exceptions)
 Write only in plain natural human English. You must NEVER use any of the following in your output:
@@ -32,7 +32,7 @@ Hi ${firstName}! Can you hear me okay?
 Then stop and wait for their reply.
 
 If their reply indicates yes (yes, yep, sure, all good, loud and clear, etc), your SECOND message must be exactly this and nothing else:
-Hi ${firstName}, I'm Sarah from Newcastle Financial Services. How's it going? What we're doing today is just a Financial Discovery Session. We want to get to know and understand your situation so we can best serve you and give you as much value as possible. We'll keep it relaxed and have some fun with it! It won't take long and most people find it really easy once we get going. You can respond by tapping the gold microphone and speaking your answers or you can type in the text box, totally up to you. Are you ready to get started ${firstName}?
+Hi ${firstName}, I'm Athena from Newcastle Financial Services. How's it going? What we're doing today is just a Financial Discovery Session. We want to get to know and understand your situation so we can best serve you and give you as much value as possible. We'll keep it relaxed and have some fun with it! It won't take long and most people find it really easy once we get going. You can respond by tapping the gold microphone and speaking your answers or you can type in the text box, totally up to you. Are you ready to get started ${firstName}?
 
 If their reply indicates the audio is not okay, ask them to try refreshing or checking their volume, then try the audio check again. Do not move on until they confirm they can hear you.
 
@@ -163,11 +163,11 @@ REMEMBER: never output any dashes, asterisks, bullets, or markdown. Plain natura
 };
 
 export async function POST(req: Request) {
-  const rl = rateLimit("sarah", clientIp(req), 30, 60);
+  const rl = rateLimit("athena", clientIp(req), 30, 60);
   if (!rl.allowed) return rateLimited(rl);
   const reqId = Math.random().toString(36).slice(2, 8);
-  const log = (...args: unknown[]) => console.log(`[sarah:${reqId}]`, ...args);
-  const err = (...args: unknown[]) => console.error(`[sarah:${reqId}]`, ...args);
+  const log = (...args: unknown[]) => console.log(`[athena:${reqId}]`, ...args);
+  const err = (...args: unknown[]) => console.error(`[athena:${reqId}]`, ...args);
 
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -224,7 +224,7 @@ export async function POST(req: Request) {
           const response = anthropic.messages.stream({
             model: "claude-sonnet-4-6",
             max_tokens: 1024,
-            system: SARAH_SYSTEM_PROMPT(clientName ?? "there"),
+            system: ATHENA_SYSTEM_PROMPT(clientName ?? "there"),
             messages,
           });
 
@@ -261,7 +261,7 @@ export async function POST(req: Request) {
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
-                error: `Sarah error: ${detail}`,
+                error: `Athena error: ${detail}`,
                 status: anyErr?.status ?? null,
               })}\n\n`
             )

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 interface Props {
   percentage: number;
   missingSections?: string[];
-  source: "sarah" | "manual";
+  source: "athena" | "manual";
 }
 
 export function CompletionBar({ percentage, missingSections, source }: Props) {
@@ -16,9 +16,9 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
             Fact Find Completion
           </p>
           <p className="text-[13px] text-muted-foreground/90 mt-1">
-            {source === "sarah"
-              ? "Collected by Sarah during Financial Discovery Session"
-              : "Awaiting Sarah completion"}
+            {source === "athena"
+              ? "Collected by Athena during Financial Discovery Session"
+              : "Awaiting Athena completion"}
           </p>
         </div>
         <span className="text-[22px] font-semibold text-foreground tabular-nums">
@@ -41,7 +41,7 @@ export function CompletionBar({ percentage, missingSections, source }: Props) {
       {missingSections && missingSections.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-muted-foreground">
-            Sarah flagged
+            Athena flagged
           </span>
           {missingSections.map((s) => (
             <span

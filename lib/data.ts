@@ -52,9 +52,9 @@ function sections(
 
 export const CLIENTS: Client[] = [
   {
-    id: "sarah-mitchell",
-    name: "Sarah Mitchell",
-    email: "sarah.mitchell@email.com",
+    id: "athena-mitchell",
+    name: "Athena Mitchell",
+    email: "athena.mitchell@email.com",
     mobile: "0412 345 678",
     progress: 85,
     status: "ready-for-meeting",

@@ -12,7 +12,7 @@ export interface ClientProfile {
 }
 
 const PROFILES: Record<string, ClientProfile> = {
-  "sarah-mitchell": {
+  "athena-mitchell": {
     tfn: "123-456-789",
     superFund: "AustralianSuper",
     superMemberNumber: "AU-4421987",

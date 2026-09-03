@@ -5,7 +5,7 @@ platform and what must be configured before real client data is stored.
 
 ## 1. What is protected
 
-- **Fact finds** — the full client financial picture collected by Sarah
+- **Fact finds** — the full client financial picture collected by Athena
   (income, assets, debts, super, insurance, goals, health, estate).
 - **Audit trail** — every compliance action (check runs, sign-offs,
   certificate generation) with actor and timestamp.
@@ -73,7 +73,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 All public endpoints are rate limited per source IP
 (`lib/rate-limit.ts`): sign-in (10/min with 15-minute lockout after 5
-failed attempts), fact-find submission (10/min), Sarah conversation
+failed attempts), fact-find submission (10/min), Athena conversation
 (30/min), transcription (30/min), audit and state writes. Limits are
 per server instance — adequate for a single-adviser deployment; swap in
 a shared store (Upstash/Postgres) when going multi-instance.
