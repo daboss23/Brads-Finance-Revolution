@@ -1,4 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { anthropicCredentialStatus } from "@/lib/ai/anthropic-credentials";
+import { ATHENA_MODEL } from "@/lib/ai/athena-model";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -170,16 +172,18 @@ export async function POST(req: Request) {
   const err = (...args: unknown[]) => console.error(`[athena:${reqId}]`, ...args);
 
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    const hasUsableCredential = Boolean(
-      apiKey?.startsWith("sk-ant-") && apiKey.length > 30,
-    );
-    log("POST received. Anthropic credential configured:", hasUsableCredential);
+    const credential = anthropicCredentialStatus();
+    log("POST received. Anthropic credential configured:", credential.configured);
 
-    if (!apiKey || !hasUsableCredential) {
-      err("ANTHROPIC_API_KEY is unavailable in this environment");
+    if (!credential.configured) {
+      // Log the specific reason. "missing" and "malformed" need different
+      // fixes, and the client-facing copy cannot say which.
+      err("Anthropic credential unusable:", credential.reason, credential.detail);
       return new Response(
-        `data: ${JSON.stringify({ error: "Athena is unavailable in this environment." })}\n\ndata: [DONE]\n\n`,
+        `data: ${JSON.stringify({
+          error: "Athena is unavailable in this environment.",
+          code: `anthropic_credential_${credential.reason}`,
+        })}\n\ndata: [DONE]\n\n`,
         {
           status: 503,
           headers: {
@@ -190,6 +194,7 @@ export async function POST(req: Request) {
         }
       );
     }
+    const apiKey = credential.key;
 
     const body = await req.json().catch((e) => {
       err("Failed to parse request JSON:", e);
@@ -225,7 +230,7 @@ export async function POST(req: Request) {
         try {
           log("Opening Anthropic stream…");
           const response = anthropic.messages.stream({
-            model: "claude-sonnet-4-6",
+            model: ATHENA_MODEL,
             max_tokens: 1024,
             system: ATHENA_SYSTEM_PROMPT(clientName ?? "there"),
             messages,

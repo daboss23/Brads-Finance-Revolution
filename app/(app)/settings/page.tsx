@@ -12,6 +12,7 @@ import {
 import { AGENTS } from "@/lib/agents";
 import { listRuntimeBlueprints } from "@/lib/agent-system";
 import { cn } from "@/lib/utils";
+import { anthropicConfigured } from "@/lib/ai/anthropic-credentials";
 
 const usageMode = "balanced";
 
@@ -20,7 +21,7 @@ const providerRows = [
     group: "AI Provider",
     icon: Bot,
     rows: [
-      { label: "Anthropic", connected: Boolean(process.env.ANTHROPIC_API_KEY), detail: "Athena and future agent JSON provider" },
+      { label: "Anthropic", connected: anthropicConfigured(), detail: "Athena and future agent JSON provider" },
       { label: "OpenAI", connected: Boolean(process.env.OPENAI_API_KEY), detail: "Optional future structured JSON provider" },
       { label: "Selected mode", connected: true, detail: "Mock-first with safe fallback" },
     ],
@@ -29,7 +30,7 @@ const providerRows = [
     group: "Voice Provider",
     icon: Mic,
     rows: [
-      { label: "ElevenLabs", connected: Boolean(process.env.ELEVENLABS_API_KEY), detail: "Current Athena voice path" },
+      { label: "ElevenLabs", connected: Boolean(process.env.ELEVENLABS_API_KEY?.trim()), detail: "Current Athena voice path" },
       { label: "OpenAI voice", connected: Boolean(process.env.OPENAI_VOICE_API_KEY), detail: "Placeholder for future voice option" },
     ],
   },
