@@ -2,15 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { anthropicCredentialStatus } from "@/lib/ai/anthropic-credentials";
 import { ATHENA_MODEL } from "@/lib/ai/athena-model";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
+import { firstNameOf } from "@/lib/athena/client-name";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function firstNameOf(name: string): string {
-  if (!name) return "there";
-  if (name.includes("&")) return name.split(" ").slice(0, -1).join(" ");
-  return name.split(" ")[0];
-}
 
 const ATHENA_SYSTEM_PROMPT = (clientName: string) => {
   const firstName = firstNameOf(clientName);
