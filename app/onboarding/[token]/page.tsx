@@ -2,9 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { AthenaChat } from "@/components/onboarding/AthenaChat";
 import { getLinkByToken } from "@/lib/athena-data";
 import { markFactFindCompleted } from "@/lib/review-store";
+import type { AthenaSessionMode } from "@/app/api/athena/session-mode/route";
+
+// The ConvAI SDK is a large dependency and only the voice path needs it.
+// Loading it behind the mode decision keeps the text fallback light, which
+// matters because clients open these links on phones on home connections.
+const AthenaVoiceSession = dynamic(
+  () =>
+    import("@/components/onboarding/AthenaVoiceSession").then(
+      (m) => m.AthenaVoiceSession,
+    ),
+  { ssr: false, loading: () => <SessionLoading /> },
+);
+
+function SessionLoading() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background text-foreground/60">
+      <p className="text-sm tracking-wide">Preparing your session…</p>
+    </div>
+  );
+}
 
 interface TokenCheck {
   valid: boolean;
@@ -26,6 +47,12 @@ export default function OnboardingPage({
       ? { valid: true, clientId: demoLink.clientId, clientName: demoLink.clientName }
       : null,
   );
+  // Which Athena this client gets. Voice is the live ElevenLabs agent and is
+  // preferred because it runs its own model, so it keeps working when the
+  // practice's Anthropic balance does not.
+  const [mode, setMode] = useState<AthenaSessionMode | null>(null);
+  // True when the text session is a failover, not the client's first screen.
+  const [failedOverFromVoice, setFailedOverFromVoice] = useState(false);
 
   useEffect(() => {
     if (demoLink) return;
@@ -36,18 +63,21 @@ export default function OnboardingPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.token]);
 
+  useEffect(() => {
+    void fetch("/api/athena/session-mode")
+      .then((r) => r.json())
+      .then((data: { mode?: AthenaSessionMode }) => setMode(data.mode ?? "text"))
+      // A failed probe must not strand the client: the text session can still
+      // report its own failure honestly if it is also down.
+      .catch(() => setMode("text"));
+  }, []);
+
   function handleComplete() {
     if (check?.clientId) markFactFindCompleted(check.clientId);
     router.push("/dashboard");
   }
 
-  if (!check) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-background text-foreground/60">
-        <p className="text-sm tracking-wide">Preparing your session…</p>
-      </div>
-    );
-  }
+  if (!check || !mode) return <SessionLoading />;
 
   if (!check.valid) {
     return (
@@ -66,12 +96,31 @@ export default function OnboardingPage({
     );
   }
 
+  if (mode === "voice") {
+    return (
+      <AthenaVoiceSession
+        clientName={check.clientName ?? "there"}
+        clientId={check.clientId}
+        token={params.token}
+        onComplete={handleComplete}
+        onUnavailable={(reason) => {
+          // The live agent was configured but would not open. Drop to the
+          // text session rather than showing the client a dead end.
+          console.error("[onboarding] voice session unavailable:", reason);
+          setFailedOverFromVoice(true);
+          setMode("text");
+        }}
+      />
+    );
+  }
+
   return (
     <AthenaChat
       clientName={check.clientName ?? "there"}
       clientId={check.clientId}
       token={params.token}
       onComplete={handleComplete}
+      autoStart={failedOverFromVoice}
     />
   );
 }

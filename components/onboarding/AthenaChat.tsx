@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { ArrowRight, Mic, Loader2 } from "lucide-react";
 import { useAudioRecorder } from "@/lib/hooks/use-audio-recorder";
-import { NewcastleLogoFull } from "@/components/logo/newcastle-logo";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { AthenaIntroScreen } from "@/components/onboarding/AthenaIntroScreen";
+import { AthenaStage } from "@/components/onboarding/AthenaStage";
+import { AthenaTranscript } from "@/components/onboarding/AthenaTranscript";
+import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComplete";
+import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
 import type { OrbState } from "@/components/orb/OrbCanvas";
-
-const OrbCanvas = dynamic(() => import("@/components/orb/OrbCanvas"), {
-  ssr: false,
-  loading: () => null,
-});
 
 type Message = {
   role: "user" | "assistant";
@@ -24,6 +21,11 @@ type Props = {
   clientId?: string;
   token?: string;
   onComplete: (factFindData?: Record<string, unknown>) => void;
+  /**
+   * Set when this session is a failover from the live agent. The client has
+   * already pressed begin once, so skip the intro rather than asking twice.
+   */
+  autoStart?: boolean;
 };
 
 function parseFactFindData(text: string): Record<string, unknown> | null {
@@ -40,7 +42,43 @@ function stripFactFindTag(text: string): string {
   return text.replace(/<fact-find-complete>[\s\S]*?<\/fact-find-complete>/, "").trim();
 }
 
-export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
+class AthenaSessionError extends Error {
+  constructor(
+    message: string,
+    readonly code: string | null,
+  ) {
+    super(message);
+    this.name = "AthenaSessionError";
+  }
+}
+
+// Turns a provider failure into something a client can act on.
+//
+// The old copy said "Athena could not connect" for everything, which sent
+// clients to press reconnect against a failure no amount of reconnecting
+// fixes, and told the adviser nothing. A configuration or billing fault is
+// the practice's to fix and the client should be told to stop trying; a
+// dropped request genuinely is worth retrying. The provider's own wording
+// never reaches the screen, only the console.
+function clientFacingError(e: unknown): string {
+  const code = e instanceof AthenaSessionError ? e.code : null;
+  if (code?.startsWith("anthropic_credential_")) {
+    return "Athena is offline for maintenance right now. Nothing you have entered is lost. Please contact Brad Lonergan at Newcastle Financial Services and he will send you a fresh link.";
+  }
+  const message = e instanceof Error ? e.message : String(e);
+  if (/credit balance|insufficient credit|quota/i.test(message)) {
+    return "Athena is offline for maintenance right now. Nothing you have entered is lost. Please contact Brad Lonergan at Newcastle Financial Services and he will send you a fresh link.";
+  }
+  return "That did not reach Athena. Check your connection and press reconnect, and she will pick up where you left off.";
+}
+
+export function AthenaChat({
+  clientName,
+  clientId,
+  token,
+  onComplete,
+  autoStart = false,
+}: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
@@ -50,10 +88,16 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(autoStart);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const transcriptRef = useRef<HTMLDivElement>(null);
-  const stickToBottomRef = useRef(true);
+  // The text session has no ElevenLabs call behind it, so it names its own
+  // record. Stable for the life of the session so every flush merges into one
+  // transcript rather than scattering across many.
+  const conversationIdRef = useRef<string | null>(null);
+  if (conversationIdRef.current === null && typeof window !== "undefined") {
+    conversationIdRef.current = `text-${crypto.randomUUID()}`;
+  }
+  const startedAtRef = useRef(new Date().toISOString());
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -297,6 +341,7 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let streamError: string | null = null;
+      let streamErrorCode: string | null = null;
       let buffer = "";
 
       while (true) {
@@ -316,6 +361,7 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
             const parsed = JSON.parse(data);
             if (parsed.error) {
               streamError = parsed.error;
+              streamErrorCode = parsed.code ?? null;
               console.error("[Athena API error]", parsed);
             }
             if (parsed.text) {
@@ -328,7 +374,7 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
       }
 
       if (streamError && !full) {
-        throw new Error(streamError);
+        throw new AthenaSessionError(streamError, streamErrorCode);
       }
 
       const factFindData = parseFactFindData(full);
@@ -350,6 +396,7 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
 
       if (factFindData) {
         setIsComplete(true);
+        void flushTranscript(true);
         if (clientId && token) {
           fetch("/api/complete-fact-find", {
             method: "POST",
@@ -367,9 +414,8 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
         setTimeout(() => onComplete(factFindData), 1800);
       }
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
       console.error("[Athena] request failed:", e);
-      setErrorMsg(msg);
+      setErrorMsg(clientFacingError(e));
       setCurrentSubtitle("Sorry, I ran into a problem. Please try again.");
       setVisibleWordCount(8);
     } finally {
@@ -438,6 +484,23 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
     [messages],
   );
 
+  const captureTurns = useMemo(
+    () =>
+      transcript.map((entry) => ({
+        role: (entry.role === "user" ? "user" : "agent") as "user" | "agent",
+        message: entry.text,
+      })),
+    [transcript],
+  );
+
+  const { flush: flushTranscript } = useTranscriptCapture({
+    token,
+    conversationId: conversationIdRef.current,
+    source: "text",
+    turns: captureTurns,
+    startedAt: startedAtRef.current,
+  });
+
   const lastUserIndex = useMemo(() => {
     for (let i = transcript.length - 1; i >= 0; i -= 1) {
       if (transcript[i].role === "user") return transcript[i].index;
@@ -445,107 +508,10 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
     return -1;
   }, [transcript]);
 
-  function handleTranscriptScroll() {
-    const el = transcriptRef.current;
-    if (!el) return;
-    stickToBottomRef.current =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 48;
-  }
-
-  // Follow the conversation as it grows, unless the client has scrolled back
-  // to re-read something earlier.
-  useEffect(() => {
-    const el = transcriptRef.current;
-    if (!el || !stickToBottomRef.current) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [transcript]);
-
   const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
 
   if (!hasStarted) {
-    return (
-      <div className="relative flex flex-col items-center justify-start min-h-[100dvh] bg-background text-foreground px-6 py-10 overflow-hidden">
-        {/* Ambient depth — warm gold horizon over near black */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,hsl(var(--gold)/0.09),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_80%,hsl(var(--gold-shadow)/0.22),transparent_60%)]" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,hsl(var(--teal-accent)/0.04),transparent_70%)] onboarding-glow-a" />
-
-        {/* Card — large soft translucent glass panel */}
-        <div className="glass-panel glass-panel-elevated glass-grain relative z-10 w-full max-w-[640px] rounded-[32px] px-8 pt-4 pb-8 flex flex-col items-center text-center sm:px-10">
-          <div className="mb-2">
-            <NewcastleLogoFull size={220} />
-          </div>
-          <h1 className="text-3xl md:text-5xl font-light tracking-wide text-foreground mb-3">
-            Financial Discovery Session
-          </h1>
-          <p className="text-lg text-foreground/70 max-w-[520px] leading-relaxed">
-            A relaxed conversation with Athena, your discovery assistant, so
-            Brad can prepare properly for your meeting.
-          </p>
-
-          <div className="gold-rule my-6 w-full max-w-[420px]" />
-
-          <ul className="mb-7 grid w-full max-w-[460px] gap-2.5 text-left">
-            {[
-              "You can type your answers or simply speak them.",
-              "Rough answers are perfectly fine. Brad will refine the detail with you.",
-              "No advice is given in this session. It is discovery only.",
-              "Your information is handled securely and reviewed personally by Brad.",
-            ].map((line) => (
-              <li key={line} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-foreground/65">
-                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-gold/70" />
-                {line}
-              </li>
-            ))}
-          </ul>
-
-          <button
-            type="button"
-            onClick={() => setHasStarted(true)}
-            className="onboarding-cta-shine btn-gold relative overflow-hidden rounded-xl px-12 py-5 text-[16px] font-bold tracking-[0.05em] uppercase transition-[filter] hover:brightness-105"
-          >
-            Begin My Financial Discovery
-          </button>
-
-          <p className="mt-5 text-[12px] text-muted-foreground/60 max-w-[440px] leading-relaxed">
-            Shared only with your Newcastle Financial Services adviser. You can
-            pause at any time and pick up where you left off.
-          </p>
-
-          {/* APP 5 collection notice — Privacy Act 1988 (Cth) */}
-          <details className="mt-4 w-full max-w-[460px] text-left">
-            <summary className="cursor-pointer text-[12px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground">
-              How your personal information is collected and used
-            </summary>
-            <div className="mt-2 space-y-2 rounded-xl bg-foreground/[0.03] p-4 text-[12px] leading-relaxed text-muted-foreground/70">
-              <p>
-                Newcastle Financial Services (BMK Financial Services, AFSL
-                authorisation via Charter Financial Planning, AFSL 234665)
-                collects the personal and financial information you share in
-                this session to prepare your financial advice, meet legal
-                obligations under the Corporations Act 2001 (Cth), and
-                verify your identity where required.
-              </p>
-              <p>
-                Your information is encrypted in storage, is reviewed only by
-                your adviser and their support staff, and is disclosed only to
-                product providers you ask us to deal with, our licensee for
-                compliance purposes, or where the law requires it. It is not
-                sold or used for marketing without your consent.
-              </p>
-              <p>
-                You may request access to or correction of your information at
-                any time, or make a privacy complaint, by contacting Brad
-                Lonergan. If unresolved, you can contact the Office of the
-                Australian Information Commissioner (oaic.gov.au). Providing
-                information is optional, but without it we may not be able to
-                give you appropriate advice.
-              </p>
-            </div>
-          </details>
-        </div>
-      </div>
-    );
+    return <AthenaIntroScreen mode="text" onBegin={() => setHasStarted(true)} />;
   }
 
   return (
@@ -553,129 +519,50 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
       {/* Ambient depth — warm gold horizon over near black */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_18%,hsl(var(--gold)/0.06),transparent_50%),radial-gradient(circle_at_50%_95%,hsl(var(--gold-shadow)/0.18),transparent_55%)]" />
 
-      {/* Header: logo lockup + headline + status — tight stack */}
-      <header className="relative shrink-0 flex flex-col items-center pt-4 px-6">
-        <NewcastleLogoFull size={180} />
-        <h1 className="-mt-2 text-3xl md:text-5xl font-light tracking-wide text-foreground text-center">
-          Financial Discovery Session
-        </h1>
-        <div className="mt-2 flex items-center gap-2">
-          <span
-            className={cn(
-              "h-2.5 w-2.5 rounded-full",
-              errorMsg
-                ? "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.6)]"
-                : isStreaming || isLoadingVoice
-                  ? "animate-pulse bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.6)]"
-                  : "status-live bg-success text-success shadow-[0_0_8px_hsl(var(--success)/0.7)]",
-            )}
+      <AthenaStage
+        orbState={orbState}
+        signalRef={orbSignalRef}
+        statusLabel={connectionLabel}
+        hasError={Boolean(errorMsg)}
+        belowPanel={
+          <AthenaTranscript
+            entries={transcript}
+            editableIndex={lastUserIndex}
+            editDisabled={isStreaming}
+            onEdit={handleEditAnswer}
           />
-          <span
-            className={cn(
-              "text-[13px] tracking-wide",
-              errorMsg ? "text-destructive/85" : "text-foreground/55",
-            )}
-          >
-            {connectionLabel}
-          </span>
-        </div>
-      </header>
-
-      {/* Orb + subtitle + recent answer — natural stack, no flex-1 dead space */}
-      <main className="relative shrink-0 flex flex-col items-center px-6 mt-8">
-        <div className="relative rounded-[28px] border border-white/10 bg-black p-8 sm:p-12 w-full max-w-[720px] flex flex-col items-center overflow-hidden shadow-[0_28px_80px_-36px_hsl(0_0%_0%/0.95)]">
-          <OrbCanvas
-            state={orbState}
-            signalRef={orbSignalRef}
-            className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] shrink-0"
-          />
-
-          <div className="mt-6 w-full flex items-start justify-center px-4 min-h-[80px] max-w-[680px] mx-auto">
-            {errorMsg ? (
-              <div className="flex flex-col items-center gap-3 text-center">
-                <p className="max-w-[680px] text-[14px] text-destructive/85">
-                  Athena could not connect. Please try the connection again.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    sendToAthena(
-                      messages.length > 0
-                        ? messages
-                        : [{ role: "user", content: "[START]" }],
-                    )
-                  }
-                  className="border-destructive/30 text-foreground hover:border-destructive/55"
-                >
-                  Reconnect Athena
-                </Button>
-              </div>
-            ) : (
-              <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-foreground/78 text-center">
-                {visibleSubtitle}
-                {(isStreaming || isLoadingVoice) && (
-                  <span className="inline-block w-1 h-4 bg-gold/60 ml-1 align-middle animate-pulse" />
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {transcript.length > 0 && (
-          <div className="mt-6 w-full max-w-[720px] mx-auto">
-            <div
-              ref={transcriptRef}
-              onScroll={handleTranscriptScroll}
-              role="log"
-              aria-live="polite"
-              aria-label="Conversation transcript"
-              className="onboarding-transcript flex max-h-[300px] flex-col gap-3 overflow-y-auto scroll-smooth px-1 py-1"
-            >
-              {transcript.map((entry) =>
-                entry.role === "user" ? (
-                  <div
-                    key={entry.index}
-                    className="flex flex-col items-end self-end max-w-[85%]"
-                  >
-                    <div className="bg-gold/[0.08] border border-gold/20 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-[inset_0_1px_0_hsl(44_75%_85%/0.08)]">
-                      <p className="text-[14px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
-                        {entry.text}
-                      </p>
-                    </div>
-                    {entry.index === lastUserIndex && (
-                      <button
-                        type="button"
-                        onClick={() => handleEditAnswer(entry.index)}
-                        disabled={isStreaming}
-                        className="mt-1 text-[11px] text-gold/80 hover:text-gold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Edit answer
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    key={entry.index}
-                    className="flex flex-col items-start self-start max-w-[85%]"
-                  >
-                    <div className="glass-chip rounded-2xl rounded-tl-sm border-foreground/10 px-4 py-2.5">
-                      <p className="text-[14px] text-foreground/75 leading-relaxed whitespace-pre-wrap">
-                        {entry.text}
-                      </p>
-                    </div>
-                  </div>
-                ),
-              )}
-            </div>
-            <p className="mt-2 text-center text-[11px] text-muted-foreground/50">
-              Scroll to review anything you have already said.
+        }
+      >
+        {errorMsg ? (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="max-w-[680px] text-[14px] text-destructive/85">
+              {errorMsg}
             </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                sendToAthena(
+                  messages.length > 0
+                    ? messages
+                    : [{ role: "user", content: "[START]" }],
+                )
+              }
+              className="border-destructive/30 text-foreground hover:border-destructive/55"
+            >
+              Reconnect Athena
+            </Button>
           </div>
+        ) : (
+          <p className="text-[18px] leading-relaxed max-w-[680px] whitespace-pre-wrap text-foreground/78 text-center">
+            {visibleSubtitle}
+            {(isStreaming || isLoadingVoice) && (
+              <span className="inline-block w-1 h-4 bg-gold/60 ml-1 align-middle animate-pulse" />
+            )}
+          </p>
         )}
-
-      </main>
+      </AthenaStage>
 
       {/* Input bar — close below subtitle/answer, fixed-height to prevent shake */}
       {!isComplete && (
@@ -735,21 +622,7 @@ export function AthenaChat({ clientName, clientId, token, onComplete }: Props) {
         </div>
       )}
 
-      {isComplete && (
-        <div className="relative shrink-0 flex flex-col items-center py-8 px-6 onboarding-rise">
-          <div className="glass-panel glass-rim-emerald glass-grain flex w-full max-w-[520px] flex-col items-center gap-3 rounded-[24px] px-8 py-8 text-center">
-            <span className="pointer-events-none absolute inset-x-12 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(158_60%_75%/0.35),transparent)]" aria-hidden />
-            <div className="glass-chip flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] text-success border-success/30 shadow-[0_0_28px_-12px_hsl(var(--success)/0.6)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_6px_0_hsl(var(--success)/0.8)]" />
-              Financial Discovery complete
-            </div>
-            <p className="max-w-[440px] text-center text-[13px] leading-relaxed text-foreground/70">
-              Thank you. Brad will personally review everything you have shared
-              and be fully prepared for your meeting.
-            </p>
-          </div>
-        </div>
-      )}
+      {isComplete && <AthenaSessionComplete />}
     </div>
   );
 }

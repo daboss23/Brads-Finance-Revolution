@@ -1,10 +1,14 @@
 import { verifyElevenLabsSignature } from "@/lib/athena/webhook-signature";
-import { persistTranscript, type TranscriptTurn } from "@/lib/secure-store/transcript-persistence";
+import { mergeTranscript, type TranscriptTurn } from "@/lib/secure-store/transcript-persistence";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+// A long discovery transcript is tens of kilobytes. Anything far above that is
+// an audio delivery, which this route does not store.
+const MAX_BODY_BYTES = 2_000_000;
 
 // Post-call webhook from ElevenLabs.
 //
@@ -26,6 +30,18 @@ export async function POST(req: Request) {
   if (!secret) {
     err("ELEVENLABS_WEBHOOK_SECRET not set — refusing unverifiable payload");
     return Response.json({ error: "Webhook not configured." }, { status: 503 });
+  }
+
+  // Audio deliveries carry a base64 MP3 of the whole call and arrive chunked.
+  // They are megabytes, they are refused by the platform's request body limit
+  // anyway, and this practice does not want vendor-held audio. Turn them away
+  // before reading the body, and do it with a 200: a webhook is auto disabled
+  // after ten consecutive failures, and an audio delivery must not be allowed
+  // to take the transcript deliveries down with it.
+  const declaredLength = Number(req.headers.get("content-length") ?? 0);
+  if (declaredLength > MAX_BODY_BYTES) {
+    log("ignoring oversized delivery:", declaredLength, "bytes");
+    return Response.json({ ok: true, ignored: "oversized" });
   }
 
   // Signature is computed over the exact bytes sent, so read the body as
@@ -68,14 +84,21 @@ export async function POST(req: Request) {
       timeInCallSecs: t.time_in_call_secs,
     }));
 
+  let stored: Awaited<ReturnType<typeof mergeTranscript>>;
   const startedAtSecs = data.metadata?.start_time_unix_secs;
+  const deletion = data.metadata?.deletion_settings;
   const rawClientId =
     data.conversation_initiation_client_data?.dynamic_variables?.client_id;
   const clientId =
     typeof rawClientId === "string" && rawClientId.trim() !== "" ? rawClientId : undefined;
 
   try {
-    await persistTranscript({
+    // Merged, never replaced. The browser has usually already written this
+    // session turn by turn, and this payload can legitimately arrive with
+    // fewer turns than that record holds, or with none at all depending on the
+    // workspace retention setting. A plain write would erase a complete
+    // transcript in exactly the case the retry exists to protect.
+    stored = await mergeTranscript({
       conversationId: data.conversation_id,
       agentId: data.agent_id ?? "",
       clientId,
@@ -83,6 +106,21 @@ export async function POST(req: Request) {
       receivedAt: new Date().toISOString(),
       durationSeconds: data.metadata?.call_duration_secs,
       status: data.status,
+      sources: ["post-call"],
+      summary: data.analysis?.transcript_summary,
+      callSuccessful: data.analysis?.call_successful,
+      terminationReason: data.metadata?.termination_reason,
+      // Recorded so the practice can answer, per client, where a disclosure
+      // still exists and until when.
+      vendorDeletion: deletion
+        ? {
+            deleteAtIso: deletion.deletion_time_unix_secs
+              ? new Date(deletion.deletion_time_unix_secs * 1000).toISOString()
+              : undefined,
+            deleteTranscriptAndPii: deletion.delete_transcript_and_pii,
+            deleteAudio: deletion.delete_audio,
+          }
+        : undefined,
       turns,
     });
   } catch (e) {
@@ -98,8 +136,21 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unable to store transcript." }, { status: 500 });
   }
 
-  log("stored transcript", data.conversation_id, `${turns.length} turns`, `client=${clientId ?? "unattached"}`);
-  return Response.json({ ok: true, conversationId: data.conversation_id });
+  // Log both numbers. A payload smaller than the stored record is the signal
+  // that the live writer is carrying the session and this webhook is not.
+  log(
+    "stored transcript",
+    data.conversation_id,
+    `payload=${turns.length} turns`,
+    `stored=${stored.turns.length} turns`,
+    `sources=${(stored.sources ?? []).join("+") || "none"}`,
+    `client=${stored.clientId ?? "unattached"}`,
+  );
+  return Response.json({
+    ok: true,
+    conversationId: data.conversation_id,
+    turns: stored.turns.length,
+  });
 }
 
 interface PostCallPayload {
@@ -109,7 +160,20 @@ interface PostCallPayload {
     conversation_id?: string;
     status?: string;
     transcript?: { role?: string; message?: string; time_in_call_secs?: number }[];
-    metadata?: { start_time_unix_secs?: number; call_duration_secs?: number };
+    metadata?: {
+      start_time_unix_secs?: number;
+      call_duration_secs?: number;
+      termination_reason?: string;
+      deletion_settings?: {
+        deletion_time_unix_secs?: number;
+        delete_transcript_and_pii?: boolean;
+        delete_audio?: boolean;
+      };
+    };
+    analysis?: {
+      transcript_summary?: string;
+      call_successful?: string;
+    };
     conversation_initiation_client_data?: {
       dynamic_variables?: Record<string, unknown>;
     };

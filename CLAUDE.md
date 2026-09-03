@@ -38,10 +38,10 @@ system learns.
 
 | Variable | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` | Powers Athena via Claude Sonnet; also flips dashboard to "All systems operational" |
-| `ELEVENLABS_API_KEY` | Powers Athena's voice and transcription |
-| `ELEVENLABS_VOICE_ID` | `qkVB3KAXPWsBoebSnOpJ` |
-| `ELEVENLABS_AGENT_ID` | Athena's ConvAI agent for the live discovery session (`agent_9701m1j9jnzzevjsy1fxt439969a`) |
+| `ELEVENLABS_API_KEY` + `ELEVENLABS_AGENT_ID` | **Athena's live discovery session.** Both together, or clients drop to the Anthropic text fallback. Agent: `agent_9701m1j9jnzzevjsy1fxt439969a`. The agent runs its own LLM, so a live session costs no Anthropic credit |
+| `DATA_ENCRYPTION_KEY` | **32 bytes, base64 or hex.** Encrypts every client record (AES-256-GCM). Generate it yourself: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Not recoverable and not resettable: save it in a password manager before Vercel. Without it, production refuses to write any client data |
+| `ANTHROPIC_API_KEY` | The text fallback Athena, the workflow agents, and the "All systems operational" badge. Every fallback turn bills this balance |
+| `ELEVENLABS_VOICE_ID` | `qkVB3KAXPWsBoebSnOpJ`. Text-fallback speech only; the live agent carries its own voice |
 | `ELEVENLABS_WEBHOOK_SECRET` | HMAC secret that authenticates the ElevenLabs post-call webhook |
 | `DATABASE_URL` | Switches secure-store from encrypted files to Postgres (run `db/schema.sql` once) |
 | `ADVISER_EMAIL` / `ADVISER_PASSWORD_HASH` | Adviser sign-in (see `scripts/hash-password.ts`) |
@@ -96,9 +96,26 @@ Pipeline matrix, shared ClientTabs across Overview, Fact Find, Strategies, Compl
 Ten-section fact find, Athena answers auto-populate, completion bar, editable fields, export to Word/PDF.
 
 ### Athena AI — `/onboarding/[token]`
-Client-facing Financial Discovery Session: plasma orb, ElevenLabs voice + Scribe transcription,
-ten-section conversational fact find feeding straight into review. Plain punctuation only — no dashes,
-no markdown, ever.
+Client-facing Financial Discovery Session: plasma orb, ten-section conversational fact find feeding
+straight into review. Plain punctuation only — no dashes, no markdown, ever.
+
+**Two sessions, one room.** `/api/athena/session-mode` decides which the client gets, and both render
+the same shell (`AthenaIntroScreen`, `AthenaStage`, `AthenaTranscript`, `AthenaSessionComplete`).
+
+| | Voice (preferred) | Text (fallback) |
+|---|---|---|
+| Component | `AthenaVoiceSession` | `AthenaChat` |
+| Runs on | ElevenLabs ConvAI agent, its own LLM | Anthropic, per turn |
+| Costs Anthropic credit | No | Yes, every turn |
+| Conversation defined in | The ElevenLabs agent, versioned there | `lib/agents/prompts.ts` + the route |
+| Fact find lands via | `submit_fact_find` client tool | `<fact-find-complete>` block |
+
+Voice is preferred because it survives an empty Anthropic balance. The browser opens the socket with a
+signed URL from `/api/athena/signed-url` and passes `client_first_name` and `client_id` as dynamic
+variables — the agent's opening line and its completion tool both depend on them. If the agent cannot
+be reached the page fails over to the text session mid-flow, without asking the client to start again.
+
+Editing the voice conversation means editing the agent in the ElevenLabs dashboard, not this repo.
 
 ### Compliance Engine — `/compliance` and `/clients/[id]/compliance`
 BID steps, safe harbour, Charter AFSL 234665 obligations, ATO thresholds, approved language templates.
@@ -119,6 +136,27 @@ onboarding, Athena endpoints, cron.
 
 ### Automation — `/api/cron/cipher`
 Vercel Cron (21:00 UTC daily = 7am Sydney) runs Cipher's stalled-client scan. Protected by `CRON_SECRET`.
+
+---
+
+## Discovery Session Capture
+
+The practice, not ElevenLabs, is the system of record. Three writers land in the
+`athena-transcripts` namespace and `mergeTranscript` reconciles them:
+
+| Writer | When | Covers |
+|---|---|---|
+| `live` | Browser, debounced ~5s + on `pagehide` | Voice sessions, including ones the client abandons |
+| `text` | Same cadence | The Anthropic fallback session |
+| `post-call` | ElevenLabs webhook, once | Authoritative timing and duration |
+
+**A write can add turns but never remove them.** Turn lists are compared by
+length and the longer one wins, so a retry, a duplicate delivery, an out of
+order flush, or an empty post-call payload are all harmless. Without that rule a
+sparse webhook would erase a complete session the browser had already captured.
+
+The client id is always derived from the onboarding token server side, never
+read from the request body, so a valid link can only write to its own file.
 
 ---
 
@@ -153,3 +191,5 @@ Agent command centre live; SOA generation consumes the full agent chain with pro
 **Next priorities:**
 - Live provider execution for the workflow agents (currently deterministic/mock by design)
 - DocuSign real integration
+- Point the ElevenLabs agent's post-call webhook at `/api/elevenlabs/post-call` so full transcripts
+  persist, not just the fact find (the route and its HMAC check are built and waiting)
