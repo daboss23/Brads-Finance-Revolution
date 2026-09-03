@@ -1,4 +1,5 @@
 import { CLIENTS, type Client } from "@/lib/data";
+import { anthropicConfigured } from "@/lib/ai/anthropic-credentials";
 import {
   getAllPipelineRows,
   type ClientPipelineRow,
@@ -130,7 +131,7 @@ export function getCommandCentreDashboard(): CommandCentreDashboard {
   // Athena runs live once her Claude key is configured. The workflow agents
   // stay deterministic by design until live provider execution is switched
   // on, so the dashboard reflects exactly what each layer is doing.
-  const athenaLive = Boolean(process.env.ANTHROPIC_API_KEY);
+  const athenaLive = anthropicConfigured();
   const mockModeActive = !athenaLive;
   const athenaComplete = CLIENTS.filter(
     (client) =>
@@ -552,13 +553,14 @@ function buildAgentActivity(mockModeActive: boolean): AgentActivityItem[] {
  * the dashboard so integration health is factual, never decorative.
  */
 function platformServicesConnected(): number {
-  return [
-    "ANTHROPIC_API_KEY",
+  const others = [
     "ELEVENLABS_API_KEY",
     "DATABASE_URL",
     "ADVISER_PASSWORD_HASH",
     "AUTH_SESSION_SECRET",
-  ].filter((key) => Boolean(process.env[key])).length;
+  ].filter((key) => Boolean(process.env[key]?.trim())).length;
+  // Anthropic counts as connected only when Athena would actually accept it.
+  return others + (anthropicConfigured() ? 1 : 0);
 }
 
 function clientName(clientId: string): string {

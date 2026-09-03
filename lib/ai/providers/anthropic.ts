@@ -1,10 +1,11 @@
 import type { AgentJsonProvider } from "@/lib/ai/types";
 import { mockProvider } from "@/lib/ai/providers/mock";
+import { anthropicConfigured } from "@/lib/ai/anthropic-credentials";
 
 export const anthropicProvider: AgentJsonProvider = {
   id: "anthropic",
   async generateJson(agent, input) {
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!anthropicConfigured()) {
       return mockProvider.generateJson(agent, input);
     }
     // External model calls are intentionally not enabled by default.
