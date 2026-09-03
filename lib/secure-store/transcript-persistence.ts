@@ -43,6 +43,20 @@ export interface StoredTranscript {
   sources?: TranscriptSource[];
   /** True once a session ended by its own completion, not by abandonment. */
   completed?: boolean;
+  /** ElevenLabs' own summary and outcome, from the post-call payload. */
+  summary?: string;
+  callSuccessful?: string;
+  terminationReason?: string;
+  /**
+   * When the vendor intends to drop its own copy, read from the post-call
+   * payload's deletion_settings. Worth keeping: it is the practice's evidence
+   * of where a client's disclosures still exist and for how long.
+   */
+  vendorDeletion?: {
+    deleteAtIso?: string;
+    deleteTranscriptAndPii?: boolean;
+    deleteAudio?: boolean;
+  };
   turns: TranscriptTurn[];
 }
 
@@ -86,6 +100,12 @@ export async function mergeTranscript(
     status: entry.status ?? existing.status,
     sources: [...sources, ...incomingSources.filter((s) => !sources.includes(s))],
     completed: entry.completed || existing.completed,
+    // Only the post-call writer knows any of these, so a live flush arriving
+    // afterwards must not blank them.
+    summary: entry.summary ?? existing.summary,
+    callSuccessful: entry.callSuccessful ?? existing.callSuccessful,
+    terminationReason: entry.terminationReason ?? existing.terminationReason,
+    vendorDeletion: entry.vendorDeletion ?? existing.vendorDeletion,
     turns: keepIncoming ? entry.turns : existing.turns,
   };
 

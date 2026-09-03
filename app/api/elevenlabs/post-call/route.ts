@@ -6,6 +6,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+// A long discovery transcript is tens of kilobytes. Anything far above that is
+// an audio delivery, which this route does not store.
+const MAX_BODY_BYTES = 2_000_000;
+
 // Post-call webhook from ElevenLabs.
 //
 // Athena's agent runs under Zero Retention Mode: ElevenLabs keeps no
@@ -26,6 +30,18 @@ export async function POST(req: Request) {
   if (!secret) {
     err("ELEVENLABS_WEBHOOK_SECRET not set — refusing unverifiable payload");
     return Response.json({ error: "Webhook not configured." }, { status: 503 });
+  }
+
+  // Audio deliveries carry a base64 MP3 of the whole call and arrive chunked.
+  // They are megabytes, they are refused by the platform's request body limit
+  // anyway, and this practice does not want vendor-held audio. Turn them away
+  // before reading the body, and do it with a 200: a webhook is auto disabled
+  // after ten consecutive failures, and an audio delivery must not be allowed
+  // to take the transcript deliveries down with it.
+  const declaredLength = Number(req.headers.get("content-length") ?? 0);
+  if (declaredLength > MAX_BODY_BYTES) {
+    log("ignoring oversized delivery:", declaredLength, "bytes");
+    return Response.json({ ok: true, ignored: "oversized" });
   }
 
   // Signature is computed over the exact bytes sent, so read the body as
@@ -70,6 +86,7 @@ export async function POST(req: Request) {
 
   let stored: Awaited<ReturnType<typeof mergeTranscript>>;
   const startedAtSecs = data.metadata?.start_time_unix_secs;
+  const deletion = data.metadata?.deletion_settings;
   const rawClientId =
     data.conversation_initiation_client_data?.dynamic_variables?.client_id;
   const clientId =
@@ -90,6 +107,20 @@ export async function POST(req: Request) {
       durationSeconds: data.metadata?.call_duration_secs,
       status: data.status,
       sources: ["post-call"],
+      summary: data.analysis?.transcript_summary,
+      callSuccessful: data.analysis?.call_successful,
+      terminationReason: data.metadata?.termination_reason,
+      // Recorded so the practice can answer, per client, where a disclosure
+      // still exists and until when.
+      vendorDeletion: deletion
+        ? {
+            deleteAtIso: deletion.deletion_time_unix_secs
+              ? new Date(deletion.deletion_time_unix_secs * 1000).toISOString()
+              : undefined,
+            deleteTranscriptAndPii: deletion.delete_transcript_and_pii,
+            deleteAudio: deletion.delete_audio,
+          }
+        : undefined,
       turns,
     });
   } catch (e) {
@@ -129,7 +160,20 @@ interface PostCallPayload {
     conversation_id?: string;
     status?: string;
     transcript?: { role?: string; message?: string; time_in_call_secs?: number }[];
-    metadata?: { start_time_unix_secs?: number; call_duration_secs?: number };
+    metadata?: {
+      start_time_unix_secs?: number;
+      call_duration_secs?: number;
+      termination_reason?: string;
+      deletion_settings?: {
+        deletion_time_unix_secs?: number;
+        delete_transcript_and_pii?: boolean;
+        delete_audio?: boolean;
+      };
+    };
+    analysis?: {
+      transcript_summary?: string;
+      call_successful?: string;
+    };
     conversation_initiation_client_data?: {
       dynamic_variables?: Record<string, unknown>;
     };
