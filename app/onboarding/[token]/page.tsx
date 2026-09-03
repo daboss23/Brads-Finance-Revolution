@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SarahChat } from "@/components/onboarding/SarahChat";
+import { AthenaVoiceChat } from "@/components/onboarding/AthenaVoiceChat";
 import { getLinkByToken } from "@/lib/sarah-data";
 import { markFactFindCompleted } from "@/lib/review-store";
 
@@ -63,6 +64,19 @@ export default function OnboardingPage({
           </p>
         </div>
       </div>
+    );
+  }
+
+  // Voice mode runs the live ElevenLabs agent. The original turn-based chat
+  // stays behind the flag so a session can be rolled back without a deploy.
+  if (process.env.NEXT_PUBLIC_ATHENA_VOICE === "1") {
+    return (
+      <AthenaVoiceChat
+        clientName={check.clientName ?? "there"}
+        clientId={check.clientId}
+        token={params.token}
+        onComplete={handleComplete}
+      />
     );
   }
 
