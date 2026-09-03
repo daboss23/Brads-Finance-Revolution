@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   type TranscriptEntry,
 } from "@/components/onboarding/AthenaTranscript";
 import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComplete";
+import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
 import { firstNameOf } from "@/lib/athena/client-name";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
@@ -58,6 +59,10 @@ function VoiceSession({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [entries, setEntries] = useState<TranscriptEntry[]>([]);
   const [caption, setCaption] = useState("");
+  // ElevenLabs' own id for this call. Sharing it means the live writer and the
+  // post-call webhook land on one record rather than two half records.
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<string | undefined>(undefined);
 
   const signalRef = useRef(0);
   const nextIndexRef = useRef(0);
@@ -76,6 +81,23 @@ function VoiceSession({
       { index: nextIndexRef.current++, role, text: trimmed },
     ]);
   }, []);
+
+  const turns = useMemo(
+    () =>
+      entries.map((e) => ({
+        role: (e.role === "user" ? "user" : "agent") as "user" | "agent",
+        message: e.text,
+      })),
+    [entries],
+  );
+
+  const { flush: flushTranscript } = useTranscriptCapture({
+    token,
+    conversationId,
+    source: "live",
+    turns,
+    startedAt,
+  });
 
   // Sends the finished fact find to the same encrypted store the text session
   // writes to. The agent waits on the string this returns, and its prompt
@@ -120,17 +142,26 @@ function VoiceSession({
       if (!completedRef.current) {
         completedRef.current = true;
         setPhase("complete");
+        // Mark the transcript finished rather than abandoned. Not awaited: the
+        // agent is holding the conversation open on this tool's reply.
+        void flushTranscript(true);
         setTimeout(() => onComplete(parsed), 2400);
       }
       return "Accepted.";
     },
-    [clientId, token, onComplete],
+    [clientId, token, onComplete, flushTranscript],
   );
 
+  // Every turn the client and Athena exchange, in the store's own shape. This
+  // is what gets written while the session runs, so a client who stops at
+  // question six still leaves their answers in the practice's own record.
+
   const conversation = useConversation({
-    onConnect: () => {
+    onConnect: ({ conversationId }) => {
       setPhase("live");
       setErrorMsg(null);
+      setConversationId(conversationId);
+      setStartedAt(new Date().toISOString());
     },
     onDisconnect: (details) => {
       // A completed session ends on the agent's own terms, so only surface a

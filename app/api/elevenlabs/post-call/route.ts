@@ -1,5 +1,5 @@
 import { verifyElevenLabsSignature } from "@/lib/athena/webhook-signature";
-import { persistTranscript, type TranscriptTurn } from "@/lib/secure-store/transcript-persistence";
+import { mergeTranscript, type TranscriptTurn } from "@/lib/secure-store/transcript-persistence";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 
 export const runtime = "nodejs";
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
       timeInCallSecs: t.time_in_call_secs,
     }));
 
+  let stored: Awaited<ReturnType<typeof mergeTranscript>>;
   const startedAtSecs = data.metadata?.start_time_unix_secs;
   const rawClientId =
     data.conversation_initiation_client_data?.dynamic_variables?.client_id;
@@ -75,7 +76,12 @@ export async function POST(req: Request) {
     typeof rawClientId === "string" && rawClientId.trim() !== "" ? rawClientId : undefined;
 
   try {
-    await persistTranscript({
+    // Merged, never replaced. The browser has usually already written this
+    // session turn by turn, and this payload can legitimately arrive with
+    // fewer turns than that record holds, or with none at all depending on the
+    // workspace retention setting. A plain write would erase a complete
+    // transcript in exactly the case the retry exists to protect.
+    stored = await mergeTranscript({
       conversationId: data.conversation_id,
       agentId: data.agent_id ?? "",
       clientId,
@@ -83,6 +89,7 @@ export async function POST(req: Request) {
       receivedAt: new Date().toISOString(),
       durationSeconds: data.metadata?.call_duration_secs,
       status: data.status,
+      sources: ["post-call"],
       turns,
     });
   } catch (e) {
@@ -98,8 +105,21 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unable to store transcript." }, { status: 500 });
   }
 
-  log("stored transcript", data.conversation_id, `${turns.length} turns`, `client=${clientId ?? "unattached"}`);
-  return Response.json({ ok: true, conversationId: data.conversation_id });
+  // Log both numbers. A payload smaller than the stored record is the signal
+  // that the live writer is carrying the session and this webhook is not.
+  log(
+    "stored transcript",
+    data.conversation_id,
+    `payload=${turns.length} turns`,
+    `stored=${stored.turns.length} turns`,
+    `sources=${(stored.sources ?? []).join("+") || "none"}`,
+    `client=${stored.clientId ?? "unattached"}`,
+  );
+  return Response.json({
+    ok: true,
+    conversationId: data.conversation_id,
+    turns: stored.turns.length,
+  });
 }
 
 interface PostCallPayload {

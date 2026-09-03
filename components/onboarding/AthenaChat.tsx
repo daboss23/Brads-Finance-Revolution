@@ -8,6 +8,7 @@ import { AthenaIntroScreen } from "@/components/onboarding/AthenaIntroScreen";
 import { AthenaStage } from "@/components/onboarding/AthenaStage";
 import { AthenaTranscript } from "@/components/onboarding/AthenaTranscript";
 import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComplete";
+import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
 type Message = {
@@ -89,6 +90,14 @@ export function AthenaChat({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(autoStart);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // The text session has no ElevenLabs call behind it, so it names its own
+  // record. Stable for the life of the session so every flush merges into one
+  // transcript rather than scattering across many.
+  const conversationIdRef = useRef<string | null>(null);
+  if (conversationIdRef.current === null && typeof window !== "undefined") {
+    conversationIdRef.current = `text-${crypto.randomUUID()}`;
+  }
+  const startedAtRef = useRef(new Date().toISOString());
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -387,6 +396,7 @@ export function AthenaChat({
 
       if (factFindData) {
         setIsComplete(true);
+        void flushTranscript(true);
         if (clientId && token) {
           fetch("/api/complete-fact-find", {
             method: "POST",
@@ -473,6 +483,23 @@ export function AthenaChat({
         .filter((entry) => entry.text.length > 0),
     [messages],
   );
+
+  const captureTurns = useMemo(
+    () =>
+      transcript.map((entry) => ({
+        role: (entry.role === "user" ? "user" : "agent") as "user" | "agent",
+        message: entry.text,
+      })),
+    [transcript],
+  );
+
+  const { flush: flushTranscript } = useTranscriptCapture({
+    token,
+    conversationId: conversationIdRef.current,
+    source: "text",
+    turns: captureTurns,
+    startedAt: startedAtRef.current,
+  });
 
   const lastUserIndex = useMemo(() => {
     for (let i = transcript.length - 1; i >= 0; i -= 1) {

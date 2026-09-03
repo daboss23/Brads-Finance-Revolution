@@ -139,6 +139,27 @@ Vercel Cron (21:00 UTC daily = 7am Sydney) runs Cipher's stalled-client scan. Pr
 
 ---
 
+## Discovery Session Capture
+
+The practice, not ElevenLabs, is the system of record. Three writers land in the
+`athena-transcripts` namespace and `mergeTranscript` reconciles them:
+
+| Writer | When | Covers |
+|---|---|---|
+| `live` | Browser, debounced ~5s + on `pagehide` | Voice sessions, including ones the client abandons |
+| `text` | Same cadence | The Anthropic fallback session |
+| `post-call` | ElevenLabs webhook, once | Authoritative timing and duration |
+
+**A write can add turns but never remove them.** Turn lists are compared by
+length and the longer one wins, so a retry, a duplicate delivery, an out of
+order flush, or an empty post-call payload are all harmless. Without that rule a
+sparse webhook would erase a complete session the browser had already captured.
+
+The client id is always derived from the onboarding token server side, never
+read from the request body, so a valid link can only write to its own file.
+
+---
+
 ## Persistence Model
 
 `lib/secure-store/` — records are always AES-256-GCM envelopes before they hit either backend:
