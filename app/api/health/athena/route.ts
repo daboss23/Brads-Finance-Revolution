@@ -59,21 +59,32 @@ export async function GET() {
     });
   } catch (e: unknown) {
     const apiErr = e as { status?: number; message?: string };
-    console.error("[health/athena] provider call failed:", apiErr?.status, apiErr?.message);
+    const message = apiErr?.message ?? "Unknown provider error.";
+    console.error("[health/athena] provider call failed:", apiErr?.status, message);
+
+    // An exhausted balance is a 400 invalid_request_error, not a 429, so it
+    // has to be recognised by message or it reads as a generic bad request.
+    const outOfCredit = /credit balance is too low|insufficient credit/i.test(message);
+
     return Response.json(
       {
         ok: false,
         athenaCanRun: false,
-        problem: `The Anthropic key is well formed but the provider rejected the call (${apiErr?.status ?? "no status"}).`,
-        detail: apiErr?.message ?? "Unknown provider error.",
-        fix:
-          apiErr?.status === 401
+        problem: outOfCredit
+          ? "The Anthropic key is valid but the workspace has no credit left, so every Athena session will fail."
+          : `The Anthropic key is well formed but the provider rejected the call (${apiErr?.status ?? "no status"}).`,
+        detail: message,
+        fix: outOfCredit
+          ? "Top up the balance at console.anthropic.com under Billing. No redeploy is needed once credit is added."
+          : apiErr?.status === 401
             ? "The key is not valid. Check it has not been revoked, and that the value in this environment has no stray whitespace."
-            : apiErr?.status === 404
-              ? `The workspace cannot call ${ATHENA_MODEL}. Confirm the model is enabled for the account behind this key.`
-              : apiErr?.status === 429
-                ? "Rate limited or out of credit. Check the workspace balance and limits."
-                : "See the detail above and the function logs for the full provider response.",
+            : apiErr?.status === 403
+              ? `The key does not have access to ${ATHENA_MODEL}. Check the key's permissions in the Console.`
+              : apiErr?.status === 404
+                ? `The workspace cannot call ${ATHENA_MODEL}. Confirm the model is enabled for the account behind this key.`
+                : apiErr?.status === 429
+                  ? "Rate limited. Check the workspace rate limits, then retry."
+                  : "See the detail above and the function logs for the full provider response.",
         checks,
       },
       { status: 502 },
