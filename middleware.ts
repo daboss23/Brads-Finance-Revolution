@@ -10,13 +10,16 @@ import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth/session";
 
 // Public paths: client onboarding + the endpoints Athena's session needs.
 // /api/cron/ is exempt from the session gate because Vercel Cron authenticates
-// with CRON_SECRET at the route level instead of an adviser cookie.
+// with CRON_SECRET at the route level instead of an adviser cookie, and
+// /api/elevenlabs/ because ElevenLabs authenticates its post-call webhook
+// with an HMAC signature verified in the route.
 const PUBLIC_PREFIXES = [
   "/login",
   "/api/auth/",
   "/onboarding/",
   "/api/athena",
   "/api/transcribe",
+  "/api/elevenlabs/",
   "/api/onboarding/",
   "/api/cron/",
   "/_next/",

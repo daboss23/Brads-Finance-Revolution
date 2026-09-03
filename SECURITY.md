@@ -110,7 +110,49 @@ expiry, RFC 6238 TOTP with ±1 step drift tolerance, and every sign-in,
 failure, lockout, and logout appended to the encrypted security event
 log.
 
-## 10. Known gaps / roadmap
+## 10. Third-party voice processing (ElevenLabs)
+
+Athena's discovery session sends a client's name, date of birth, address,
+income, assets, liabilities, superannuation and — in section 9 — their
+health conditions to ElevenLabs. That is sensitive information under the
+Privacy Act 1988 (Cth), so the practice holds the record and the vendor
+holds nothing.
+
+The agent (`ELEVENLABS_AGENT_ID`) runs under **Zero Retention Mode**:
+`platform_settings.privacy.zero_retention_mode = true`. ElevenLabs keeps no
+transcript, no audio and no PII once a call ends. Nothing is recoverable
+from their dashboard, by their staff, or by a subpoena served on them.
+
+Two consequences follow, and both are load-bearing:
+
+1. **The post-call webhook is the only durable copy.**
+   `POST /api/elevenlabs/post-call` receives the transcript at call end and
+   writes it to the `athena-transcripts` namespace through the same
+   AES-256-GCM envelope as every other record. If that write fails the route
+   returns 5xx so ElevenLabs retries; it never returns 200 on a dropped
+   transcript.
+
+2. **The webhook must exist and verify before ZRM is switched on.**
+   Enabling ZRM against a missing or broken webhook silently destroys every
+   session from that moment. Verify a real call lands in the store first.
+
+The webhook is authenticated by HMAC-SHA256 over `${timestamp}.${rawBody}`
+using `ELEVENLABS_WEBHOOK_SECRET`, compared in constant time, with a
+30-minute timestamp window that rejects replays. An unsigned, missigned or
+stale payload is rejected with 401 before the body is parsed. This is why
+`/api/elevenlabs/` is a public prefix in `middleware.ts` — it authenticates
+the sender, not an adviser session.
+
+`GET /api/athena/signed-url` mints the short-lived session URL so
+`ELEVENLABS_API_KEY` never reaches the browser. It is public by necessity
+(clients are not signed in) but requires a valid onboarding token, so it
+cannot be used by a stranger to open sessions or burn conversation minutes.
+
+Residual exposure: audio is processed in transit by ElevenLabs during the
+call itself. ZRM removes retention, not processing. Disclose the vendor in
+the privacy collection notice.
+
+## 11. Known gaps / roadmap
 
 In priority order:
 
@@ -119,3 +161,5 @@ In priority order:
 3. Real DocuSign integration with webhook signature verification.
 4. Key rotation tooling (enc2 envelope migration).
 5. Independent penetration test before onboarding other firms.
+6. Adviser-facing screen for the encrypted `athena-transcripts` namespace
+   (records are stored and retrievable, but not yet surfaced in the UI).

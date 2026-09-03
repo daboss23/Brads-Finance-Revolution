@@ -27,6 +27,8 @@ then redeploy. Nothing is committed to the repo.
 | `ANTHROPIC_API_KEY` | Athena's conversation (Claude) | console.anthropic.com → API Keys |
 | `ELEVENLABS_API_KEY` | Athena's spoken voice + speech-to-text (Scribe v1) | elevenlabs.io → Profile → API Key |
 | `ELEVENLABS_VOICE_ID` | Which voice Athena uses | Already chosen: `qkVB3KAXPWsBoebSnOpJ` |
+| `ELEVENLABS_AGENT_ID` | Athena's ConvAI agent for the live session | elevenlabs.io → Agents → Athena. Currently `agent_9701m1j9jnzzevjsy1fxt439969a` |
+| `ELEVENLABS_WEBHOOK_SECRET` | Authenticates the post-call webhook that saves each transcript | elevenlabs.io → Settings → Webhooks, shown once when you create the webhook |
 
 Without these, Athena runs in **mock mode** — the interface, orb, and flow all
 work for a demo, she just won't hold a live AI conversation or speak.
