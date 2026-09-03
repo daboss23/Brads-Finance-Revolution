@@ -41,6 +41,8 @@ system learns.
 | `ANTHROPIC_API_KEY` | Powers Athena via Claude Sonnet; also flips dashboard to "All systems operational" |
 | `ELEVENLABS_API_KEY` | Powers Athena's voice and transcription |
 | `ELEVENLABS_VOICE_ID` | `qkVB3KAXPWsBoebSnOpJ` |
+| `ELEVENLABS_AGENT_ID` | Athena's ConvAI agent for the live discovery session (`agent_9701m1j9jnzzevjsy1fxt439969a`) |
+| `ELEVENLABS_WEBHOOK_SECRET` | HMAC secret that authenticates the ElevenLabs post-call webhook |
 | `DATABASE_URL` | Switches secure-store from encrypted files to Postgres (run `db/schema.sql` once) |
 | `ADVISER_EMAIL` / `ADVISER_PASSWORD_HASH` | Adviser sign-in (see `scripts/hash-password.ts`) |
 | `AUTH_SESSION_SECRET` | Signs adviser session cookies |
