@@ -159,6 +159,30 @@ REMEMBER: never output any dashes, asterisks, bullets, or markdown. Plain natura
 `;
 };
 
+// Appended when the conversation above is one the client already started and
+// has come back to.
+//
+// The opening sequence is the whole reason this is needed. Without it the model
+// reads its own instructions, sees no audio check in the history it has been
+// handed, and dutifully runs one, which is how a returning client ends up being
+// asked whether they can hear us for a second time and every question after it
+// again. The history is real and already in the practice's record, so the only
+// correct next move is the next uncovered question.
+const RESUME_CLAUSE = (firstName: string, timeAway: string) => `
+
+## This session is being resumed (overrides the opening sequence above)
+
+${firstName} started this Financial Discovery Session ${timeAway} and has come back to finish it. The conversation so far is already in the messages above and every answer in it has been saved.
+
+Because of that:
+1. Do NOT run the audio check. Do NOT send the greeting. Do NOT say "Great!" and restart. The opening sequence has already happened.
+2. Your very first message now is one short warm sentence welcoming ${firstName} back and saying you will pick up where you left off, followed immediately by the next question you still need.
+3. Never ask again about anything ${firstName} has already answered above. Read the history first and work out which of the ten areas are already covered.
+4. Continue from the first area that is still uncovered, in the usual order, and carry on until all ten are done.
+5. If the history shows all ten areas are already covered, thank ${firstName}, close with the completion sentence, and output the fact find block using the answers from the history.
+
+Everything else, the writing style rules, one question per message, and the completion format, is unchanged.`;
+
 export async function POST(req: Request) {
   const rl = rateLimit("athena", clientIp(req), 30, 60);
   if (!rl.allowed) return rateLimited(rl);
@@ -202,12 +226,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const { messages, clientName } = body as {
+    const { messages, clientName, resumed, timeAway } = body as {
       messages?: Array<{ role: "user" | "assistant"; content: string }>;
       clientName?: string;
+      resumed?: boolean;
+      timeAway?: string;
     };
 
-    log("clientName:", clientName, "messages:", messages?.length ?? 0);
+    log(
+      "clientName:",
+      clientName,
+      "messages:",
+      messages?.length ?? 0,
+      "resumed:",
+      Boolean(resumed),
+    );
 
     if (!Array.isArray(messages) || messages.length === 0) {
       err("messages missing or empty");
@@ -220,6 +253,12 @@ export async function POST(req: Request) {
     const anthropic = new Anthropic({ apiKey });
     const encoder = new TextEncoder();
 
+    const resolvedName = clientName ?? "there";
+    const systemPrompt = resumed
+      ? ATHENA_SYSTEM_PROMPT(resolvedName) +
+        RESUME_CLAUSE(firstNameOf(resolvedName), timeAway || "earlier")
+      : ATHENA_SYSTEM_PROMPT(resolvedName);
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -227,7 +266,7 @@ export async function POST(req: Request) {
           const response = anthropic.messages.stream({
             model: ATHENA_MODEL,
             max_tokens: 1024,
-            system: ATHENA_SYSTEM_PROMPT(clientName ?? "there"),
+            system: systemPrompt,
             messages,
           });
 

@@ -158,6 +158,28 @@ sparse webhook would erase a complete session the browser had already captured.
 The client id is always derived from the onboarding token server side, never
 read from the request body, so a valid link can only write to its own file.
 
+### Resuming a half finished session
+
+A client who stops partway reopens the same link and carries on from the next
+question. `GET /api/athena/transcript?token=` returns the session to resume;
+`findResumableSession` offers one back only while it is unfinished, has turns,
+and was last touched within `RESUME_WINDOW_DAYS` (14). Records carry a
+`threadId`, set once and never movable, so a resumed voice session joins the
+original conversation instead of reading as a second abandoned one.
+
+Text resume works end to end. Voice resume saves and shows the client's answers
+today, but Athena only skips the covered ground once the ElevenLabs agent prompt
+reads the `is_resumed` and `resume_context` dynamic variables the browser
+already sends. The exact snippet to paste is in `docs/athena-resume.md`.
+
+### Partial sessions in the CRM
+
+`/clients/[id]` shows a notice when a client has an unfinished session.
+`/clients/[id]/fact-find-review` shows every session, its status, how many
+answers it captured, and the full transcript on expand. Status is derived in
+`lib/athena/discovery-sessions.ts` and matches what the client can still do:
+live, paused, abandoned, completed.
+
 ---
 
 ## Persistence Model
@@ -193,3 +215,5 @@ Agent command centre live; SOA generation consumes the full agent chain with pro
 - DocuSign real integration
 - Point the ElevenLabs agent's post-call webhook at `/api/elevenlabs/post-call` so full transcripts
   persist, not just the fact find (the route and its HMAC check are built and waiting)
+- Add the resume block to the ElevenLabs agent prompt so voice sessions skip covered ground
+  (`docs/athena-resume.md` has the snippet and the two variables to declare)

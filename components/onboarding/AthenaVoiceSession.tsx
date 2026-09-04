@@ -13,6 +13,7 @@ import {
 import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComplete";
 import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
 import { firstNameOf } from "@/lib/athena/client-name";
+import { resumeContextFor, type AthenaResumeState } from "@/lib/athena/resume";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
 type Props = {
@@ -25,6 +26,16 @@ type Props = {
    * Anthropic text session rather than leaving the client on a dead screen.
    */
   onUnavailable: (reason: string) => void;
+  /**
+   * A conversation this client started earlier and did not finish.
+   *
+   * Restoring it on the voice path takes two things. The turns are seeded into
+   * this component so the client sees their history and so the live writer
+   * keeps growing one record instead of starting a second one. The agent gets
+   * the same history through dynamic variables, because a resumed call is a new
+   * call and ElevenLabs remembers nothing of the last one.
+   */
+  resume?: AthenaResumeState | null;
 };
 
 // Athena's live discovery session, spoken through the ElevenLabs agent.
@@ -54,10 +65,17 @@ function VoiceSession({
   token,
   onComplete,
   onUnavailable,
+  resume = null,
 }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [entries, setEntries] = useState<TranscriptEntry[]>([]);
+  const [entries, setEntries] = useState<TranscriptEntry[]>(() =>
+    (resume?.turns ?? []).map((t, index) => ({
+      index,
+      role: t.role === "user" ? "user" : "assistant",
+      text: t.message,
+    })),
+  );
   const [caption, setCaption] = useState("");
   // ElevenLabs' own id for this call. Sharing it means the live writer and the
   // post-call webhook land on one record rather than two half records.
@@ -65,7 +83,7 @@ function VoiceSession({
   const [startedAt, setStartedAt] = useState<string | undefined>(undefined);
 
   const signalRef = useRef(0);
-  const nextIndexRef = useRef(0);
+  const nextIndexRef = useRef(resume?.turns.length ?? 0);
   // Read inside the animation frame loop, which must not re-subscribe on
   // every speaking/listening flip.
   const isSpeakingRef = useRef(false);
@@ -94,6 +112,7 @@ function VoiceSession({
   const { flush: flushTranscript } = useTranscriptCapture({
     token,
     conversationId,
+    threadId: resume?.threadId,
     source: "live",
     turns,
     startedAt,
@@ -271,19 +290,43 @@ function VoiceSession({
     // The agent's opening line is "Hi {{client_first_name}}!" and its
     // completion tool is keyed to the client file, so both variables have to
     // be on the wire before the first word is spoken.
+    //
+    // is_resumed and resume_context are the same information the text session
+    // puts in its system prompt. They only change what the client hears once
+    // the ElevenLabs agent prompt reads them (see docs/athena-resume.md); until
+    // then a returning voice client still has their answers saved and shown,
+    // and the agent simply starts from the top. Passing variables the prompt
+    // does not reference is harmless, so this ships ahead of that change
+    // rather than waiting on it.
     conversation.startSession({
       signedUrl,
       connectionType: "websocket",
       dynamicVariables: {
         client_first_name: firstNameOf(clientName),
         client_id: clientId ?? "",
+        is_resumed: resume ? "true" : "false",
+        resume_context: resume ? resumeContextFor(resume.turns) : "",
       },
       clientTools: { submit_fact_find: submitFactFind },
     });
-  }, [clientName, clientId, token, conversation, submitFactFind, onUnavailable]);
+  }, [
+    clientName,
+    clientId,
+    token,
+    conversation,
+    submitFactFind,
+    onUnavailable,
+    resume,
+  ]);
 
   if (phase === "intro") {
-    return <AthenaIntroScreen mode="voice" onBegin={begin} />;
+    return (
+      <AthenaIntroScreen
+        mode="voice"
+        resuming={resume ? { answerCount: resume.answerCount } : undefined}
+        onBegin={begin}
+      />
+    );
   }
 
   const orbState: OrbState =

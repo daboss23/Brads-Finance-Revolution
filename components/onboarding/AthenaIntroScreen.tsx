@@ -8,6 +8,13 @@ type Props = {
    * begin, so the intro has to say so before the browser prompt appears.
    */
   mode: "voice" | "text";
+  /**
+   * Set when the client is coming back to a session they already started.
+   * The screen has to say so before they press anything: a returning client
+   * who is shown the same "Begin" screen as the first time has no reason to
+   * believe their answers survived, and the honest answer is that they did.
+   */
+  resuming?: { answerCount: number };
   disabled?: boolean;
   onBegin: () => void;
 };
@@ -27,7 +34,28 @@ const EXPECTATIONS: Record<Props["mode"], string[]> = {
   ],
 };
 
-export function AthenaIntroScreen({ mode, disabled, onBegin }: Props) {
+const RESUME_EXPECTATIONS: Record<Props["mode"], string[]> = {
+  voice: [
+    "Athena will welcome you back and carry on from the next question.",
+    "You will not be asked anything you have already answered.",
+    "Rough answers are perfectly fine. Brad will refine the detail with you.",
+    "You can stop and come back again as many times as you need.",
+  ],
+  text: [
+    "Athena will welcome you back and carry on from the next question.",
+    "You will not be asked anything you have already answered.",
+    "Rough answers are perfectly fine. Brad will refine the detail with you.",
+    "You can stop and come back again as many times as you need.",
+  ],
+};
+
+export function AthenaIntroScreen({
+  mode,
+  resuming,
+  disabled,
+  onBegin,
+}: Props) {
+  const answers = resuming?.answerCount ?? 0;
   return (
     <div className="relative flex flex-col items-center justify-start min-h-[100dvh] bg-background text-foreground px-6 py-10 overflow-hidden">
       {/* Ambient depth — warm gold horizon over near black */}
@@ -41,17 +69,22 @@ export function AthenaIntroScreen({ mode, disabled, onBegin }: Props) {
           <NewcastleLogoFull size={220} />
         </div>
         <h1 className="text-3xl md:text-5xl font-light tracking-wide text-foreground mb-3">
-          Financial Discovery Session
+          {resuming ? "Welcome Back" : "Financial Discovery Session"}
         </h1>
         <p className="text-lg text-foreground/70 max-w-[520px] leading-relaxed">
-          A relaxed conversation with Athena, your discovery assistant, so Brad
-          can prepare properly for your meeting.
+          {resuming
+            ? `Your session is exactly where you left it. ${
+                answers === 1
+                  ? "Your answer is saved"
+                  : `All ${answers} of your answers are saved`
+              }, and Athena will carry on from the next question.`
+            : "A relaxed conversation with Athena, your discovery assistant, so Brad can prepare properly for your meeting."}
         </p>
 
         <div className="gold-rule my-6 w-full max-w-[420px]" />
 
         <ul className="mb-7 grid w-full max-w-[460px] gap-2.5 text-left">
-          {EXPECTATIONS[mode].map((line) => (
+          {(resuming ? RESUME_EXPECTATIONS : EXPECTATIONS)[mode].map((line) => (
             <li
               key={line}
               className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-foreground/65"
@@ -68,7 +101,7 @@ export function AthenaIntroScreen({ mode, disabled, onBegin }: Props) {
           disabled={disabled}
           className="onboarding-cta-shine btn-gold relative overflow-hidden rounded-xl px-12 py-5 text-[16px] font-bold tracking-[0.05em] uppercase transition-[filter] hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Begin My Financial Discovery
+          {resuming ? "Continue Where I Left Off" : "Begin My Financial Discovery"}
         </button>
 
         <p className="mt-5 text-[12px] text-muted-foreground/60 max-w-[440px] leading-relaxed">
