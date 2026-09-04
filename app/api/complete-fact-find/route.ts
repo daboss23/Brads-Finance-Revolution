@@ -11,6 +11,7 @@ import {
 import { getLinkByToken } from "@/lib/athena-data";
 import { notifyAdviser } from "@/lib/notify";
 import { normalizeFactFind, type AthenaFactFind } from "@/lib/athena-fact-find-schema";
+import { clearPartialFactFind } from "@/lib/secure-store/partial-fact-find-persistence";
 import { rateLimit, clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -79,6 +80,15 @@ export async function POST(req: Request) {
     }
 
     log("Athena fact find received for", clientId);
+
+    // Any answers previously read out of this client's unfinished session are
+    // now superseded by what they confirmed themselves. Dropping them is what
+    // stops the review screen showing two answers to the same question.
+    // Not fatal: a stale extraction is untidy, not a reason to fail a fact find
+    // that has already been stored.
+    await clearPartialFactFind(clientId).catch((e) =>
+      err("could not clear extracted answers:", e),
+    );
 
     // Move the client along the pipeline (real clients only; demo clients
     // are static) and tell Brad the file is ready to review.

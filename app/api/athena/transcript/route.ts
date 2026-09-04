@@ -4,6 +4,7 @@ import {
   type TranscriptTurn,
 } from "@/lib/secure-store/transcript-persistence";
 import { findResumableSession } from "@/lib/athena/discovery-sessions";
+import { stripAudioTags } from "@/lib/athena/audio-tags";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 import { getRealClientByToken } from "@/lib/clients/real-client-store";
 import { getLinkByToken } from "@/lib/athena-data";
@@ -81,9 +82,16 @@ export async function POST(req: Request) {
     if (typeof turn.message !== "string") continue;
     const message = turn.message.trim();
     if (!message) continue;
+    const role = turn.role === "user" ? "user" : "agent";
     clean.push({
-      role: turn.role === "user" ? "user" : "agent",
-      message: message.slice(0, MAX_MESSAGE_CHARS),
+      role,
+      // Athena's square bracket stage directions are for the voice engine, not
+      // for the record. Stripped server side so every writer is covered and a
+      // browser that has not been updated cannot store them anyway.
+      message: (role === "agent" ? stripAudioTags(message) : message).slice(
+        0,
+        MAX_MESSAGE_CHARS,
+      ),
       timeInCallSecs:
         typeof turn.timeInCallSecs === "number" ? turn.timeInCallSecs : undefined,
     });

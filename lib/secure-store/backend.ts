@@ -24,6 +24,8 @@ export interface StoreBackend {
   name: string;
   put(record: SecureRecord): Promise<void>;
   get(namespace: string, key: string): Promise<SecureRecord | undefined>;
+  /** Removes one record. A key that is not there is not an error. */
+  delete(namespace: string, key: string): Promise<void>;
   list(namespace: string): Promise<SecureRecord[]>;
   append(namespace: string, ciphertext: string): Promise<void>;
   listAppended(namespace: string, limit?: number): Promise<SecureRecord[]>;
@@ -71,6 +73,13 @@ class FileBackend implements StoreBackend {
 
   async get(namespace: string, key: string): Promise<SecureRecord | undefined> {
     return (await this.read(namespace)).find((r) => r.key === key);
+  }
+
+  async delete(namespace: string, key: string): Promise<void> {
+    const records = await this.read(namespace);
+    const remaining = records.filter((r) => r.key !== key);
+    if (remaining.length === records.length) return;
+    await this.write(namespace, remaining);
   }
 
   async list(namespace: string): Promise<SecureRecord[]> {
@@ -136,6 +145,14 @@ class PostgresBackend implements StoreBackend {
       [namespace, key],
     );
     return rows[0] ? rowToRecord(rows[0]) : undefined;
+  }
+
+  async delete(namespace: string, key: string): Promise<void> {
+    const pool = await this.getPool();
+    await pool.query(
+      `DELETE FROM secure_records WHERE namespace = $1 AND key = $2`,
+      [namespace, key],
+    );
   }
 
   async list(namespace: string): Promise<SecureRecord[]> {
