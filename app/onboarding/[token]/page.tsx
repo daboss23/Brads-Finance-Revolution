@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { AthenaChat } from "@/components/onboarding/AthenaChat";
 import { getLinkByToken } from "@/lib/athena-data";
 import { markFactFindCompleted } from "@/lib/review-store";
+import { fetchResumeState, type AthenaResumeState } from "@/lib/athena/resume";
 import type { AthenaSessionMode } from "@/app/api/athena/session-mode/route";
 
 // The ConvAI SDK is a large dependency and only the voice path needs it.
@@ -53,6 +54,13 @@ export default function OnboardingPage({
   const [mode, setMode] = useState<AthenaSessionMode | null>(null);
   // True when the text session is a failover, not the client's first screen.
   const [failedOverFromVoice, setFailedOverFromVoice] = useState(false);
+  // The conversation this client already started, if there is one. Undefined
+  // means the lookup has not answered yet, null means there is nothing to pick
+  // up. Both sessions have to mount already knowing, because a session that
+  // starts and then discovers a history has already said hello.
+  const [resume, setResume] = useState<AthenaResumeState | null | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (demoLink) return;
@@ -60,6 +68,11 @@ export default function OnboardingPage({
       .then((r) => r.json())
       .then((data: TokenCheck) => setCheck(data))
       .catch(() => setCheck({ valid: false }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.token]);
+
+  useEffect(() => {
+    void fetchResumeState(params.token).then(setResume);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.token]);
 
@@ -77,7 +90,7 @@ export default function OnboardingPage({
     router.push("/dashboard");
   }
 
-  if (!check || !mode) return <SessionLoading />;
+  if (!check || !mode || resume === undefined) return <SessionLoading />;
 
   if (!check.valid) {
     return (
@@ -102,6 +115,7 @@ export default function OnboardingPage({
         clientName={check.clientName ?? "there"}
         clientId={check.clientId}
         token={params.token}
+        resume={resume}
         onComplete={handleComplete}
         onUnavailable={(reason) => {
           // The live agent was configured but would not open. Drop to the
@@ -119,6 +133,7 @@ export default function OnboardingPage({
       clientName={check.clientName ?? "there"}
       clientId={check.clientId}
       token={params.token}
+      resume={resume}
       onComplete={handleComplete}
       autoStart={failedOverFromVoice}
     />

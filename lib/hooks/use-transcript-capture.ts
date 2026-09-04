@@ -15,6 +15,12 @@ type Options = {
   token?: string;
   /** Null until the session has an id. Nothing is sent before then. */
   conversationId: string | null;
+  /**
+   * Set when this session continues one the client started earlier. Carries
+   * the new record into the original conversation instead of leaving the
+   * adviser with two half sessions that each look abandoned.
+   */
+  threadId?: string;
   source: TranscriptSource;
   turns: TranscriptTurn[];
   startedAt?: string;
@@ -31,6 +37,7 @@ type Options = {
 export function useTranscriptCapture({
   token,
   conversationId,
+  threadId,
   source,
   turns,
   startedAt,
@@ -38,18 +45,34 @@ export function useTranscriptCapture({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSentCountRef = useRef(0);
   // Read by the unload handler, which must not re-register on every turn.
-  const latestRef = useRef({ token, conversationId, source, turns, startedAt });
+  const latestRef = useRef({
+    token,
+    conversationId,
+    threadId,
+    source,
+    turns,
+    startedAt,
+  });
 
   useEffect(() => {
-    latestRef.current = { token, conversationId, source, turns, startedAt };
-  }, [token, conversationId, source, turns, startedAt]);
+    latestRef.current = {
+      token,
+      conversationId,
+      threadId,
+      source,
+      turns,
+      startedAt,
+    };
+  }, [token, conversationId, threadId, source, turns, startedAt]);
 
   const payload = useCallback((completed: boolean) => {
-    const { token, conversationId, source, turns, startedAt } = latestRef.current;
+    const { token, conversationId, threadId, source, turns, startedAt } =
+      latestRef.current;
     if (!token || !conversationId || turns.length === 0) return null;
     return JSON.stringify({
       token,
       conversationId,
+      threadId,
       source,
       completed,
       startedAt,

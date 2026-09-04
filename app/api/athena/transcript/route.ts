@@ -3,6 +3,7 @@ import {
   type TranscriptSource,
   type TranscriptTurn,
 } from "@/lib/secure-store/transcript-persistence";
+import { findResumableSession } from "@/lib/athena/discovery-sessions";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 import { getRealClientByToken } from "@/lib/clients/real-client-store";
 import { getLinkByToken } from "@/lib/athena-data";
@@ -41,14 +42,16 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { token, conversationId, turns, source, completed, startedAt } = body as {
-    token?: string;
-    conversationId?: string;
-    turns?: unknown;
-    source?: TranscriptSource;
-    completed?: boolean;
-    startedAt?: string;
-  };
+  const { token, conversationId, threadId, turns, source, completed, startedAt } =
+    body as {
+      token?: string;
+      conversationId?: string;
+      threadId?: string;
+      turns?: unknown;
+      source?: TranscriptSource;
+      completed?: boolean;
+      startedAt?: string;
+    };
 
   if (!token || !conversationId || !Array.isArray(turns)) {
     return Response.json(
@@ -89,6 +92,11 @@ export async function POST(req: Request) {
   try {
     const stored = await mergeTranscript({
       conversationId,
+      // Sent back by a resumed session so its new record joins the original
+      // conversation instead of reading as a second, contradictory one. The
+      // store only honours it when the record is new, so a caller cannot move
+      // an existing transcript into another thread.
+      threadId: typeof threadId === "string" && threadId ? threadId : undefined,
       agentId: process.env.ELEVENLABS_AGENT_ID ?? "",
       clientId,
       startedAt,
@@ -109,5 +117,57 @@ export async function POST(req: Request) {
     }
     err("store failed:", e instanceof Error ? e.message : e);
     return Response.json({ error: "Unable to store transcript." }, { status: 500 });
+  }
+}
+
+// What a returning client is owed: the conversation they already had.
+//
+// Public for the same reason the write is. The onboarding token is the client's
+// only credential, it resolves to exactly one client file, and the answer is
+// that client's own words back. Nothing here is readable without the link.
+//
+// Returns the session to resume, or null when there is nothing to pick up:
+// a first visit, a finished session, or one old enough that its answers should
+// not be trusted as current.
+export async function GET(req: Request) {
+  const rl = rateLimit("athena-resume", clientIp(req), 30, 60);
+  if (!rl.allowed) return rateLimited(rl);
+
+  const err = (...a: unknown[]) => console.error("[athena-resume]", ...a);
+
+  const token = new URL(req.url).searchParams.get("token");
+  if (!token) {
+    return Response.json({ error: "token is required." }, { status: 400 });
+  }
+
+  const realClient = await getRealClientByToken(token);
+  const clientId = realClient?.id ?? getLinkByToken(token)?.clientId;
+  if (!clientId) {
+    return Response.json(
+      { error: "Invalid or expired onboarding link." },
+      { status: 403 },
+    );
+  }
+
+  try {
+    const session = await findResumableSession(clientId);
+    if (!session) return Response.json({ resume: null });
+
+    return Response.json({
+      resume: {
+        threadId: session.threadId,
+        conversationId: session.conversationId,
+        startedAt: session.startedAt,
+        lastActivityAt: session.lastActivityAt,
+        answerCount: session.answerCount,
+        turns: session.turns,
+      },
+    });
+  } catch (e) {
+    // A resume that cannot be read is not a session that cannot be had. Report
+    // nothing to resume and let the client start cleanly rather than stranding
+    // them on an error screen.
+    err("lookup failed:", e instanceof Error ? e.message : e);
+    return Response.json({ resume: null });
   }
 }

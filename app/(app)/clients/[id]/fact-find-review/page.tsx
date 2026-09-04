@@ -21,6 +21,8 @@ import { EditableFactFindValue } from "@/components/fact-find-review/EditableFac
 import { CompletionBar } from "@/components/fact-find-review/CompletionBar";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { AgentIntelligencePanel } from "@/components/agents/AgentIntelligencePanel";
+import { DiscoverySessions } from "@/components/clients/DiscoverySessions";
+import { getDiscoverySessions } from "@/lib/athena/discovery-sessions";
 import { findClient } from "@/lib/data/client-repository";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
@@ -63,6 +65,13 @@ export default async function FactFindReviewPage({
   const sampleAnswers = getClientAnswers(client.id);
   await ensureFactFindsHydrated();
   const athenaEntry = getFactFind(client.id);
+  // Read alongside the submitted fact find, never instead of it. A completed
+  // fact find is the answer; these are the conversations that produced it, plus
+  // the ones that stopped before they could.
+  const discoverySessions = await getDiscoverySessions(client.id).catch((e) => {
+    console.error("[fact-find-review] discovery sessions unavailable:", e);
+    return [];
+  });
   const athenaAnswers = athenaEntry ? athenaToReviewAnswers(athenaEntry.data) : null;
 
   // Athena's collected answers take precedence over sample data when present.
@@ -262,6 +271,7 @@ export default async function FactFindReviewPage({
 
         {/* Right — interactive checklist, notes, actions */}
         <div className="xl:sticky xl:top-8">
+          <DiscoverySessions sessions={discoverySessions} />
           <AgentIntelligencePanel clientId={client.id} />
           <ReviewInteractive
             clientId={client.id}

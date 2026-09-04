@@ -19,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { checkCompliance } from "@/lib/compliance/compliance-checker";
 import { ClientTabs } from "@/components/clients/ClientTabs";
+import { UnfinishedSessionNotice } from "@/components/clients/DiscoverySessions";
+import { getDiscoverySessions } from "@/lib/athena/discovery-sessions";
 import {
   PipelineStagesClient,
   SoaGateClient,
@@ -38,6 +40,13 @@ export default async function ClientDetailPage({
   const total = client.factFindSections.length;
   const factFindComplete = completeSections === total;
   const complianceResult = checkCompliance(client.id);
+  // A failure here must not take the client record down with it. The overview
+  // is how Brad reaches everything else about this client, and an unreadable
+  // transcript store is a reason to show no notice, not no page.
+  const discoverySessions = await getDiscoverySessions(client.id).catch((e) => {
+    console.error("[client] discovery sessions unavailable:", e);
+    return [];
+  });
 
   return (
     <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
@@ -104,6 +113,12 @@ export default async function ClientDetailPage({
       <div className="grid gap-6 xl:grid-cols-[1fr_380px] xl:gap-8">
         {/* Left */}
         <div className="space-y-6">
+
+          {/* A session the client started and did not finish */}
+          <UnfinishedSessionNotice
+            sessions={discoverySessions}
+            clientId={client.id}
+          />
 
           {/* SOA gate */}
           <SoaGateClient clientId={client.id} result={complianceResult} />

@@ -9,12 +9,35 @@ import { AthenaStage } from "@/components/onboarding/AthenaStage";
 import { AthenaTranscript } from "@/components/onboarding/AthenaTranscript";
 import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComplete";
 import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
+import { timeAwayLabel, type AthenaResumeState } from "@/lib/athena/resume";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
+
+// Markers the client never sees. They exist to give Athena a user turn to
+// answer, because the Messages API needs one to respond to and the client has
+// not typed anything yet. Filtered out of the transcript and of everything the
+// practice stores.
+const START = "[START]";
+const RESUME = "[RESUME]";
+const CONTROL_MESSAGES: readonly string[] = [START, RESUME];
+
+// Rebuilds the conversation Athena needs to see from the turns the practice
+// kept. The leading control turn matters: the Messages API requires the first
+// message to be a user message, and a restored history opens with Athena
+// asking whether the client can hear her.
+function messagesFromTurns(resume: AthenaResumeState): Message[] {
+  return [
+    { role: "user", content: START },
+    ...resume.turns.map((t) => ({
+      role: (t.role === "user" ? "user" : "assistant") as Message["role"],
+      content: t.message,
+    })),
+  ];
+}
 
 type Props = {
   clientName: string;
@@ -26,6 +49,11 @@ type Props = {
    * already pressed begin once, so skip the intro rather than asking twice.
    */
   autoStart?: boolean;
+  /**
+   * A conversation this client started earlier and did not finish. When set,
+   * the session restores it and asks the next question instead of the first.
+   */
+  resume?: AthenaResumeState | null;
 };
 
 function parseFactFindData(text: string): Record<string, unknown> | null {
@@ -78,8 +106,11 @@ export function AthenaChat({
   token,
   onComplete,
   autoStart = false,
+  resume = null,
 }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() =>
+    resume ? messagesFromTurns(resume) : [],
+  );
   const [currentSubtitle, setCurrentSubtitle] = useState("");
   const [visibleWordCount, setVisibleWordCount] = useState(0);
   const [input, setInput] = useState("");
@@ -93,11 +124,14 @@ export function AthenaChat({
   // The text session has no ElevenLabs call behind it, so it names its own
   // record. Stable for the life of the session so every flush merges into one
   // transcript rather than scattering across many.
-  const conversationIdRef = useRef<string | null>(null);
+  // A resumed session writes back into the record it is continuing, so the
+  // practice ends up with one growing transcript rather than a pile of
+  // fragments that each look like a client who gave up.
+  const conversationIdRef = useRef<string | null>(resume?.conversationId ?? null);
   if (conversationIdRef.current === null && typeof window !== "undefined") {
     conversationIdRef.current = `text-${crypto.randomUUID()}`;
   }
-  const startedAtRef = useRef(new Date().toISOString());
+  const startedAtRef = useRef(resume?.startedAt ?? new Date().toISOString());
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -133,7 +167,15 @@ export function AthenaChat({
 
   useEffect(() => {
     if (!hasStarted) return;
-    sendToAthena([{ role: "user", content: "[START]" }]);
+    if (!resume) {
+      sendToAthena([{ role: "user", content: START }]);
+      return;
+    }
+    // The restored history ends wherever the client stopped, which is usually
+    // mid question. The marker gives Athena a turn to answer so she can welcome
+    // them back and ask the next thing, rather than the client landing on a
+    // silent screen holding a question they already read.
+    sendToAthena([...messagesFromTurns(resume), { role: "user", content: RESUME }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasStarted]);
 
@@ -333,7 +375,16 @@ export function AthenaChat({
       const res = await fetch("/api/athena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, clientName }),
+        body: JSON.stringify({
+          messages: apiMessages,
+          clientName,
+          // Suppresses the audio check and the greeting for the whole resumed
+          // session, not just its first turn: the opening sequence is in the
+          // history and running it again is what makes a returning client
+          // answer everything twice.
+          resumed: Boolean(resume),
+          timeAway: resume ? timeAwayLabel(resume.lastActivityAt) : undefined,
+        }),
       });
 
       if (!res.body) throw new Error(`No response body (status ${res.status})`);
@@ -388,9 +439,14 @@ export function AthenaChat({
         // Athena turn number = number of prior assistant messages + 1.
         // 1 = audio check (show subtitle), 2 = full greeting (NO subtitle),
         // 3+ = normal (show subtitle).
+        //
+        // A resumed session has no greeting to suppress: its second turn is
+        // the welcome back and the next question, which the client needs to
+        // read. Counting turns alone would silence exactly that message for
+        // anyone who left early in their first visit.
         const athenaTurnNumber =
           apiMessages.filter((m) => m.role === "assistant").length + 1;
-        const showSubtitle = athenaTurnNumber !== 2;
+        const showSubtitle = Boolean(resume) || athenaTurnNumber !== 2;
         await playAthenaVoice(spoken, showSubtitle);
       }
 
@@ -451,7 +507,7 @@ export function AthenaChat({
     stopAudioPlayback();
     const trimmed = messages.slice(0, userIdx);
     setMessages(trimmed);
-    setInput(target.content === "[START]" ? "" : target.content);
+    setInput(CONTROL_MESSAGES.includes(target.content) ? "" : target.content);
 
     const lastAthena = [...trimmed].reverse().find((m) => m.role === "assistant");
     if (lastAthena) {
@@ -474,7 +530,7 @@ export function AthenaChat({
     () =>
       messages
         .map((m, i) => ({ m, i }))
-        .filter(({ m }) => m.content !== "[START]")
+        .filter(({ m }) => !CONTROL_MESSAGES.includes(m.content))
         .map(({ m, i }) => ({
           index: i,
           role: m.role,
@@ -496,6 +552,7 @@ export function AthenaChat({
   const { flush: flushTranscript } = useTranscriptCapture({
     token,
     conversationId: conversationIdRef.current,
+    threadId: resume?.threadId,
     source: "text",
     turns: captureTurns,
     startedAt: startedAtRef.current,
@@ -511,7 +568,13 @@ export function AthenaChat({
   const inputDisabled = isStreaming || isLoadingVoice || isPlayingAudio;
 
   if (!hasStarted) {
-    return <AthenaIntroScreen mode="text" onBegin={() => setHasStarted(true)} />;
+    return (
+      <AthenaIntroScreen
+        mode="text"
+        resuming={resume ? { answerCount: resume.answerCount } : undefined}
+        onBegin={() => setHasStarted(true)}
+      />
+    );
   }
 
   return (
@@ -546,7 +609,7 @@ export function AthenaChat({
                 sendToAthena(
                   messages.length > 0
                     ? messages
-                    : [{ role: "user", content: "[START]" }],
+                    : [{ role: "user", content: START }],
                 )
               }
               className="border-destructive/30 text-foreground hover:border-destructive/55"

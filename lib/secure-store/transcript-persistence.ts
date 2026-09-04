@@ -33,6 +33,20 @@ export interface TranscriptTurn {
 
 export interface StoredTranscript {
   conversationId: string;
+  /**
+   * Groups the records that make up one discovery conversation.
+   *
+   * A text session that a client resumes reuses its conversation id, so its
+   * record simply grows. A voice session cannot: ElevenLabs mints a fresh
+   * conversation id for every call, so a client who returns produces a second
+   * record that starts with a copy of the first one's turns. Both records
+   * carry the same thread id, which is what lets the adviser see one resumed
+   * session rather than two contradictory ones.
+   *
+   * Defaults to the conversation id, so a session that is never resumed is a
+   * thread of one and needs no special handling anywhere.
+   */
+  threadId?: string;
   agentId: string;
   clientId?: string;
   startedAt?: string;
@@ -77,6 +91,7 @@ export async function mergeTranscript(
   if (!existing) {
     const first: StoredTranscript = {
       ...entry,
+      threadId: entry.threadId ?? entry.conversationId,
       sources: entry.sources ?? [],
     };
     await secureSet(NAMESPACE, entry.conversationId, first);
@@ -89,6 +104,9 @@ export async function mergeTranscript(
 
   const merged: StoredTranscript = {
     conversationId: entry.conversationId,
+    // Set once, by whichever writer created the record. A later flush must not
+    // be able to move a record into a different thread.
+    threadId: existing.threadId ?? entry.threadId ?? entry.conversationId,
     // Prefer whichever writer actually knows each field. The live writer has
     // no duration and the post-call writer has no client token, so neither
     // alone produces a complete record.
@@ -124,4 +142,29 @@ export async function listTranscripts(): Promise<StoredTranscript[]> {
   return entries
     .map((e) => e.value)
     .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
+}
+
+// Every record belonging to one client, oldest first.
+//
+// Records written before the client id was captured (or by a post-call webhook
+// that arrived without one) are simply not this client's and are skipped: an
+// unattributed transcript must never surface under someone else's name.
+export async function listTranscriptsForClient(
+  clientId: string,
+): Promise<StoredTranscript[]> {
+  const entries = await secureList<StoredTranscript>(NAMESPACE);
+  return entries
+    .map((e) => e.value)
+    .filter((t) => t.clientId === clientId)
+    .sort((a, b) => transcriptStart(a).localeCompare(transcriptStart(b)));
+}
+
+/** Best available start time. Falls back to arrival for pre-thread records. */
+export function transcriptStart(t: StoredTranscript): string {
+  return t.startedAt ?? t.receivedAt;
+}
+
+/** Every record in one thread, oldest first. */
+export function threadOf(t: StoredTranscript): string {
+  return t.threadId ?? t.conversationId;
 }
