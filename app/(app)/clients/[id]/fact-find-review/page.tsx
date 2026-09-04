@@ -23,6 +23,7 @@ import { ClientTabs } from "@/components/clients/ClientTabs";
 import { AgentIntelligencePanel } from "@/components/agents/AgentIntelligencePanel";
 import { DiscoverySessions } from "@/components/clients/DiscoverySessions";
 import { getDiscoverySessions } from "@/lib/athena/discovery-sessions";
+import { getPartialFactFind } from "@/lib/secure-store/partial-fact-find-persistence";
 import { findClient } from "@/lib/data/client-repository";
 
 // Maps FACT_FIND_SECTIONS ids → the client's factFindSection name
@@ -44,7 +45,12 @@ function getSectionStatus(client: (typeof CLIENTS)[0], sectionId: string): Secti
   return client.factFindSections.find((s) => s.name === name)?.status ?? "missing";
 }
 
-function sectionHasAthenaData(
+// A section is only rendered as fields once it is past "missing", so anything
+// Athena collected has to lift it out of that state or the answers never reach
+// the screen. Extracted answers count for exactly the same reason: a section
+// left showing "not completed" while holding the client's own income figure
+// would hide the very thing this feature exists to surface.
+function sectionHasCollectedData(
   athenaAnswers: Record<string, Record<string, string>> | null,
   sectionId: string,
 ): boolean {
@@ -72,6 +78,20 @@ export default async function FactFindReviewPage({
     console.error("[fact-find-review] discovery sessions unavailable:", e);
     return [];
   });
+
+  // Answers read out of a session the client never finished. Only ever used
+  // when there is no confirmed fact find: the completion route clears these the
+  // moment a client finishes properly, and this guard means even a stale record
+  // could never sit beside a confirmed answer to the same question.
+  const partialEntry = athenaEntry
+    ? undefined
+    : await getPartialFactFind(client.id).catch((e) => {
+        console.error("[fact-find-review] extracted answers unavailable:", e);
+        return undefined;
+      });
+  const partialAnswers = partialEntry
+    ? athenaToReviewAnswers(partialEntry.data)
+    : null;
   const athenaAnswers = athenaEntry ? athenaToReviewAnswers(athenaEntry.data) : null;
 
   // Athena's collected answers take precedence over sample data when present.
@@ -81,6 +101,23 @@ export default async function FactFindReviewPage({
       const merged = { ...(answers[sec] ?? {}) };
       for (const [k, v] of Object.entries(fields)) {
         if (v && v.trim()) merged[k] = v;
+      }
+      answers[sec] = merged;
+    }
+  }
+
+  // Which fields came out of an unfinished conversation rather than a client
+  // confirming them. Carried down to each field so the screen can mark them
+  // one by one, which is the only honest way to show a mix of the two.
+  const unconfirmedFields = new Set<string>();
+  if (partialAnswers) {
+    for (const [sec, fields] of Object.entries(partialAnswers)) {
+      const merged = { ...(answers[sec] ?? {}) };
+      for (const [k, v] of Object.entries(fields)) {
+        if (v && v.trim()) {
+          merged[k] = v;
+          unconfirmedFields.add(`${sec}.${k}`);
+        }
       }
       answers[sec] = merged;
     }
@@ -137,10 +174,41 @@ export default async function FactFindReviewPage({
 
       {/* Completion bar — Athena's collected progress */}
       <CompletionBar
-        percentage={athenaEntry?.data.completionPercentage ?? client.progress}
-        missingSections={athenaEntry?.data.missingSections}
+        percentage={
+          athenaEntry?.data.completionPercentage ??
+          partialEntry?.data.completionPercentage ??
+          client.progress
+        }
+        missingSections={
+          athenaEntry?.data.missingSections ?? partialEntry?.data.missingSections
+        }
         source={athenaEntry ? "athena" : "manual"}
       />
+
+      {/* Read from a session the client never finished. Says so once, loudly,
+          before Brad reads a single number below. */}
+      {partialEntry && (
+        <div className="glass-panel glass-rim-gold mb-8 overflow-hidden">
+          <div className="flex">
+            <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold/70 to-gold/20" />
+            <div className="px-6 py-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+                Read from an unfinished session
+              </p>
+              <p className="max-w-[70ch] text-[13px] leading-relaxed text-foreground/80">
+                {partialEntry.fieldCount === 1
+                  ? "One field below was"
+                  : `${partialEntry.fieldCount} fields below were`}{" "}
+                read out of a discovery session this client stopped partway
+                through. Each one is marked unconfirmed and holds only what the
+                client actually said. Nothing here has been confirmed by them,
+                and none of it reaches a Statement of Advice until you edit the
+                field to stand behind it.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gaps summary — only when there are missing sections */}
       {missingSections.length > 0 && (
@@ -179,7 +247,9 @@ export default async function FactFindReviewPage({
             // If Athena collected data for this section, escalate from "missing"
             // so Brad still sees the fields (and can edit them).
             const status: SectionStatus =
-              baseStatus === "missing" && sectionHasAthenaData(athenaAnswers, section.id)
+              baseStatus === "missing" &&
+              (sectionHasCollectedData(athenaAnswers, section.id) ||
+                sectionHasCollectedData(partialAnswers, section.id))
                 ? "in-progress"
                 : baseStatus;
             const sectionAnswers = answers[section.id] ?? {};
@@ -252,6 +322,9 @@ export default async function FactFindReviewPage({
                               fieldId={field.id}
                               initialValue={value === "—" ? "" : value}
                               multiline={multiline}
+                              unconfirmed={unconfirmedFields.has(
+                                `${section.id}.${field.id}`,
+                              )}
                             />
                           </div>
                         );
@@ -271,7 +344,18 @@ export default async function FactFindReviewPage({
 
         {/* Right — interactive checklist, notes, actions */}
         <div className="xl:sticky xl:top-8">
-          <DiscoverySessions sessions={discoverySessions} />
+          <DiscoverySessions
+            sessions={discoverySessions}
+            clientId={client.id}
+            extraction={
+              partialEntry
+                ? {
+                    turnCount: partialEntry.turnCount,
+                    threadId: partialEntry.threadId,
+                  }
+                : null
+            }
+          />
           <AgentIntelligencePanel clientId={client.id} />
           <ReviewInteractive
             clientId={client.id}

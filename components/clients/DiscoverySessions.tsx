@@ -11,6 +11,7 @@ import {
   PauseCircle,
 } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
+import { ExtractAnswersButton } from "@/components/clients/ExtractAnswersButton";
 import { cn } from "@/lib/utils";
 import type {
   DiscoverySession,
@@ -19,6 +20,16 @@ import type {
 
 type Props = {
   sessions: DiscoverySession[];
+};
+
+type PanelProps = Props & {
+  clientId: string;
+  /**
+   * State of the answers already read out of this client's unfinished session.
+   * Absent when none have been read, or when the client finished properly and
+   * their confirmed fact find is the better record.
+   */
+  extraction?: { turnCount: number; threadId: string } | null;
 };
 
 const STATUS: Record<
@@ -97,7 +108,23 @@ function durationLabel(seconds?: number): string | null {
 // encrypted store and read by nobody. An abandoned session and a session that
 // never happened looked identical from here, which is the one thing they must
 // never look like.
-export function DiscoverySessions({ sessions }: Props) {
+export function DiscoverySessions({
+  sessions,
+  clientId,
+  extraction = null,
+}: PanelProps) {
+  // The one session worth reading: unfinished, and the client said something.
+  const unread = sessions.find(
+    (s) => s.status !== "completed" && s.answerCount > 0,
+  );
+  const finished = sessions.some((s) => s.status === "completed");
+  const upToDate = Boolean(
+    unread &&
+      extraction &&
+      extraction.threadId === unread.threadId &&
+      extraction.turnCount >= unread.turns.length,
+  );
+
   if (sessions.length === 0) {
     return (
       <GlassPanel padding="default" className="mb-5">
@@ -119,6 +146,16 @@ export function DiscoverySessions({ sessions }: Props) {
           <SessionRow key={session.threadId} session={session} />
         ))}
       </div>
+
+      {/* A finished session already filled the sections below properly, so
+          there is nothing here worth reading a second time. */}
+      {unread && !finished && (
+        <ExtractAnswersButton
+          clientId={clientId}
+          answerCount={unread.answerCount}
+          upToDate={upToDate}
+        />
+      )}
     </GlassPanel>
   );
 }

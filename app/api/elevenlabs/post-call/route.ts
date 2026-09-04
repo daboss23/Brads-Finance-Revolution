@@ -1,5 +1,6 @@
 import { verifyElevenLabsSignature } from "@/lib/athena/webhook-signature";
 import { mergeTranscript, type TranscriptTurn } from "@/lib/secure-store/transcript-persistence";
+import { stripAudioTags } from "@/lib/athena/audio-tags";
 import { EncryptionKeyMissingError } from "@/lib/secure-store";
 
 export const runtime = "nodejs";
@@ -78,11 +79,20 @@ export async function POST(req: Request) {
 
   const turns: TranscriptTurn[] = (data.transcript ?? [])
     .filter((t) => typeof t.message === "string" && t.message.trim() !== "")
-    .map((t) => ({
-      role: t.role === "user" ? "user" : "agent",
-      message: t.message as string,
-      timeInCallSecs: t.time_in_call_secs,
-    }));
+    .map((t) => {
+      const role = t.role === "user" ? "user" : "agent";
+      return {
+        role,
+        // Same rule as the live writer. The vendor's own copy of a turn keeps
+        // Athena's square bracket stage directions, and the practice's record
+        // holds what was said rather than how it was performed.
+        message:
+          role === "agent"
+            ? stripAudioTags(t.message as string)
+            : (t.message as string),
+        timeInCallSecs: t.time_in_call_secs,
+      } satisfies TranscriptTurn;
+    });
 
   let stored: Awaited<ReturnType<typeof mergeTranscript>>;
   const startedAtSecs = data.metadata?.start_time_unix_secs;

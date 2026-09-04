@@ -23,6 +23,13 @@ export async function secureGet<T>(namespace: string, key: string): Promise<T | 
   return record ? safeDecrypt<T>(record) : undefined;
 }
 
+// Removes a record permanently. Deleting something that is not there is a
+// no-op, so a caller clearing state it may or may not have written does not
+// need to look first.
+export async function secureDelete(namespace: string, key: string): Promise<void> {
+  await getBackend().delete(namespace, key);
+}
+
 export async function secureList<T>(namespace: string): Promise<{ key: string; value: T }[]> {
   const records = await getBackend().list(namespace);
   const out: { key: string; value: T }[] = [];

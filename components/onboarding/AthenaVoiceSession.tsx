@@ -14,6 +14,7 @@ import { AthenaSessionComplete } from "@/components/onboarding/AthenaSessionComp
 import { useTranscriptCapture } from "@/lib/hooks/use-transcript-capture";
 import { firstNameOf } from "@/lib/athena/client-name";
 import { resumeContextFor, type AthenaResumeState } from "@/lib/athena/resume";
+import { stripAudioTags } from "@/lib/athena/audio-tags";
 import type { OrbState } from "@/components/orb/OrbCanvas";
 
 type Props = {
@@ -199,8 +200,12 @@ function VoiceSession({
       setPhase("failed");
     },
     onMessage: ({ message, source }) => {
-      appendEntry(source === "user" ? "user" : "assistant", message);
-      if (source !== "user") setCaption(message);
+      // Athena's turns carry square bracket stage directions for the voice
+      // engine. She speaks them as feeling, not as words, so the client must
+      // never read them on screen either.
+      const spoken = source === "user" ? message : stripAudioTags(message);
+      appendEntry(source === "user" ? "user" : "assistant", spoken);
+      if (source !== "user") setCaption(spoken);
     },
   });
 

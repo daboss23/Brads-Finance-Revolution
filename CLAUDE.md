@@ -172,6 +172,30 @@ today, but Athena only skips the covered ground once the ElevenLabs agent prompt
 reads the `is_resumed` and `resume_context` dynamic variables the browser
 already sends. The exact snippet to paste is in `docs/athena-resume.md`.
 
+### Answers from an unfinished session
+
+A session that stops early never fires `submit_fact_find`, so there is no fact
+find to read. `lib/athena/answer-extraction.ts` reads the client's answers out
+of the transcript instead, on `claude-opus-5`, and only records what the client
+actually said. Brad triggers it from the fact find review
+(`POST /api/clients/[id]/extract-answers`); it is never automatic, because it
+spends Anthropic credit.
+
+Extractions live in their own `partial-fact-finds` namespace. **Nothing
+downstream reads it** — not compliance, not the SOA generator, not the
+recommender. That separation is what stops a number read out of a half sentence
+reaching a Statement of Advice. On the review screen every extracted field is
+marked unconfirmed until Brad edits it, and a completed fact find clears the
+extraction outright.
+
+### Athena's audio tags
+
+The live ElevenLabs agent writes square bracket stage directions such as
+`[warmly]` into its turns. `lib/athena/audio-tags.ts` strips them server side on
+every write path, and in the voice session before the client reads them. Agent
+turns only: a client's speech reaches us through speech to text, which never
+produces brackets, so their words are never touched.
+
 ### Partial sessions in the CRM
 
 `/clients/[id]` shows a notice when a client has an unfinished session.
