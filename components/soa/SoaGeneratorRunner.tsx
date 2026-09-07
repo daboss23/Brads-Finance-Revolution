@@ -1,14 +1,22 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, Circle, AlertTriangle, Play } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import {
+  CheckCircle2,
+  Loader2,
+  Circle,
+  AlertTriangle,
+  Play,
+  ArrowRight,
+} from "lucide-react";
 import {
   STAGE_LABELS,
   getStageOrder,
   type GenerationStage,
 } from "@/lib/soa/soa-generator";
 import { recordPlanGenerated } from "@/lib/soa/voice-learner";
+import { announceSoaGenerated } from "@/lib/soa/generation-events";
 import { logAudit } from "@/lib/compliance/audit-trail";
 import { getApprovedStrategies } from "@/lib/client-strategy-store";
 import { getCatalogueStrategy } from "@/lib/strategy-catalogue";
@@ -33,24 +41,39 @@ type AgentEventState = {
   cached: boolean;
 };
 
+/**
+ * The server finishes the chain far faster than a person can read it, so every
+ * event is held for a beat before it renders. Brad watches each agent land
+ * instead of seeing five names flash past.
+ */
+const PACE_MS = {
+  stage: 420,
+  agentStart: 1200,
+  agentDone: 1500,
+  beforeComplete: 900,
+} as const;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export function SoaGeneratorRunner({ clientId, disabled }: Props) {
-  const router = useRouter();
   const stages = getStageOrder();
-  const [states, setStates] = useState<Record<GenerationStage, StageState>>(() =>
-    Object.fromEntries(stages.map((s) => [s, "pending"])) as Record<
-      GenerationStage,
-      StageState
-    >,
+  const [states, setStates] = useState<Record<GenerationStage, StageState>>(
+    () =>
+      Object.fromEntries(stages.map((s) => [s, "pending"])) as Record<
+        GenerationStage,
+        StageState
+      >,
   );
   const [running, setRunning] = useState(false);
+  const [complete, setComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blockers, setBlockers] = useState<string[]>([]);
   const [agentEvents, setAgentEvents] = useState<AgentEventState[]>([]);
-  const eventSourceRef = useRef<EventSource | null>(null);
 
   async function start() {
     setError(null);
     setBlockers([]);
+    setComplete(false);
     setRunning(true);
     const fresh = Object.fromEntries(
       stages.map((s) => [s, "pending"]),
@@ -97,6 +120,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               ...prev,
               [stage]: status === "starting" ? "running" : "done",
             }));
+            await sleep(PACE_MS.stage);
           } else if (event.name === "agent") {
             const incoming = event.data as unknown as AgentEventState;
             setAgentEvents((prev) => {
@@ -108,7 +132,13 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               }
               return [...prev, incoming];
             });
+            await sleep(
+              incoming.status === "running"
+                ? PACE_MS.agentStart
+                : PACE_MS.agentDone,
+            );
           } else if (event.name === "complete") {
+            await sleep(PACE_MS.beforeComplete);
             // Persist the generated document so the review page shows exactly
             // what was generated, including catalogue/custom strategies.
             if (event.data.doc) {
@@ -120,6 +150,15 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               complianceScore: event.data.complianceScore,
               sectionCount: event.data.sectionCount,
               generatedAt: event.data.generatedAt,
+            });
+            setComplete(true);
+            // Raises the gold download CTA in the right rail. Nothing
+            // navigates: the chain above is the record of what just happened.
+            announceSoaGenerated({
+              clientId,
+              generatedAt: String(event.data.generatedAt ?? ""),
+              complianceScore: Number(event.data.complianceScore ?? 0),
+              sectionCount: Number(event.data.sectionCount ?? 0),
             });
           } else if (event.name === "error") {
             setError(
@@ -140,19 +179,14 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
       }
 
       setRunning(false);
-      if (!error) {
-        // Brief pause so the UI shows the final "done" state before navigating.
-        setTimeout(() => {
-          router.push(`/clients/${clientId}/soa`);
-          router.refresh();
-        }, 600);
-      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
       setRunning(false);
     }
   }
+
+  const doneAgents = agentEvents.filter((a) => a.status === "done").length;
 
   return (
     <div className="space-y-6">
@@ -174,10 +208,38 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
         ) : (
           <>
             <Play className="h-3.5 w-3.5" />
-            Generate SOA
+            {complete ? "Generate Again" : "Generate SOA"}
           </>
         )}
       </button>
+
+      {complete && (
+        <div className="soa-cta-enter rounded-lg border border-gold/30 bg-gold/[0.05] overflow-hidden">
+          <div className="flex">
+            <div className="w-[3px] shrink-0 bg-gradient-to-b from-gold-bright/80 to-gold/20" />
+            <div className="px-5 py-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <CheckCircle2 className="h-4 w-4 text-gold" />
+                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-gold/90">
+                  Statement of Advice Generated
+                </p>
+              </div>
+              <p className="text-[12.5px] text-foreground/80 leading-relaxed">
+                The agent chain below stays on screen. Download the PDF from the
+                panel on the right, or open the review page to edit before
+                sending.
+              </p>
+              <Link
+                href={`/clients/${clientId}/soa`}
+                className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-gold hover:text-gold-bright transition-colors"
+              >
+                Open SOA review
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {agentEvents.length > 0 && (
         <div className="rounded-lg glass-card overflow-hidden">
@@ -186,7 +248,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
               Agent Intelligence Chain
             </h3>
             <span className="text-[10px] font-medium tracking-[0.14em] uppercase text-gold/80">
-              {agentEvents.filter((a) => a.status === "done").length}/{SOA_CHAIN_LENGTH} complete
+              {doneAgents}/{SOA_CHAIN_LENGTH} complete
             </span>
           </div>
           <ul className="px-6 py-4 space-y-4">
@@ -207,7 +269,9 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
                     >
                       {agent.name}
                     </p>
-                    <p className="text-[11px] text-muted-foreground/70">{agent.role}</p>
+                    <p className="text-[11px] text-muted-foreground/70">
+                      {agent.role}
+                    </p>
                     {agent.status === "done" && (
                       <span className="ml-auto shrink-0 rounded-full border border-white/[0.09] bg-white/[0.03] px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75 tabular-nums">
                         {agent.cached ? "cached" : `${agent.durationMs}ms`}
@@ -230,7 +294,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
         </div>
       )}
 
-      {(running || states["done"] === "done" || error) && (
+      {(running || complete || error) && (
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="px-6 py-4 border-b border-border/60 bg-black/25">
             <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -299,7 +363,9 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
 
 const SOA_CHAIN_LENGTH = 5;
 
-function parseEvent(raw: string): { name: string; data: Record<string, unknown> } | null {
+function parseEvent(
+  raw: string,
+): { name: string; data: Record<string, unknown> } | null {
   const lines = raw.split("\n").filter(Boolean);
   let name = "message";
   let data = "";
@@ -319,7 +385,9 @@ function StageIcon({ state }: { state: StageState }) {
   if (state === "done")
     return <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />;
   if (state === "running")
-    return <Loader2 className="h-3.5 w-3.5 text-warning shrink-0 animate-spin" />;
+    return (
+      <Loader2 className="h-3.5 w-3.5 text-warning shrink-0 animate-spin" />
+    );
   if (state === "error")
     return <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />;
   return <Circle className="h-3.5 w-3.5 text-muted-foreground/35 shrink-0" />;

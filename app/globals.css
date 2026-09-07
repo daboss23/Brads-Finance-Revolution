@@ -1147,3 +1147,42 @@
     50%      { box-shadow: 0 0 16px -4px hsl(var(--cyan-glow) / 0.4), 0 1px 0 0 hsl(44 70% 90% / 0.09) inset; }
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SOA ready — pulsating gold download CTA
+   ═══════════════════════════════════════════════════════════ */
+@layer components {
+  .soa-cta-pulse {
+    animation: soa-cta-pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes soa-cta-pulse {
+    0%, 100% {
+      box-shadow:
+        0 1px 0 0 hsl(44 70% 95% / 0.18) inset,
+        0 0 0 0 hsl(var(--gold-glow) / 0.34),
+        0 10px 26px -12px hsl(var(--gold-shadow) / 0.7);
+    }
+    50% {
+      box-shadow:
+        0 1px 0 0 hsl(44 70% 95% / 0.18) inset,
+        0 0 0 10px hsl(var(--gold-glow) / 0),
+        0 0 34px -6px hsl(var(--gold-glow) / 0.6),
+        0 10px 26px -12px hsl(var(--gold-shadow) / 0.7);
+    }
+  }
+
+  .soa-cta-enter {
+    animation: soa-cta-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes soa-cta-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .soa-cta-pulse,
+    .soa-cta-enter {
+      animation: none;
+    }
+  }
+}

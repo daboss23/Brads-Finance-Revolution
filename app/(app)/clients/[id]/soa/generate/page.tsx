@@ -21,6 +21,7 @@ import { getGenerationReadiness } from "@/lib/soa/soa-generator";
 import { Badge } from "@/components/ui/badge";
 import { ClientTabs } from "@/components/clients/ClientTabs";
 import { SoaGeneratorRunner } from "@/components/soa/SoaGeneratorRunner";
+import { SoaReadyCta } from "@/components/soa/SoaReadyCta";
 import { findClient } from "@/lib/data/client-repository";
 
 export default async function GenerateSoaPage({
@@ -75,7 +76,6 @@ export default async function GenerateSoaPage({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8 xl:items-start">
         <div className="space-y-5">
-
           {/* Readiness */}
           <ReadinessCard
             label="Fact Find"
@@ -187,45 +187,50 @@ export default async function GenerateSoaPage({
           )}
         </div>
 
-        {/* Right summary */}
-        <aside className="sticky top-8 rounded-lg glass-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/60 bg-black/25">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              Client Summary
-            </h3>
-          </div>
-          <div className="px-5 py-5 space-y-3.5 text-[12.5px] text-foreground/85">
-            <Row label="Name" value={client.name} />
-            <Row label="Adviser" value={client.adviser} />
-            <Row
-              label="Income"
-              value={factFind?.employmentAndIncome.annualGrossIncome || "—"}
-            />
-            <Row
-              label="Super"
-              value={
-                factFind?.superannuation.fundName
-                  ? `${factFind.superannuation.fundName} · ${factFind.superannuation.estimatedBalance || "—"}`
-                  : "—"
-              }
-            />
-            <Row
-              label="Risk profile"
-              value={
-                factFind?.goalsAndObjectives.investmentRiskPreference || "—"
-              }
-            />
-            <div className="pt-2 mt-2 border-t border-border/40">
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/85 mb-2">
-                Generation Notes
-              </p>
-              <p className="flex items-start gap-1.5 text-[11.5px] text-muted-foreground/85 leading-relaxed mb-1.5">
-                <Clock className="h-3 w-3 mt-0.5 shrink-0" />
-                Generation typically completes in under two minutes.
-              </p>
-              <p className="text-[11.5px] text-muted-foreground/85 leading-relaxed">
-                All disclosures and approved language pull from the Charter compliance knowledge base.
-              </p>
+        {/* Right rail — download CTA appears here once generation lands */}
+        <aside className="sticky top-8 space-y-5">
+          <SoaReadyCta clientId={client.id} clientName={client.name} />
+
+          <div className="rounded-lg glass-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-border/60 bg-black/25">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                Client Summary
+              </h3>
+            </div>
+            <div className="px-5 py-5 space-y-3.5 text-[12.5px] text-foreground/85">
+              <Row label="Name" value={client.name} />
+              <Row label="Adviser" value={client.adviser} />
+              <Row
+                label="Income"
+                value={factFind?.employmentAndIncome.annualGrossIncome || "—"}
+              />
+              <Row
+                label="Super"
+                value={
+                  factFind?.superannuation.fundName
+                    ? `${factFind.superannuation.fundName} · ${factFind.superannuation.estimatedBalance || "—"}`
+                    : "—"
+                }
+              />
+              <Row
+                label="Risk profile"
+                value={
+                  factFind?.goalsAndObjectives.investmentRiskPreference || "—"
+                }
+              />
+              <div className="pt-2 mt-2 border-t border-border/40">
+                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground/85 mb-2">
+                  Generation Notes
+                </p>
+                <p className="flex items-start gap-1.5 text-[11.5px] text-muted-foreground/85 leading-relaxed mb-1.5">
+                  <Clock className="h-3 w-3 mt-0.5 shrink-0" />
+                  Generation typically completes in under two minutes.
+                </p>
+                <p className="text-[11.5px] text-muted-foreground/85 leading-relaxed">
+                  All disclosures and approved language pull from the Charter
+                  compliance knowledge base.
+                </p>
+              </div>
             </div>
           </div>
         </aside>
