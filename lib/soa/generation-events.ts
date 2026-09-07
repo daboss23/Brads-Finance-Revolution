@@ -17,3 +17,17 @@ export function announceSoaGenerated(detail: SoaGeneratedDetail) {
     new CustomEvent<SoaGeneratedDetail>(SOA_GENERATED_EVENT, { detail }),
   );
 }
+
+/**
+ * Fired by the ready panel's "Regenerate with agents" button. The runner owns
+ * the stream, so the panel asks it to start again rather than duplicating it.
+ */
+export const SOA_REGENERATE_EVENT = "bmk:soa-regenerate";
+
+export function requestSoaRegenerate(clientId: string) {
+  window.dispatchEvent(
+    new CustomEvent<{ clientId: string }>(SOA_REGENERATE_EVENT, {
+      detail: { clientId },
+    }),
+  );
+}

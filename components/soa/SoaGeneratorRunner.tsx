@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   Loader2,
@@ -16,7 +16,10 @@ import {
   type GenerationStage,
 } from "@/lib/soa/soa-generator";
 import { recordPlanGenerated } from "@/lib/soa/voice-learner";
-import { announceSoaGenerated } from "@/lib/soa/generation-events";
+import {
+  announceSoaGenerated,
+  SOA_REGENERATE_EVENT,
+} from "@/lib/soa/generation-events";
 import { logAudit } from "@/lib/compliance/audit-trail";
 import { getApprovedStrategies } from "@/lib/client-strategy-store";
 import { getCatalogueStrategy } from "@/lib/strategy-catalogue";
@@ -69,6 +72,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [blockers, setBlockers] = useState<string[]>([]);
   const [agentEvents, setAgentEvents] = useState<AgentEventState[]>([]);
+  const runningRef = useRef(false);
 
   /**
    * The generator reports the stage it is entering. Everything before it is
@@ -101,6 +105,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
     setBlockers([]);
     setComplete(false);
     setRunning(true);
+    runningRef.current = true;
     const fresh = Object.fromEntries(
       stages.map((s) => [s, "pending"]),
     ) as Record<GenerationStage, StageState>;
@@ -203,12 +208,29 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
       }
 
       setRunning(false);
+      runningRef.current = false;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
       setRunning(false);
+      runningRef.current = false;
     }
   }
+
+  // The ready panel's "Regenerate with agents" button asks the runner to go
+  // again — the runner owns the stream, so there is only ever one of them.
+  const startRef = useRef(start);
+  startRef.current = start;
+  useEffect(() => {
+    function onRegenerate(event: Event) {
+      const detail = (event as CustomEvent<{ clientId: string }>).detail;
+      if (detail?.clientId !== clientId) return;
+      if (disabled || runningRef.current) return;
+      startRef.current();
+    }
+    window.addEventListener(SOA_REGENERATE_EVENT, onRegenerate);
+    return () => window.removeEventListener(SOA_REGENERATE_EVENT, onRegenerate);
+  }, [clientId, disabled]);
 
   const doneAgents = agentEvents.filter((a) => a.status === "done").length;
 

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Download, FileCheck2 } from "lucide-react";
+import { Download, FileCheck2, RefreshCw, Send } from "lucide-react";
 import {
   SOA_GENERATED_EVENT,
+  requestSoaRegenerate,
   type SoaGeneratedDetail,
 } from "@/lib/soa/generation-events";
 
@@ -16,7 +17,8 @@ interface Props {
 /**
  * Sits in the generate page's right rail and stays empty until the runner
  * finishes. The CTA is the end of the journey, so it never disappears and
- * never moves the page under Brad.
+ * never moves the page under Brad. It carries the same actions as the review
+ * panel, with the download promoted to the gold call to action.
  */
 export function SoaReadyCta({ clientId, clientName }: Props) {
   const [ready, setReady] = useState<SoaGeneratedDetail | null>(null);
@@ -57,6 +59,33 @@ export function SoaReadyCta({ clientId, clientName }: Props) {
           <Download className="h-4 w-4" />
           Download SOA as PDF
         </a>
+
+        <div className="space-y-2.5 pt-1">
+          <button
+            onClick={() => requestSoaRegenerate(clientId)}
+            title="Run the full agent chain again and produce a fresh draft"
+            className="w-full inline-flex items-center justify-center gap-2 rounded border border-gold/35 bg-gold/[0.06] px-3 py-2 text-[12px] font-medium text-gold hover:border-gold/60 transition-colors"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Regenerate with agents
+          </button>
+
+          {/* Sending stays on the review page: it unlocks only once Brad has
+              approved every section, which he does there, not here. */}
+          <button
+            disabled
+            title="Approve every section on the review page before sending"
+            className="w-full inline-flex items-center justify-center gap-2 rounded border border-border bg-card px-3 py-2 text-[12px] font-medium text-muted-foreground/55 cursor-not-allowed"
+          >
+            <Send className="h-3.5 w-3.5" />
+            Send via DocuSign
+          </button>
+
+          <p className="text-[11px] text-muted-foreground/65 leading-relaxed">
+            Approve every section on the review page to unlock sending. DocuSign
+            integration is a stub for now and will be wired in Phase 5.
+          </p>
+        </div>
 
         <Link
           href={`/clients/${clientId}/soa`}
