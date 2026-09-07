@@ -14,6 +14,36 @@
 
 ---
 
+## ⛔ FINISH THE WORK BEFORE YOU REPORT IT
+
+Brad is running a practice, not supervising a build. A message that ends in
+caveats he has to chase is work handed back to him, and it costs him more than
+the thing you were hedging about.
+
+**The rule:**
+
+- If I can resolve it, resolve it before I tell you. Don't hand you work I
+  could do myself.
+- If I genuinely can't, and you can act on it, say it once with the specific
+  action.
+- If neither — it doesn't go in the message at all.
+
+**What this rules out.** Reporting a code path as untested when the tools to
+test it are available in the session. Spin up the dependency and test it: a
+throwaway Postgres, a local server, a seeded record. "I could not verify X"
+is only honest when verifying X was genuinely out of reach, and it names what
+Brad should do about it.
+
+**What this does not rule out.** A real finding he would want and cannot see
+himself — a security document that no longer matches the deployed
+configuration, an agent quietly failing over to a third party, a client record
+that will not generate. Say those plainly. The test is whether the information
+changes what Brad does, not whether it sounds cautious.
+
+Hedging protects the assistant, not the practice. Resolve it or drop it.
+
+---
+
 ## Project Overview
 
 A custom CRM and AI-powered client onboarding platform for BMK Financial Services (Brad Lonergan, Newcastle NSW).
