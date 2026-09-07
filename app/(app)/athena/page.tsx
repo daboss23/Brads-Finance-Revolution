@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { FACT_FIND_LINKS } from "@/lib/athena-data";
 import { CLIENTS } from "@/lib/data";
-import { FactFindLinksTable } from "@/components/fact-find/FactFindLinksTable";
 import { cn } from "@/lib/utils";
 
 const SECTIONS_ORDER = [
@@ -268,8 +267,6 @@ export default function AthenaPage() {
           </div>
         </div>
       </div>
-
-      <FactFindLinksTable />
     </div>
   );
 }
