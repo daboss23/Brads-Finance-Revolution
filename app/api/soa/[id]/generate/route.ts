@@ -3,7 +3,6 @@ import {
   generateSoa,
   SoaGenerationError,
   STAGE_LABELS,
-  getStageOrder,
   type GenerationStage,
 } from "@/lib/soa/soa-generator";
 import { buildClientAgentInput } from "@/lib/agents/client-input";
@@ -16,7 +15,13 @@ import { ensureFactFindsHydrated } from "@/lib/secure-store/fact-find-persistenc
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SOA_AGENT_CHAIN: AgentId[] = ["beacon", "guardian", "scribe", "orion", "atlas"];
+const SOA_AGENT_CHAIN: AgentId[] = [
+  "beacon",
+  "guardian",
+  "scribe",
+  "orion",
+  "atlas",
+];
 
 export async function POST(
   req: NextRequest,
@@ -57,16 +62,9 @@ export async function POST(
       };
 
       try {
-        const stages = getStageOrder();
-        for (const stage of stages) {
-          emit("stage", {
-            stage,
-            label: STAGE_LABELS[stage],
-            status: "starting",
-          });
-          // Stagger to feel like genuine progress without being slow.
-          await new Promise((r) => setTimeout(r, 220));
-        }
+        // Stages are advanced one at a time by the runner as each completes.
+        // Emitting them all as "starting" up front lit every row at once and
+        // read as nine things stuck, not as progress.
 
         // Run the intelligence chain live and stream each agent's real
         // result to the UI as it lands — this is the demo moment where the
@@ -105,7 +103,7 @@ export async function POST(
             emit("stage", {
               stage: s,
               label: STAGE_LABELS[s],
-              status: "complete",
+              status: "starting",
             });
           },
         });
