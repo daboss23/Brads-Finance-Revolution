@@ -70,6 +70,32 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
   const [blockers, setBlockers] = useState<string[]>([]);
   const [agentEvents, setAgentEvents] = useState<AgentEventState[]>([]);
 
+  /**
+   * The generator reports the stage it is entering. Everything before it is
+   * finished by definition, and the last stage closes the list out, so the
+   * panel always reads as one moving row rather than nine at once.
+   */
+  function advanceTo(stage: GenerationStage) {
+    const target = stages.indexOf(stage);
+    if (target < 0) return;
+    const last = target === stages.length - 1;
+    setStates(
+      () =>
+        Object.fromEntries(
+          stages.map((s, i) => [
+            s,
+            i < target
+              ? "done"
+              : i === target
+                ? last
+                  ? "done"
+                  : "running"
+                : "pending",
+          ]),
+        ) as Record<GenerationStage, StageState>,
+    );
+  }
+
   async function start() {
     setError(null);
     setBlockers([]);
@@ -80,6 +106,9 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
     ) as Record<GenerationStage, StageState>;
     setStates(fresh);
     setAgentEvents([]);
+    // The agent chain runs before the generator's first stage lands, so show
+    // the list moving from the moment Brad clicks.
+    advanceTo(stages[0]);
 
     try {
       // Send Brad's approved strategies (built-in, catalogue and custom) plus
@@ -114,12 +143,7 @@ export function SoaGeneratorRunner({ clientId, disabled }: Props) {
           const event = parseEvent(chunk);
           if (!event) continue;
           if (event.name === "stage") {
-            const stage = event.data.stage as GenerationStage;
-            const status = event.data.status as "starting" | "complete";
-            setStates((prev) => ({
-              ...prev,
-              [stage]: status === "starting" ? "running" : "done",
-            }));
+            advanceTo(event.data.stage as GenerationStage);
             await sleep(PACE_MS.stage);
           } else if (event.name === "agent") {
             const incoming = event.data as unknown as AgentEventState;
