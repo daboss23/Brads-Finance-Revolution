@@ -127,7 +127,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$142,000",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Bring the old super accounts into one fund and get proper cover in place, so that a period off work does not undo everything she has saved. Buying in Newcastle within five years is the goal behind the goal.",
+      targetRetirementAge: "60",
+      desiredRetirementIncome: "$65,000 a year in today's dollars",
       investmentRiskPreference: "Moderate",
+      otherConsiderations:
+        "Shift penalties move her income around month to month, so she wants a plan that holds up in a quiet month. Prefers something simple she does not have to watch closely.",
     },
   }),
 
@@ -164,7 +170,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$380,000 combined",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Let James drop to four days a week without the household income dropping with him, using a transition to retirement structure. Build the portfolio outside super and finally get the investment property counted properly.",
+      targetRetirementAge: "James at 65, Fiona at 63",
+      desiredRetirementIncome: "$90,000 a year combined",
       investmentRiskPreference: "Growth",
+      otherConsiderations:
+        "Fiona's super sits in a separate fund that has never been reviewed. They want one plan across both of them rather than two half plans.",
     },
   }),
 
@@ -202,7 +214,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$87,000",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Get his super onto one platform he can actually see, and start moving toward an investment property. Wants to know the two children are covered if something happens to him.",
+      targetRetirementAge: "62",
+      desiredRetirementIncome: "$80,000 a year",
       investmentRiskPreference: "Moderate",
+      otherConsiderations:
+        "Two dependent children aged 6 and 9. Wants school fees modelled alongside the retirement plan rather than treated as a separate problem.",
     },
   }),
 
@@ -230,7 +248,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$210,000",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Protect the family and the business if he cannot work. Wants life and income protection sized against what he actually earns, and a clear view of what the business is worth to his retirement.",
+      targetRetirementAge: "65",
+      desiredRetirementIncome: "$100,000 a year",
       investmentRiskPreference: "Moderate",
+      otherConsiderations:
+        "Income arrives as a mix of director salary and trust distributions, so cover has to be sized on the total package rather than salary alone.",
     },
   }),
 
@@ -260,7 +284,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$54,000",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Buy a first home in Newcastle within three years, using the First Home Super Saver scheme, and pull two old super accounts together on the way. Start investing outside super once the deposit is done.",
+      targetRetirementAge: "60",
+      desiredRetirementIncome: "$70,000 a year",
       investmentRiskPreference: "Growth",
+      otherConsiderations:
+        "The deposit is the priority and the deadline. Any strategy has to leave that timeline intact.",
     },
   }),
 
@@ -293,7 +323,13 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
       estimatedBalance: "$520,000 combined",
     },
     goalsAndObjectives: {
+      primaryFinancialGoals:
+        "Move from semi retirement onto a proper pension income without drawing the balance down too early. Get aged care planning in place for Sue's mother before it becomes urgent rather than after.",
+      targetRetirementAge: "Robert fully retired within two years, Sue to follow",
+      desiredRetirementIncome: "$75,000 a year combined",
       investmentRiskPreference: "Conservative",
+      otherConsiderations:
+        "Conservative by temperament. Certainty of income matters more to them than growth, and they would rather know the number than beat it.",
     },
   }),
 
@@ -327,8 +363,12 @@ export const DEMO_FACT_FINDS: Record<string, AthenaFactFind> = {
     },
     goalsAndObjectives: {
       primaryFinancialGoals:
-        "Review estate planning, no current will or beneficiary nominations in place.",
+        "Get a valid will and binding beneficiary nominations in place, and settle how the jointly held property is dealt with. Wants the three adult children treated evenly and no argument left behind her.",
+      targetRetirementAge: "Already retired",
+      desiredRetirementIncome: "$48,000 a year",
       investmentRiskPreference: "Conservative",
+      otherConsiderations:
+        "The property settlement is still being negotiated, so the structure has to survive a change in what she ends up holding.",
     },
   }),
 };

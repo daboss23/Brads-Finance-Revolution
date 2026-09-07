@@ -113,44 +113,104 @@ log.
 ## 10. Third-party voice processing (ElevenLabs)
 
 Athena's discovery session sends a client's name, date of birth, address,
-income, assets, liabilities, superannuation and — in section 9 — their
-health conditions to ElevenLabs. That is sensitive information under the
-Privacy Act 1988 (Cth), so the practice holds the record and the vendor
-holds nothing.
+income, assets, liabilities, superannuation and, in section 9, their health
+conditions to ElevenLabs. That is sensitive information under the Privacy
+Act 1988 (Cth), so the design rule is that the practice holds the record and
+the vendor holds as little as the architecture allows.
 
-The agent (`ELEVENLABS_AGENT_ID`) runs under **Zero Retention Mode**:
-`platform_settings.privacy.zero_retention_mode = true`. ElevenLabs keeps no
-transcript, no audio and no PII once a call ends. Nothing is recoverable
-from their dashboard, by their staff, or by a subpoena served on them.
+### What cannot be avoided
 
-Two consequences follow, and both are load-bearing:
+A live voice agent cannot run without the vendor processing the
+conversation. Audio reaches ElevenLabs for speech to text, the transcript
+reaches the model that generates each reply, and the reply is spoken by
+their voice engine. Retention can be reduced to near nothing; processing
+cannot. Disclose ElevenLabs in the privacy collection notice.
 
-1. **The post-call webhook is the only durable copy.**
-   `POST /api/elevenlabs/post-call` receives the transcript at call end and
-   writes it to the `athena-transcripts` namespace through the same
-   AES-256-GCM envelope as every other record. If that write fails the route
-   returns 5xx so ElevenLabs retries; it never returns 200 on a dropped
-   transcript.
+The text fallback session substitutes Anthropic for ElevenLabs. It does not
+remove the third party, it changes which one.
 
-2. **The webhook must exist and verify before ZRM is switched on.**
-   Enabling ZRM against a missing or broken webhook silently destroys every
-   session from that moment. Verify a real call lands in the store first.
+### Current agent settings
+
+Configured on agent `ELEVENLABS_AGENT_ID`, under
+`platform_settings.privacy`:
+
+| Setting | Value | Effect |
+|---|---|---|
+| `record_voice` | `false` | No audio recording is stored at any point |
+| `retention_days` | `7` | Transcripts are removed after a week |
+| `delete_transcript_and_pii` | `true` | Removal covers transcript text and PII, not just metadata |
+| `delete_audio` | `true` | Any audio artefact is removed on the same schedule |
+| `zero_retention_mode` | `false` | See the trade-off below |
+| `user_memory.enabled` | `false` | Nothing a client says is carried into another conversation |
+
+Also disabled: `topic_discovery` and `sentiment_analysis`. Both ran a
+separate analysis model (`analysis_llm`, a Google Gemini model) across the
+full transcript, which put client financial data in front of a further
+processor. Nothing in this codebase reads topics or sentiment, so switching
+them off costs no functionality.
+
+`conversation_config.agent.prompt.backup_llm_config` is restricted to
+Anthropic (`claude-sonnet-4-5`). It previously cascaded to Gemini and GPT-4o,
+which meant a provider outage would have silently routed a client's
+financial discovery through Google or OpenAI. A fallback still exists, so an
+overloaded primary model does not end the session.
+
+### Why not Zero Retention Mode
+
+ZRM is the strongest available position and remains the target. It is not on
+yet for one reason: the ElevenLabs post-call webhook is not yet pointed at
+`/api/elevenlabs/post-call`. Turning ZRM on against an unwired webhook
+removes the vendor-side copy while nothing on the practice side receives the
+authoritative post-call payload. Seven-day retention keeps a recoverable
+window until the webhook is verified end to end.
+
+Switch ZRM on only after a real call has been observed landing in the
+`athena-transcripts` namespace through that route.
+
+### How the practice holds its own copy
+
+Three writers land in the `athena-transcripts` namespace, and
+`mergeTranscript` reconciles them:
+
+| Writer | Source | Depends on the vendor? |
+|---|---|---|
+| `live` | The browser, debounced about every 5s and on `pagehide` | No |
+| `text` | The Anthropic fallback session, same cadence | No |
+| `post-call` | The ElevenLabs webhook, once per call | Yes |
+
+The `live` writer is the load-bearing one: the practice's record is built
+from the browser as the client speaks, so it survives an abandoned session,
+a webhook that never fires, and vendor-side deletion. A write can add turns
+but never remove them, so a sparse or duplicate delivery cannot erase a
+complete session already captured.
+
+The client id is always derived from the onboarding token server side, never
+read from the request body, so a valid link can only ever write to its own
+record.
+
+### Transport and authentication
 
 The webhook is authenticated by HMAC-SHA256 over `${timestamp}.${rawBody}`
 using `ELEVENLABS_WEBHOOK_SECRET`, compared in constant time, with a
 30-minute timestamp window that rejects replays. An unsigned, missigned or
 stale payload is rejected with 401 before the body is parsed. This is why
-`/api/elevenlabs/` is a public prefix in `middleware.ts` — it authenticates
+`/api/elevenlabs/` is a public prefix in `middleware.ts`: it authenticates
 the sender, not an adviser session.
 
 `GET /api/athena/signed-url` mints the short-lived session URL so
 `ELEVENLABS_API_KEY` never reaches the browser. It is public by necessity
-(clients are not signed in) but requires a valid onboarding token, so it
-cannot be used by a stranger to open sessions or burn conversation minutes.
+(clients are not signed in) but requires a valid onboarding token, so a
+stranger cannot use it to open sessions or burn conversation minutes.
 
-Residual exposure: audio is processed in transit by ElevenLabs during the
-call itself. ZRM removes retention, not processing. Disclose the vendor in
-the privacy collection notice.
+### Open items
+
+- Wire the post-call webhook, verify it, then enable ZRM.
+- `platform_settings.auth.enable_auth` is `false` on the agent, so the agent
+  is reachable by anyone holding the agent id. The app's signed-URL flow is
+  unaffected; this concerns direct use of the id outside the app.
+- Retention changes apply to new conversations only
+  (`apply_to_existing_conversations` is `false`). Sessions recorded before
+  this change are still held indefinitely and need a deliberate purge.
 
 ## 11. Known gaps / roadmap
 

@@ -13,6 +13,7 @@ import { AGENTS } from "@/lib/agents";
 import { listRuntimeBlueprints } from "@/lib/agent-system";
 import { cn } from "@/lib/utils";
 import { anthropicConfigured } from "@/lib/ai/anthropic-credentials";
+import { DemoReadiness } from "@/components/settings/demo-readiness";
 
 const usageMode = "balanced";
 
@@ -76,6 +77,8 @@ export default function SettingsPage() {
           and cache-first, so the platform remains usable without API keys.
         </p>
       </div>
+
+      <DemoReadiness />
 
       <section className="mb-8 grid gap-4 lg:grid-cols-2">
         {providerRows.map((section) => {
