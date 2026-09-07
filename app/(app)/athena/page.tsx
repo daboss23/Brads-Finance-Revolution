@@ -1,26 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import {
   Sparkles,
-  Copy,
-  Send,
   ExternalLink,
   CheckCircle2,
-  ArrowRight,
   TrendingDown,
   Clock,
   Users,
   Link as LinkIcon,
 } from "lucide-react";
-import {
-  FACT_FIND_LINKS,
-  LINK_STATUS_CONFIG,
-  type LinkStatus,
-} from "@/lib/athena-data";
+import { FACT_FIND_LINKS } from "@/lib/athena-data";
 import { CLIENTS } from "@/lib/data";
-import { Badge } from "@/components/ui/badge";
+import { FactFindLinksTable } from "@/components/fact-find/FactFindLinksTable";
 import { cn } from "@/lib/utils";
 
 const SECTIONS_ORDER = [
@@ -37,12 +28,13 @@ function getDropOffData() {
   return SECTIONS_ORDER.map((section) => {
     const missing = CLIENTS.filter(
       (c) =>
-        c.factFindSections.find((s) => s.name === section)?.status === "missing"
+        c.factFindSections.find((s) => s.name === section)?.status ===
+        "missing",
     ).length;
     const inProgress = CLIENTS.filter(
       (c) =>
         c.factFindSections.find((s) => s.name === section)?.status ===
-        "in-progress"
+        "in-progress",
     ).length;
     return { section, missing, inProgress, incomplete: missing + inProgress };
   }).sort((a, b) => b.incomplete - a.incomplete);
@@ -51,20 +43,21 @@ function getDropOffData() {
 function getMetrics() {
   const sent = FACT_FIND_LINKS.filter((l) => l.status !== "not-sent").length;
   const opened = FACT_FIND_LINKS.filter(
-    (l) => l.status === "opened" || l.status === "in-progress" || l.status === "completed"
+    (l) =>
+      l.status === "opened" ||
+      l.status === "in-progress" ||
+      l.status === "completed",
   ).length;
   const inProgress = FACT_FIND_LINKS.filter(
-    (l) => l.status === "in-progress"
+    (l) => l.status === "in-progress",
   ).length;
   const completed = FACT_FIND_LINKS.filter(
-    (l) => l.status === "completed"
+    (l) => l.status === "completed",
   ).length;
-  const notStarted = FACT_FIND_LINKS.filter(
-    (l) => l.status === "sent"
-  ).length;
+  const notStarted = FACT_FIND_LINKS.filter((l) => l.status === "sent").length;
   const avg = Math.round(
     FACT_FIND_LINKS.reduce((sum, l) => sum + l.progress, 0) /
-      FACT_FIND_LINKS.length
+      FACT_FIND_LINKS.length,
   );
   return { sent, opened, inProgress, completed, notStarted, avg };
 }
@@ -72,29 +65,13 @@ function getMetrics() {
 export default function AthenaPage() {
   const metrics = getMetrics();
   const dropOff = getDropOffData();
-  const [copied, setCopied] = useState<string | null>(null);
-  const [resent, setResent] = useState<string | null>(null);
-
-  function copyLink(token: string) {
-    const url = `${window.location.origin}/onboarding/${token}`;
-    navigator.clipboard.writeText(url).catch(() => {});
-    setCopied(token);
-    setTimeout(() => setCopied(null), 2000);
-  }
-
-  function resendLink(token: string) {
-    setResent(token);
-    setTimeout(() => setResent(null), 2500);
-  }
-
   const topStall = dropOff[0]?.section ?? "Assets & Liabilities";
   const readyForReview = FACT_FIND_LINKS.filter(
-    (l) => l.progress >= 85 && l.status !== "completed"
+    (l) => l.progress >= 85 && l.status !== "completed",
   ).length;
 
   return (
     <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-10">
-
       {/* Page header */}
       <div className="flex items-end justify-between mb-12">
         <div>
@@ -116,21 +93,70 @@ export default function AthenaPage() {
       {/* KPI cards */}
       <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         {[
-          { label: "Links Sent", value: metrics.sent, icon: LinkIcon, color: "text-blue-accent", bg: "bg-blue-accent/15", accent: "from-blue-accent/50" },
-          { label: "Opened", value: metrics.opened, icon: ExternalLink, color: "text-sky-400", bg: "bg-sky-400/15", accent: "from-sky-400/50" },
-          { label: "In Progress", value: metrics.inProgress, icon: Clock, color: "text-warning", bg: "bg-warning/[0.15]", accent: "from-warning/50" },
-          { label: "Completed", value: metrics.completed, icon: CheckCircle2, color: "text-success", bg: "bg-success/15", accent: "from-success/50" },
-          { label: "Not Started", value: metrics.notStarted, icon: Users, color: "text-zinc-400", bg: "bg-zinc-400/15", accent: "from-zinc-400/20" },
-          { label: "Avg Completion", value: `${metrics.avg}%`, icon: TrendingDown, color: "text-gold", bg: "bg-gold/15", accent: "from-gold/50" },
+          {
+            label: "Links Sent",
+            value: metrics.sent,
+            icon: LinkIcon,
+            color: "text-blue-accent",
+            bg: "bg-blue-accent/15",
+            accent: "from-blue-accent/50",
+          },
+          {
+            label: "Opened",
+            value: metrics.opened,
+            icon: ExternalLink,
+            color: "text-sky-400",
+            bg: "bg-sky-400/15",
+            accent: "from-sky-400/50",
+          },
+          {
+            label: "In Progress",
+            value: metrics.inProgress,
+            icon: Clock,
+            color: "text-warning",
+            bg: "bg-warning/[0.15]",
+            accent: "from-warning/50",
+          },
+          {
+            label: "Completed",
+            value: metrics.completed,
+            icon: CheckCircle2,
+            color: "text-success",
+            bg: "bg-success/15",
+            accent: "from-success/50",
+          },
+          {
+            label: "Not Started",
+            value: metrics.notStarted,
+            icon: Users,
+            color: "text-zinc-400",
+            bg: "bg-zinc-400/15",
+            accent: "from-zinc-400/20",
+          },
+          {
+            label: "Avg Completion",
+            value: `${metrics.avg}%`,
+            icon: TrendingDown,
+            color: "text-gold",
+            bg: "bg-gold/15",
+            accent: "from-gold/50",
+          },
         ].map(({ label, value, icon: Icon, color, bg, accent }) => (
           <div key={label} className="rounded-lg glass-card overflow-hidden">
-            <div className={cn("h-px bg-gradient-to-r to-transparent", accent)} />
+            <div
+              className={cn("h-px bg-gradient-to-r to-transparent", accent)}
+            />
             <div className="px-5 pt-5 pb-5">
               <div className="flex items-start justify-between mb-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-snug">
                   {label}
                 </p>
-                <div className={cn("flex h-7 w-7 items-center justify-center rounded-full shrink-0", bg)}>
+                <div
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-full shrink-0",
+                    bg,
+                  )}
+                >
                   <Icon className={cn("h-3.5 w-3.5", color)} />
                 </div>
               </div>
@@ -144,7 +170,6 @@ export default function AthenaPage() {
 
       {/* Two-column: Athena intelligence + Drop-off */}
       <div className="mb-12 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-
         {/* Athena intelligence panel */}
         <div className="rounded-lg glass-card overflow-hidden">
           <div className="flex">
@@ -189,10 +214,10 @@ export default function AthenaPage() {
                         item.priority === "high"
                           ? "bg-warning"
                           : item.priority === "action"
-                          ? "bg-success"
-                          : item.priority === "medium"
-                          ? "bg-warning"
-                          : "bg-gold/50"
+                            ? "bg-success"
+                            : item.priority === "medium"
+                              ? "bg-warning"
+                              : "bg-gold/50",
                       )}
                     />
                     <p className="text-[13px] text-foreground leading-relaxed">
@@ -221,7 +246,9 @@ export default function AthenaPage() {
               return (
                 <div key={section}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[12px] text-foreground">{section}</span>
+                    <span className="text-[12px] text-foreground">
+                      {section}
+                    </span>
                     <span className="text-[11px] text-muted-foreground tabular-nums">
                       {incomplete}/{CLIENTS.length}
                     </span>
@@ -242,150 +269,7 @@ export default function AthenaPage() {
         </div>
       </div>
 
-      {/* Fact find links table */}
-      <div>
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-[14px] font-semibold text-foreground">
-              Fact Find Links
-            </h2>
-            <p className="text-[12px] text-muted-foreground mt-1">
-              All client fact find links — manage, resend, and monitor progress
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-card">
-                {["Client", "Link Status", "Progress", "Sent", "Last Activity", "Actions"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/80">
-              {FACT_FIND_LINKS.map((link) => (
-                <tr
-                  key={link.token}
-                  className="hover:bg-gold/[0.04] transition-colors duration-150 group"
-                >
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border border-border/80 text-[11px] font-bold text-foreground/70 tracking-tight">
-                        {link.clientName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                      </div>
-                      <div>
-                        <p className="font-medium text-[13px] text-foreground">
-                          {link.clientName}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {link.email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <Badge className={LINK_STATUS_CONFIG[link.status].className}>
-                      {LINK_STATUS_CONFIG[link.status].label}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2.5">
-                      <progress
-                        value={link.progress}
-                        max={100}
-                        className={cn(
-                          "bmk-progress w-24",
-                          link.status === "in-progress" ? "bmk-progress-blue" : ""
-                        )}
-                      />
-                      <span className="text-[12px] text-muted-foreground tabular-nums w-8">
-                        {link.progress}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground">
-                      {link.sentDate ?? "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[13px] text-muted-foreground">
-                      {link.lastActivity ?? "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      {/* Copy link */}
-                      <button
-                        onClick={() => copyLink(link.token)}
-                        title="Copy fact find link"
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-colors duration-150",
-                          copied === link.token
-                            ? "border-success/30 bg-success/[0.08] text-success"
-                            : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
-                        )}
-                      >
-                        {copied === link.token ? (
-                          <CheckCircle2 className="h-3 w-3" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                        {copied === link.token ? "Copied" : "Copy"}
-                      </button>
-
-                      {/* Resend */}
-                      <button
-                        onClick={() => resendLink(link.token)}
-                        title="Resend fact find link"
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] font-medium transition-all duration-150",
-                          resent === link.token
-                            ? "border-blue-800/50 bg-blue-950/40 text-blue-400"
-                            : "border-border/70 text-muted-foreground hover:border-border hover:text-foreground/80 hover:bg-white/[0.04]"
-                        )}
-                      >
-                        <Send className="h-3 w-3" />
-                        {resent === link.token ? "Sent" : "Resend"}
-                      </button>
-
-                      {/* Open client experience */}
-                      <Link
-                        href={`/onboarding/${link.token}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Open client fact find experience"
-                        className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/[0.07] px-2.5 py-1.5 text-[11px] font-medium text-gold/80 hover:bg-gold/[0.12] hover:text-gold transition-colors duration-150"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Open
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Link format note */}
-        <div className="mt-4 flex items-center gap-2 px-1">
-          <LinkIcon className="h-3 w-3 text-muted-foreground/35 shrink-0" />
-          <p className="text-[11px] text-muted-foreground/35">
-            Links follow the format:{" "}
-            <span className="font-mono text-muted-foreground/50">
-              /onboarding/[token]
-            </span>
-          </p>
-        </div>
-      </div>
+      <FactFindLinksTable />
     </div>
   );
 }
